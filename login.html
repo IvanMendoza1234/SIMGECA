@@ -297,16 +297,16 @@
       </p>
       <div class="stats">
         <div class="stat">
-          <div class="stat-val">48</div>
+          <div class="stat-val" id="statACs">—</div>
           <div class="stat-lbl">Equipos AC</div>
         </div>
         <div class="stat">
-          <div class="stat-val">12</div>
+          <div class="stat-val" id="statAulas">—</div>
           <div class="stat-lbl">Aulas</div>
         </div>
         <div class="stat">
-          <div class="stat-val">3</div>
-          <div class="stat-lbl">Roles</div>
+          <div class="stat-val" id="statSolicitudes">—</div>
+          <div class="stat-lbl">Solicitudes</div>
         </div>
       </div>
     </div>
@@ -379,6 +379,7 @@
 <!-- Firebase SDK -->
   <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
@@ -391,11 +392,25 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db   = firebase.firestore();
 
     // Si ya hay sesión activa, redirigir directo al dashboard
     auth.onAuthStateChanged(user => {
       if (user) window.location.href = 'dashboard.html';
     });
+
+    // Cargar contadores desde Firestore en tiempo real
+    db.collection('aires_acondicionados').onSnapshot(snap => {
+      document.getElementById('statACs').textContent = snap.size;
+    }, () => { document.getElementById('statACs').textContent = '0'; });
+
+    db.collection('aulas').onSnapshot(snap => {
+      document.getElementById('statAulas').textContent = snap.size;
+    }, () => { document.getElementById('statAulas').textContent = '0'; });
+
+    db.collection('solicitudes').where('estado', '==', 'pendiente').onSnapshot(snap => {
+      document.getElementById('statSolicitudes').textContent = snap.size;
+    }, () => { document.getElementById('statSolicitudes').textContent = '0'; });
   </script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -445,10 +460,7 @@
     const email = document.getElementById('email').value.trim();
     const pass  = document.getElementById('password').value;
 
-    // SESSION = la sesión dura solo mientras la pestaña esté abierta.
-    // Al cerrar el navegador o la pestaña, Firebase borra la sesión automáticamente.
-    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
-      .then(() => auth.signInWithEmailAndPassword(email, pass))
+    auth.signInWithEmailAndPassword(email, pass)
       .then(() => {
         showToast('Sesión iniciada correctamente', 'success');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
