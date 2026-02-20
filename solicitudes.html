@@ -392,6 +392,15 @@
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
+  // ── Estado — declarado al tope para que los onclick del HTML lo encuentren ──
+  var mainTab     = 'registro';
+  var tabReg      = 'pendiente';
+  var tabAC       = 'pendiente';
+  var todasSolReg = [];
+  var todasSolAC  = [];
+  var accionId    = null;
+  var accionTipo  = null;
+
   auth.onAuthStateChanged(user => {
     if (!user) { window.location.href = 'login.html'; return; }
     document.getElementById('userName').textContent   = user.email.split('@')[0];
@@ -400,15 +409,6 @@
     cargarAulas();
   });
   function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
-
-  // ── Estado ──
-  let mainTab       = 'registro';
-  let tabReg        = 'pendiente';
-  let tabAC         = 'pendiente';
-  let todasSolReg   = [];  // solicitudes_registro
-  let todasSolAC    = [];  // solicitudes
-  let accionId      = null;
-  let accionTipo    = null; // 'registro' | 'ac'
 
   // ── Listeners en tiempo real ──
   function iniciarListeners() {
