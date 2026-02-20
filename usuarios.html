@@ -57,8 +57,9 @@
     .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
     .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
     .topbar-right   { display: flex; align-items: center; gap: .6rem; }
-    .btn-primary { display: flex; align-items: center; gap: .5rem; padding: .55rem 1.1rem; background: var(--azul); color: #fff; border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .2s; }
-    .btn-primary:hover { background: var(--azul-mid); }
+
+    /* info chip en topbar */
+    .info-chip { display: flex; align-items: center; gap: .4rem; background: var(--azul-pale); color: var(--azul); border: 1px solid #C5D8FF; border-radius: 8px; padding: .4rem .8rem; font-size: .75rem; font-weight: 600; }
 
     .page-content { padding: 1.5rem 1.75rem; flex: 1; }
 
@@ -80,52 +81,41 @@
     /* ══ TABLA ══ */
     .table-wrap { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; overflow: hidden; }
     table { width: 100%; border-collapse: collapse; }
-    thead th {
-      background: var(--surface2); padding: .7rem 1rem;
-      text-align: left; font-size: .68rem; font-weight: 700;
-      color: var(--text-light); text-transform: uppercase; letter-spacing: .05em;
-      border-bottom: 1.5px solid var(--border);
-    }
+    thead th { background: var(--surface2); padding: .7rem 1rem; text-align: left; font-size: .68rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; border-bottom: 1.5px solid var(--border); }
     tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; animation: fadeIn .25s ease both; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--surface2); }
     td { padding: .85rem 1rem; font-size: .85rem; vertical-align: middle; }
     @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
 
-    /* user cell */
     .user-cell { display: flex; align-items: center; gap: .75rem; }
     .u-avatar { width: 36px; height: 36px; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; font-weight: 700; color: #fff; flex-shrink: 0; text-transform: uppercase; }
     .u-name  { font-weight: 600; font-size: .875rem; color: var(--text); }
     .u-email { font-size: .75rem; color: var(--text-light); margin-top: .1rem; }
 
-    /* rol badges */
     .badge-rol { padding: .2rem .6rem; border-radius: 6px; font-size: .72rem; font-weight: 700; }
     .rol-admin   { background: #EDE9FE; color: #5B21B6; }
     .rol-docente { background: #DBEAFE; color: #1D4ED8; }
     .rol-alumno  { background: #DCFCE7; color: #15803D; }
     .rol-tecnico { background: #FFF7ED; color: #C2410C; }
 
-    /* turno badges */
     .badge-turno { padding: .2rem .6rem; border-radius: 6px; font-size: .72rem; font-weight: 700; }
     .turno-matutino   { background: #EEF3FF; color: var(--azul); }
     .turno-vespertino { background: #FEF3C7; color: #92400E; }
     .turno-ambos      { background: #F0FDF4; color: #166534; }
     .turno-none       { background: var(--surface2); color: var(--text-light); }
 
-    /* status */
     .status-dot-wrap { display: flex; align-items: center; gap: .45rem; font-size: .82rem; color: var(--text-mid); }
     .s-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
     .s-dot.activo   { background: var(--success); }
     .s-dot.inactivo { background: var(--text-light); }
 
-    /* action buttons */
     .actions { display: flex; gap: .35rem; }
     .btn-icon { display: flex; align-items: center; gap: .35rem; padding: .38rem .75rem; border-radius: 7px; font-size: .75rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-mid); cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif; }
     .btn-icon:hover { border-color: var(--azul-light); color: var(--azul); background: var(--azul-pale); }
     .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); background: #FFF5F5; }
     .btn-icon.success-btn:hover { border-color: var(--success); color: var(--success); background: #F0FDF4; }
 
-    /* empty state */
     .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-light); }
     .empty-state i { font-size: 2.5rem; margin-bottom: .75rem; display: block; opacity: .3; }
     .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--text-mid); margin-bottom: .4rem; }
@@ -135,9 +125,12 @@
     .modal-overlay { position: fixed; inset: 0; background: rgba(13,27,62,.45); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
     .modal-overlay.open { display: flex; }
     .modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 580px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); animation: modalIn .25s ease; }
+    .modal.modal-sm { max-width: 420px; }
+    .modal.modal-lg { max-width: 700px; }
     @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(12px); } to { opacity:1; transform:none; } }
     .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
     .modal-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .modal-subtitle { font-size: .75rem; color: var(--text-light); margin-top: .15rem; }
     .modal-close { width: 32px; height: 32px; border: none; background: var(--surface2); border-radius: 8px; cursor: pointer; color: var(--text-light); font-size: .9rem; display: flex; align-items: center; justify-content: center; transition: all .15s; }
     .modal-close:hover { background: #FEE2E2; color: var(--danger); }
     .modal-body { padding: 1.25rem 1.5rem; }
@@ -149,8 +142,10 @@
     .form-label { font-size: .76rem; font-weight: 700; color: var(--text-mid); letter-spacing: .02em; }
     .form-input, .form-select, .form-textarea { padding: .65rem .9rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface2); font-family: 'DM Sans', sans-serif; font-size: .875rem; color: var(--text); outline: none; transition: border-color .2s, box-shadow .2s; }
     .form-input:focus, .form-select:focus { border-color: var(--azul-light); box-shadow: 0 0 0 3px rgba(26,117,255,.1); background: #fff; }
-    .form-input.error { border-color: var(--danger); }
+    .form-input.error { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(239,68,68,.1); }
     .form-hint { font-size: .7rem; color: var(--text-light); }
+    .form-hint.warn { color: var(--warning); }
+    .form-input:disabled { opacity: .6; cursor: not-allowed; background: var(--bg); }
     .section-label { font-size: .72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .08em; margin: .75rem 0 .5rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); grid-column: 1 / -1; }
 
     .btn-cancel { padding: .55rem 1.1rem; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text-mid); cursor: pointer; }
@@ -160,13 +155,25 @@
     .btn-danger-full { padding: .55rem 1.1rem; background: #FEE2E2; border: 1.5px solid #FECACA; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #991B1B; cursor: pointer; }
     .btn-danger-full:hover { background: #FECACA; }
 
-    /* confirm modal */
-    .modal-confirm .modal { max-width: 400px; }
+    /* modal confirm */
     .confirm-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 1rem; }
     .confirm-icon.warn    { background: #FEF3C7; color: var(--warning); }
+    .confirm-icon.danger  { background: #FEE2E2; color: var(--danger); }
+    .confirm-icon.success { background: #D1FAE5; color: var(--success); }
     .modal-body.center { text-align: center; }
     .confirm-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
     .confirm-desc  { font-size: .84rem; color: var(--text-light); line-height: 1.5; }
+
+    /* historial panel */
+    .historial-list { display: flex; flex-direction: column; gap: .6rem; max-height: 380px; overflow-y: auto; }
+    .historial-item { display: flex; align-items: flex-start; gap: .75rem; padding: .7rem .9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; }
+    .h-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; }
+    .h-icon.sol  { background: #DBEAFE; color: var(--azul); }
+    .h-icon.apro { background: #D1FAE5; color: var(--success); }
+    .h-icon.rech { background: #FEE2E2; color: var(--danger); }
+    .h-icon.edit { background: #FEF3C7; color: var(--warning); }
+    .h-desc { font-size: .82rem; color: var(--text-mid); flex: 1; line-height: 1.4; }
+    .h-fecha { font-size: .72rem; color: var(--text-light); margin-top: .2rem; }
 
     /* toast */
     .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
@@ -231,12 +238,13 @@
   <header class="topbar">
     <div class="topbar-left">
       <h1>Usuarios</h1>
-      <p>Administración de cuentas y accesos al sistema</p>
+      <p>Directorio de usuarios aprobados en el sistema</p>
     </div>
     <div class="topbar-right">
-      <button class="btn-primary" onclick="abrirModalRegistro()">
-        <i class="fa-solid fa-plus"></i> Agregar Usuario
-      </button>
+      <div class="info-chip">
+        <i class="fa-solid fa-circle-info"></i>
+        Los nuevos usuarios se registran desde la app móvil
+      </div>
     </div>
   </header>
 
@@ -248,7 +256,7 @@
         <i class="fa-solid fa-circle-check"></i> Activos <span id="countActivos" style="opacity:.6"></span>
       </button>
       <button class="tab" onclick="cambiarTab('inactivos', this)">
-        <i class="fa-solid fa-ban"></i> Inactivos <span id="countInactivos" style="opacity:.6"></span>
+        <i class="fa-solid fa-ban"></i> Dados de baja <span id="countInactivos" style="opacity:.6"></span>
       </button>
       <button class="tab" onclick="cambiarTab('todos', this)">
         <i class="fa-solid fa-users"></i> Todos <span id="countTodos" style="opacity:.6"></span>
@@ -259,7 +267,7 @@
     <div class="toolbar">
       <div class="search-wrap">
         <i class="fa-solid fa-magnifying-glass"></i>
-        <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nombre o correo..." oninput="filtrar()"/>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nombre, correo o no. control..." oninput="filtrar()"/>
       </div>
       <select class="filter-select" id="filtroRol" onchange="filtrar()">
         <option value="">Todos los roles</option>
@@ -288,7 +296,7 @@
             <th>No. Control / ID</th>
             <th>Departamento</th>
             <th>Estado</th>
-            <th>Registro</th>
+            <th>Alta</th>
             <th>Acciones</th>
           </tr>
         </thead>
@@ -306,35 +314,32 @@
   </div>
 </div>
 
-<!-- ══ MODAL REGISTRO / EDICIÓN ══ -->
-<div class="modal-overlay" id="modalRegistro">
+<!-- ══ MODAL EDITAR USUARIO ══ -->
+<div class="modal-overlay" id="modalEditar">
   <div class="modal">
     <div class="modal-header">
-      <span class="modal-title" id="modalTitulo">Agregar Usuario</span>
-      <button class="modal-close" onclick="cerrarModal('modalRegistro')"><i class="fa-solid fa-xmark"></i></button>
+      <div>
+        <div class="modal-title">Editar información del usuario</div>
+        <div class="modal-subtitle" id="editSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalEditar')"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="modal-body">
       <div class="form-grid">
 
         <div class="section-label">Información personal</div>
-
         <div class="form-group">
-          <label class="form-label">Nombre(s) *</label>
-          <input type="text" class="form-input" id="fNombre" placeholder="Ej. Juan Carlos"/>
+          <label class="form-label">Nombre(s)</label>
+          <input type="text" class="form-input" id="fNombre" placeholder="Nombre(s)"/>
         </div>
         <div class="form-group">
-          <label class="form-label">Apellidos *</label>
-          <input type="text" class="form-input" id="fApellidos" placeholder="Ej. García López"/>
+          <label class="form-label">Apellidos</label>
+          <input type="text" class="form-input" id="fApellidos" placeholder="Apellidos"/>
         </div>
         <div class="form-group full">
-          <label class="form-label">Correo electrónico *</label>
+          <label class="form-label">Correo electrónico institucional</label>
           <input type="email" class="form-input" id="fCorreo" placeholder="correo@lcardenas.tecnm.mx"/>
-          <span class="form-hint">Se usará para iniciar sesión en el sistema</span>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Contraseña *</label>
-          <input type="password" class="form-input" id="fPassword" placeholder="Mínimo 6 caracteres"/>
-          <span class="form-hint" id="pwHint">Mínimo 6 caracteres</span>
+          <span class="form-hint warn"><i class="fa-solid fa-triangle-exclamation"></i> Solo se aceptan correos @lcardenas.tecnm.mx</span>
         </div>
         <div class="form-group">
           <label class="form-label">Teléfono</label>
@@ -342,10 +347,9 @@
         </div>
 
         <div class="section-label">Rol y turno</div>
-
         <div class="form-group">
           <label class="form-label">Rol *</label>
-          <select class="form-select" id="fRol" onchange="toggleCamposRol()">
+          <select class="form-select" id="fRol" onchange="toggleLabelControl()">
             <option value="">Seleccionar...</option>
             <option value="admin">Administrador</option>
             <option value="docente">Docente</option>
@@ -364,7 +368,6 @@
         </div>
 
         <div class="section-label">Datos institucionales</div>
-
         <div class="form-group">
           <label class="form-label" id="labelControl">No. de Control</label>
           <input type="text" class="form-input" id="fControl" placeholder="Ej. L21xxxxxx"/>
@@ -376,32 +379,89 @@
 
         <div class="section-label">Observaciones</div>
         <div class="form-group full">
-          <textarea class="form-input form-textarea" id="fObs" placeholder="Notas adicionales..." style="resize:vertical;min-height:70px"></textarea>
+          <textarea class="form-input form-textarea" id="fObs" placeholder="Notas adicionales sobre el usuario..." style="resize:vertical;min-height:65px"></textarea>
         </div>
 
       </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="cerrarModal('modalRegistro')">Cancelar</button>
-      <button class="btn-save" id="btnGuardar" onclick="guardarUsuario()">
-        <i class="fa-solid fa-floppy-disk"></i> Guardar
+      <button class="btn-cancel" onclick="cerrarModal('modalEditar')">Cancelar</button>
+      <button class="btn-save" id="btnGuardar" onclick="guardarEdicion()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
       </button>
     </div>
   </div>
 </div>
 
-<!-- ══ MODAL DESACTIVAR ══ -->
-<div class="modal-overlay modal-confirm" id="modalDesactivar">
-  <div class="modal">
-    <div class="modal-body center" style="padding:2rem 1.5rem">
-      <div class="confirm-icon warn"><i class="fa-solid fa-user-slash"></i></div>
-      <div class="confirm-title">¿Desactivar usuario?</div>
-      <p class="confirm-desc">El usuario <strong id="desNombre"></strong> perderá acceso al sistema. Podrás reactivarlo en cualquier momento.</p>
+<!-- ══ MODAL CAMBIAR CONTRASEÑA ══ -->
+<div class="modal-overlay" id="modalPassword">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Cambiar contraseña</div>
+        <div class="modal-subtitle" id="pwSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalPassword')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="grid-template-columns:1fr;">
+        <div class="form-group">
+          <label class="form-label">Nueva contraseña *</label>
+          <input type="password" class="form-input" id="fNewPw" placeholder="Mínimo 6 caracteres"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirmar contraseña *</label>
+          <input type="password" class="form-input" id="fConfirmPw" placeholder="Repite la contraseña"/>
+          <span class="form-hint">Se enviará un correo de restablecimiento al usuario</span>
+        </div>
+      </div>
     </div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="cerrarModal('modalDesactivar')">Cancelar</button>
-      <button class="btn-danger-full" onclick="confirmarDesactivar()">
-        <i class="fa-solid fa-user-slash"></i> Desactivar
+      <button class="btn-cancel" onclick="cerrarModal('modalPassword')">Cancelar</button>
+      <button class="btn-save" id="btnPw" onclick="cambiarPassword()">
+        <i class="fa-solid fa-key"></i> Actualizar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL HISTORIAL ══ -->
+<div class="modal-overlay" id="modalHistorial">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Historial del usuario</div>
+        <div class="modal-subtitle" id="histSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalHistorial')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="historial-list" id="historialList">
+        <div class="empty-state" style="padding:2rem">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <h3>Sin historial</h3>
+          <p>No hay actividad registrada para este usuario.</p>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalHistorial')">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR BAJA ══ -->
+<div class="modal-overlay" id="modalBaja">
+  <div class="modal modal-sm">
+    <div class="modal-body center" style="padding:2rem 1.5rem">
+      <div class="confirm-icon danger"><i class="fa-solid fa-user-slash"></i></div>
+      <div class="confirm-title">¿Dar de baja al usuario?</div>
+      <p class="confirm-desc">El usuario <strong id="bajaNombre"></strong> perderá acceso al sistema. Podrás reactivarlo en cualquier momento desde la pestaña "Dados de baja".</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalBaja')">Cancelar</button>
+      <button class="btn-danger-full" onclick="confirmarBaja()">
+        <i class="fa-solid fa-user-slash"></i> Dar de baja
       </button>
     </div>
   </div>
@@ -437,13 +497,14 @@
 
   function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
 
-  // ── Estado global ──
+  // ── Estado ──
   let todosUsuarios = [];
   let tabActual     = 'activos';
   let docIdEditar   = null;
   let docIdAccion   = null;
+  let docIdPassword = null;
 
-  // ── Badge solicitudes ──
+  // ── Badge ──
   async function cargarBadgeSolicitudes() {
     try {
       const snap = await db.collection('solicitudes').where('estado','==','pendiente').get();
@@ -453,7 +514,7 @@
     } catch(e) {}
   }
 
-  // ── Cargar usuarios en tiempo real ──
+  // ── Cargar en tiempo real ──
   function cargarUsuarios() {
     db.collection('usuarios').orderBy('nombre').onSnapshot(snap => {
       todosUsuarios = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -463,10 +524,8 @@
   }
 
   function actualizarContadores() {
-    const activos   = todosUsuarios.filter(u => u.activo !== false).length;
-    const inactivos = todosUsuarios.filter(u => u.activo === false).length;
-    document.getElementById('countActivos').textContent   = `(${activos})`;
-    document.getElementById('countInactivos').textContent = `(${inactivos})`;
+    document.getElementById('countActivos').textContent   = `(${todosUsuarios.filter(u => u.activo !== false).length})`;
+    document.getElementById('countInactivos').textContent = `(${todosUsuarios.filter(u => u.activo === false).length})`;
     document.getElementById('countTodos').textContent     = `(${todosUsuarios.length})`;
   }
 
@@ -482,7 +541,7 @@
       if (rol   && u.rol   !== rol)   return false;
       if (turno && u.turno !== turno) return false;
       if (q) {
-        const h = `${u.nombre} ${u.apellidos} ${u.correo} ${u.noControl}`.toLowerCase();
+        const h = `${u.nombre||''} ${u.apellidos||''} ${u.correo||''} ${u.noControl||''}`.toLowerCase();
         if (!h.includes(q)) return false;
       }
       return true;
@@ -492,14 +551,14 @@
     renderTabla(lista);
   }
 
-  // ── Render tabla ──
+  // ── Render ──
   function renderTabla(lista) {
     const tbody = document.getElementById('tablaBody');
-    if (lista.length === 0) {
+    if (!lista || lista.length === 0) {
       tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">
         <i class="fa-solid fa-users"></i>
-        <h3>Sin usuarios registrados</h3>
-        <p>${tabActual === 'activos' ? 'Haz clic en "Agregar Usuario" para crear el primero.' : 'No hay usuarios que coincidan.'}</p>
+        <h3>${tabActual === 'activos' ? 'Sin usuarios activos' : tabActual === 'inactivos' ? 'Sin usuarios dados de baja' : 'Sin usuarios registrados'}</h3>
+        <p>${tabActual === 'activos' ? 'Los usuarios se registran desde la app móvil.' : 'No hay usuarios que coincidan.'}</p>
       </div></td></tr>`;
       return;
     }
@@ -520,8 +579,8 @@
     tbody.innerHTML = lista.map(u => {
       const ini   = ((u.nombre||'')[0] || (u.correo||'U')[0]).toUpperCase();
       const color = colores[u.rol] || '#7A90B8';
-      const rm    = rolMap[u.rol]   || { lbl: u.rol || '—', cls: '' };
-      const tm    = turnoMap[u.turno]|| null;
+      const rm    = rolMap[u.rol]   || { lbl: u.rol||'—', cls:'' };
+      const tm    = turnoMap[u.turno] || null;
       const fecha = u.fecha_registro ? fmtDate(u.fecha_registro) : '—';
       const activo = u.activo !== false;
 
@@ -530,8 +589,8 @@
           <div class="user-cell">
             <div class="u-avatar" style="background:${color}">${ini}</div>
             <div>
-              <div class="u-name">${u.nombre || ''} ${u.apellidos || ''}</div>
-              <div class="u-email">${u.correo || ''}</div>
+              <div class="u-name">${u.nombre||''} ${u.apellidos||''}</div>
+              <div class="u-email">${u.correo||''}</div>
             </div>
           </div>
         </td>
@@ -540,25 +599,31 @@
           ? `<span class="badge-turno ${tm.cls}">${tm.lbl}</span>`
           : `<span class="badge-turno turno-none">Sin turno</span>`}
         </td>
-        <td style="color:var(--text-mid);font-size:.82rem;">${u.noControl || '—'}</td>
-        <td style="color:var(--text-mid);font-size:.82rem;">${u.departamento || '—'}</td>
+        <td style="color:var(--text-mid);font-size:.82rem;">${u.noControl||'—'}</td>
+        <td style="color:var(--text-mid);font-size:.82rem;">${u.departamento||'—'}</td>
         <td>
           <div class="status-dot-wrap">
             <div class="s-dot ${activo ? 'activo' : 'inactivo'}"></div>
-            ${activo ? 'Activo' : 'Inactivo'}
+            ${activo ? 'Activo' : 'Dado de baja'}
           </div>
         </td>
         <td style="color:var(--text-light);font-size:.8rem;">${fecha}</td>
         <td>
           <div class="actions">
-            <button class="btn-icon" onclick="editarUsuario('${u.id}')">
-              <i class="fa-solid fa-pen"></i> Editar
+            <button class="btn-icon" onclick="abrirEditar('${u.id}')" title="Editar información">
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button class="btn-icon" onclick="abrirPassword('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')".trim() title="Cambiar contraseña">
+              <i class="fa-solid fa-key"></i>
+            </button>
+            <button class="btn-icon" onclick="abrirHistorial('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')".trim() title="Historial">
+              <i class="fa-solid fa-clock-rotate-left"></i>
             </button>
             ${activo
-              ? `<button class="btn-icon danger" title="Desactivar" onclick="pedirDesactivar('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')">
+              ? `<button class="btn-icon danger" onclick="pedirBaja('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')".trim() title="Dar de baja">
                   <i class="fa-solid fa-user-slash"></i>
                 </button>`
-              : `<button class="btn-icon success-btn" title="Reactivar" onclick="reactivarUsuario('${u.id}')">
+              : `<button class="btn-icon success-btn" onclick="reactivarUsuario('${u.id}')" title="Reactivar">
                   <i class="fa-solid fa-user-check"></i>
                 </button>`
             }
@@ -569,10 +634,8 @@
   }
 
   function fmtDate(ts) {
-    try {
-      const d = ts?.toDate ? ts.toDate() : new Date(ts);
-      return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' });
-    } catch { return '—'; }
+    try { const d = ts?.toDate ? ts.toDate() : new Date(ts); return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' }); }
+    catch { return '—'; }
   }
 
   // ── Tabs ──
@@ -583,75 +646,75 @@
     filtrar();
   }
 
-  // ── Modal ──
-  function abrirModalRegistro() {
-    docIdEditar = null;
-    document.getElementById('modalTitulo').textContent = 'Agregar Usuario';
-    document.getElementById('pwHint').textContent      = 'Mínimo 6 caracteres';
-    limpiarForm();
-    document.getElementById('modalRegistro').classList.add('open');
-  }
-
-  function editarUsuario(id) {
+  // ── Modal Editar ──
+  function abrirEditar(id) {
     const u = todosUsuarios.find(x => x.id === id);
     if (!u) return;
     docIdEditar = id;
-    document.getElementById('modalTitulo').textContent  = 'Editar Usuario';
-    document.getElementById('pwHint').textContent       = 'Dejar vacío para no cambiar';
-    document.getElementById('fNombre').value            = u.nombre       || '';
-    document.getElementById('fApellidos').value         = u.apellidos    || '';
-    document.getElementById('fCorreo').value            = u.correo       || '';
-    document.getElementById('fPassword').value          = '';
-    document.getElementById('fTelefono').value          = u.telefono     || '';
-    document.getElementById('fRol').value               = u.rol          || '';
-    document.getElementById('fTurno').value             = u.turno        || '';
-    document.getElementById('fControl').value           = u.noControl    || '';
-    document.getElementById('fDepartamento').value      = u.departamento || '';
-    document.getElementById('fObs').value               = u.observaciones|| '';
-    toggleCamposRol();
-    document.getElementById('modalRegistro').classList.add('open');
+    document.getElementById('editSubtitle').textContent  = u.correo || '';
+    document.getElementById('fNombre').value             = u.nombre       || '';
+    document.getElementById('fApellidos').value          = u.apellidos    || '';
+    document.getElementById('fCorreo').value             = u.correo       || '';
+    document.getElementById('fTelefono').value           = u.telefono     || '';
+    document.getElementById('fRol').value                = u.rol          || '';
+    document.getElementById('fTurno').value              = u.turno        || '';
+    document.getElementById('fControl').value            = u.noControl    || '';
+    document.getElementById('fDepartamento').value       = u.departamento || '';
+    document.getElementById('fObs').value                = u.observaciones|| '';
+    toggleLabelControl();
+    document.querySelectorAll('#modalEditar .form-input.error').forEach(e => e.classList.remove('error'));
+    document.getElementById('modalEditar').classList.add('open');
   }
 
-  function toggleCamposRol() {
+  function toggleLabelControl() {
     const r = document.getElementById('fRol').value;
-    const lbls = { admin:'ID Admin', docente:'No. Empleado', alumno:'No. de Control', tecnico:'ID Técnico' };
-    document.getElementById('labelControl').textContent = lbls[r] || 'Identificador';
+    const m = { admin:'ID Admin', docente:'No. Empleado', alumno:'No. de Control', tecnico:'ID Técnico' };
+    document.getElementById('labelControl').textContent = m[r] || 'Identificador';
   }
 
-  function limpiarForm() {
-    ['fNombre','fApellidos','fCorreo','fPassword','fTelefono','fControl','fDepartamento','fObs']
-      .forEach(id => { document.getElementById(id).value = ''; document.getElementById(id).classList.remove('error'); });
-    document.getElementById('fRol').value   = '';
-    document.getElementById('fTurno').value = '';
-  }
+  async function guardarEdicion() {
+    const correo = document.getElementById('fCorreo').value.trim();
+    const rol    = document.getElementById('fRol').value;
+    const nombre = document.getElementById('fNombre').value.trim();
 
-  async function guardarUsuario() {
-    const nombre    = document.getElementById('fNombre').value.trim();
-    const apellidos = document.getElementById('fApellidos').value.trim();
-    const correo    = document.getElementById('fCorreo').value.trim();
-    const password  = document.getElementById('fPassword').value;
-    const rol       = document.getElementById('fRol').value;
-
-    let ok = true;
-    ['fNombre','fCorreo','fRol'].forEach(id => {
-      const el = document.getElementById(id);
-      const empty = !el.value.trim();
-      el.classList.toggle('error', empty);
-      if (empty) ok = false;
-    });
-    if (!docIdEditar && (!password || password.length < 6)) {
-      document.getElementById('fPassword').classList.add('error'); ok = false;
+    // Validar correo institucional
+    if (!correo.endsWith('@lcardenas.tecnm.mx')) {
+      document.getElementById('fCorreo').classList.add('error');
+      showToast('Solo se aceptan correos @lcardenas.tecnm.mx', 'error'); return;
     }
-    if (!ok) { showToast('Completa los campos obligatorios', 'error'); return; }
+    if (!nombre || !rol) {
+      if (!nombre) document.getElementById('fNombre').classList.add('error');
+      if (!rol)    document.getElementById('fRol').classList.add('error');
+      showToast('Completa los campos obligatorios', 'error'); return;
+    }
+
+    // Verificar duplicado de correo (excluyendo el mismo usuario)
+    const duplicado = todosUsuarios.find(u => u.correo === correo && u.id !== docIdEditar);
+    if (duplicado) {
+      document.getElementById('fCorreo').classList.add('error');
+      showToast('Este correo ya está registrado en otro usuario', 'error'); return;
+    }
+
+    // Verificar duplicado de no. control (si aplica)
+    const noControl = document.getElementById('fControl').value.trim();
+    if (noControl) {
+      const dupControl = todosUsuarios.find(u => u.noControl === noControl && u.id !== docIdEditar && u.noControl);
+      if (dupControl) {
+        document.getElementById('fControl').classList.add('error');
+        showToast('Este número de control ya está registrado en otro usuario', 'error'); return;
+      }
+    }
 
     const datos = {
-      nombre, apellidos, correo, rol,
+      nombre,
+      apellidos:     document.getElementById('fApellidos').value.trim(),
+      correo,
+      rol,
       turno:         document.getElementById('fTurno').value,
-      noControl:     document.getElementById('fControl').value.trim(),
+      noControl,
       departamento:  document.getElementById('fDepartamento').value.trim(),
       telefono:      document.getElementById('fTelefono').value.trim(),
       observaciones: document.getElementById('fObs').value.trim(),
-      activo: true,
     };
 
     const btn = document.getElementById('btnGuardar');
@@ -659,51 +722,157 @@
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
 
     try {
-      if (docIdEditar) {
-        await db.collection('usuarios').doc(docIdEditar).update(datos);
-        showToast('Usuario actualizado correctamente', 'success');
-      } else {
-        // Segunda instancia de Firebase para no cerrar sesión del admin
-        const secondApp  = firebase.initializeApp(firebaseConfig, `aux_${Date.now()}`);
-        const secondAuth = secondApp.auth();
-        const cred = await secondAuth.createUserWithEmailAndPassword(correo, password);
-        await secondAuth.signOut();
-        datos.uid            = cred.user.uid;
-        datos.fecha_registro = firebase.firestore.FieldValue.serverTimestamp();
-        await db.collection('usuarios').add(datos);
-        await db.collection('historial_eventos').add({
-          tipo: 'usuario_registrado',
-          descripcion: `Nuevo usuario registrado: ${nombre} ${apellidos} (${rol})`,
-          fecha: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        showToast('Usuario registrado correctamente', 'success');
-      }
-      cerrarModal('modalRegistro');
+      await db.collection('usuarios').doc(docIdEditar).update(datos);
+      // Registrar en historial
+      await db.collection('historial_eventos').add({
+        tipo: 'usuario_editado',
+        usuario_id: docIdEditar,
+        descripcion: `Información editada: ${nombre} (${rol})`,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('Información actualizada correctamente', 'success');
+      cerrarModal('modalEditar');
     } catch(e) {
       console.error(e);
-      showToast(traducirError(e.code), 'error');
+      showToast('Error al guardar los cambios', 'error');
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar cambios';
     }
   }
 
-  // ── Desactivar / Reactivar ──
-  function pedirDesactivar(id, nombre) {
-    docIdAccion = id;
-    document.getElementById('desNombre').textContent = nombre.trim();
-    document.getElementById('modalDesactivar').classList.add('open');
+  // ── Modal Contraseña ──
+  function abrirPassword(id, nombre) {
+    docIdPassword = id;
+    document.getElementById('pwSubtitle').textContent = nombre.trim();
+    document.getElementById('fNewPw').value     = '';
+    document.getElementById('fConfirmPw').value = '';
+    document.getElementById('fNewPw').classList.remove('error');
+    document.getElementById('fConfirmPw').classList.remove('error');
+    document.getElementById('modalPassword').classList.add('open');
   }
 
-  async function confirmarDesactivar() {
+  async function cambiarPassword() {
+    const pw1 = document.getElementById('fNewPw').value;
+    const pw2 = document.getElementById('fConfirmPw').value;
+
+    if (!pw1 || pw1.length < 6) {
+      document.getElementById('fNewPw').classList.add('error');
+      showToast('La contraseña debe tener al menos 6 caracteres', 'error'); return;
+    }
+    if (pw1 !== pw2) {
+      document.getElementById('fConfirmPw').classList.add('error');
+      showToast('Las contraseñas no coinciden', 'error'); return;
+    }
+
+    // Buscamos el correo del usuario para enviar reset
+    const u = todosUsuarios.find(x => x.id === docIdPassword);
+    if (!u?.correo) { showToast('No se encontró el correo del usuario', 'error'); return; }
+
+    const btn = document.getElementById('btnPw');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
+
+    try {
+      // Enviar correo de restablecimiento
+      await auth.sendPasswordResetEmail(u.correo);
+      await db.collection('historial_eventos').add({
+        tipo: 'password_reset',
+        usuario_id: docIdPassword,
+        descripcion: `Restablecimiento de contraseña enviado a ${u.correo}`,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('Correo de restablecimiento enviado al usuario', 'success');
+      cerrarModal('modalPassword');
+    } catch(e) {
+      console.error(e);
+      showToast('Error al enviar el correo de restablecimiento', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-key"></i> Actualizar';
+    }
+  }
+
+  // ── Modal Historial ──
+  async function abrirHistorial(id, nombre) {
+    document.getElementById('histSubtitle').textContent = nombre.trim();
+    document.getElementById('historialList').innerHTML  = `<div style="text-align:center;padding:1.5rem;color:var(--text-light)"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>`;
+    document.getElementById('modalHistorial').classList.add('open');
+
+    try {
+      const snap = await db.collection('historial_eventos')
+        .where('usuario_id','==',id)
+        .orderBy('fecha','desc')
+        .limit(30)
+        .get();
+
+      if (snap.empty) {
+        document.getElementById('historialList').innerHTML = `<div class="empty-state" style="padding:2rem">
+          <i class="fa-solid fa-clock-rotate-left"></i>
+          <h3>Sin historial</h3>
+          <p>No hay actividad registrada para este usuario.</p>
+        </div>`;
+        return;
+      }
+
+      const iconMap = {
+        solicitud_ac:      { cls:'sol',  ico:'snowflake' },
+        solicitud_aprobada:{ cls:'apro', ico:'circle-check' },
+        solicitud_rechazada:{ cls:'rech',ico:'circle-xmark' },
+        usuario_editado:   { cls:'edit', ico:'pen' },
+        password_reset:    { cls:'edit', ico:'key' },
+      };
+
+      document.getElementById('historialList').innerHTML = snap.docs.map(d => {
+        const ev = d.data();
+        const m  = iconMap[ev.tipo] || { cls:'sol', ico:'circle-info' };
+        return `<div class="historial-item">
+          <div class="h-icon ${m.cls}"><i class="fa-solid fa-${m.ico}"></i></div>
+          <div>
+            <div class="h-desc">${ev.descripcion || ev.tipo}</div>
+            <div class="h-fecha">${ev.fecha ? fmtDate(ev.fecha) : '—'}</div>
+          </div>
+        </div>`;
+      }).join('');
+    } catch(e) {
+      document.getElementById('historialList').innerHTML = `<div class="empty-state" style="padding:2rem">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        <h3>Error al cargar historial</h3>
+        <p>Puede que necesites crear un índice en Firestore.</p>
+      </div>`;
+    }
+  }
+
+  // ── Baja / Reactivar ──
+  function pedirBaja(id, nombre) {
+    docIdAccion = id;
+    document.getElementById('bajaNombre').textContent = nombre.trim();
+    document.getElementById('modalBaja').classList.add('open');
+  }
+
+  async function confirmarBaja() {
     if (!docIdAccion) return;
+    const u = todosUsuarios.find(x => x.id === docIdAccion);
     await db.collection('usuarios').doc(docIdAccion).update({ activo: false });
-    showToast('Usuario desactivado', 'info');
-    cerrarModal('modalDesactivar');
+    await db.collection('historial_eventos').add({
+      tipo: 'usuario_baja',
+      usuario_id: docIdAccion,
+      descripcion: `Usuario dado de baja: ${u?.nombre || ''} ${u?.apellidos || ''}`,
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    showToast('Usuario dado de baja correctamente', 'info');
+    cerrarModal('modalBaja');
   }
 
   async function reactivarUsuario(id) {
+    const u = todosUsuarios.find(x => x.id === id);
     await db.collection('usuarios').doc(id).update({ activo: true });
+    await db.collection('historial_eventos').add({
+      tipo: 'usuario_reactivado',
+      usuario_id: id,
+      descripcion: `Usuario reactivado: ${u?.nombre||''} ${u?.apellidos||''}`,
+      fecha: firebase.firestore.FieldValue.serverTimestamp()
+    });
     showToast('Usuario reactivado correctamente', 'success');
   }
 
@@ -715,15 +884,6 @@
   document.querySelectorAll('.modal-overlay').forEach(o => {
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
   });
-
-  function traducirError(code) {
-    return {
-      'auth/email-already-in-use': 'Este correo ya está registrado en el sistema',
-      'auth/invalid-email':        'El formato del correo no es válido',
-      'auth/weak-password':        'La contraseña debe tener al menos 6 caracteres',
-      'auth/network-request-failed':'Error de conexión, revisa tu internet',
-    }[code] || 'Ocurrió un error. Inténtalo de nuevo';
-  }
 
   function showToast(msg, type = 'info') {
     const icons = { success:'circle-check', error:'circle-xmark', info:'circle-info' };
