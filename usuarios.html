@@ -486,6 +486,13 @@
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
+  // ── Estado — declarado al tope para que los onclick del HTML lo encuentren ──
+  var todosUsuarios = [];
+  var tabActual     = 'activos';
+  var docIdEditar   = null;
+  var docIdAccion   = null;
+  var docIdPassword = null;
+
   // ── Protección de ruta ──
   auth.onAuthStateChanged(user => {
     if (!user) { window.location.href = 'login.html'; return; }
@@ -496,13 +503,6 @@
   });
 
   function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
-
-  // ── Estado ──
-  let todosUsuarios = [];
-  let tabActual     = 'activos';
-  let docIdEditar   = null;
-  let docIdAccion   = null;
-  let docIdPassword = null;
 
   // ── Badge ──
   async function cargarBadgeSolicitudes() {
