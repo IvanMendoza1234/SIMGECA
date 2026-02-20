@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIMGECA — Aires Acondicionados</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --azul:       #003B8E;
+      --azul-mid:   #0057CC;
+      --azul-light: #1A75FF;
+      --azul-pale:  #E8F0FE;
+      --accent:     #00C2A8;
+      --danger:     #EF4444;
+      --success:    #10B981;
+      --warning:    #F59E0B;
+      --bg:         #F0F4FA;
+      --surface:    #FFFFFF;
+      --surface2:   #F8FAFF;
+      --text:       #0D1B3E;
+      --text-mid:   #3D5280;
+      --text-light: #7A90B8;
+      --border:     #DDE5F4;
+      --sidebar-w:  265px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* ══ SIDEBAR (idéntico al dashboard) ══ */
+    .sidebar { width: var(--sidebar-w); background: var(--azul); min-height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-row { display: flex; align-items: center; gap: .7rem; }
+    .logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .logo-sub  { font-size: .62rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
+    .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
+    .nav-section { font-size: .6rem; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: .85rem 1.25rem .3rem; }
+    .nav-item { display: flex; align-items: center; gap: .7rem; padding: .65rem 1.25rem; color: rgba(255,255,255,.55); font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; border-left: 3px solid transparent; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+    .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--accent); }
+    .nav-item i { width: 17px; text-align: center; font-size: .9rem; }
+    .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 700; padding: .12rem .42rem; border-radius: 20px; display:none; }
+    .sidebar-footer { padding: .9rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .user-card { display: flex; align-items: center; gap: .65rem; }
+    .user-avatar { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: .8rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: .68rem; color: rgba(255,255,255,.38); }
+    .btn-logout { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35); font-size: .88rem; padding: .25rem; border-radius: 6px; transition: color .2s; }
+    .btn-logout:hover { color: var(--danger); }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: .9rem 1.75rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
+    .topbar-right   { display: flex; align-items: center; gap: .6rem; }
+    .btn-primary { display: flex; align-items: center; gap: .5rem; padding: .55rem 1.1rem; background: var(--azul); color: #fff; border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .2s; }
+    .btn-primary:hover { background: var(--azul-mid); }
+
+    .page-content { padding: 1.5rem 1.75rem; flex: 1; }
+
+    /* ══ TABS ══ */
+    .tabs { display: flex; gap: .35rem; margin-bottom: 1.25rem; background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: .3rem; width: fit-content; }
+    .tab { padding: .45rem 1.1rem; border-radius: 8px; font-size: .83rem; font-weight: 600; cursor: pointer; color: var(--text-light); transition: all .2s; border: none; background: none; font-family: 'DM Sans', sans-serif; }
+    .tab.active { background: var(--azul); color: #fff; }
+    .tab:hover:not(.active) { background: var(--azul-pale); color: var(--azul); }
+
+    /* ══ FILTROS Y BÚSQUEDA ══ */
+    .toolbar { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 340px; }
+    .search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: .85rem; pointer-events: none; }
+    .search-input { width: 100%; padding: .6rem 1rem .6rem 2.35rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: .85rem; color: var(--text); outline: none; transition: border-color .2s; }
+    .search-input:focus { border-color: var(--azul-light); }
+    .filter-select { padding: .6rem .9rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: .83rem; color: var(--text-mid); outline: none; cursor: pointer; }
+    .filter-select:focus { border-color: var(--azul-light); }
+    .count-badge { margin-left: auto; font-size: .78rem; color: var(--text-light); font-weight: 500; }
+
+    /* ══ GRID DE CARDS DE AC ══ */
+    .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; }
+
+    .ac-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.1rem;
+      transition: box-shadow .2s, transform .2s;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn .3s ease both;
+    }
+    .ac-card:hover { box-shadow: 0 6px 24px rgba(0,59,142,.09); transform: translateY(-1px); }
+    .ac-card.baja { opacity: .65; }
+    .ac-card.baja::after { content: 'BAJA'; position: absolute; top: 12px; right: 12px; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 800; padding: .15rem .45rem; border-radius: 5px; letter-spacing: .05em; }
+
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+    .ac-card-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .85rem; }
+    .ac-icon { width: 44px; height: 44px; border-radius: 12px; background: var(--azul-pale); display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: var(--azul-light); flex-shrink: 0; }
+    .ac-estado { display: flex; align-items: center; gap: .3rem; font-size: .72rem; font-weight: 700; padding: .22rem .6rem; border-radius: 6px; }
+    .estado-encendido    { background: #D1FAE5; color: #065F46; }
+    .estado-apagado      { background: #F1F5F9; color: #64748B; }
+    .estado-mantenimiento{ background: #FEF3C7; color: #92400E; }
+    .estado-baja         { background: #FEE2E2; color: #991B1B; }
+
+    .ac-nombre { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; color: var(--text); margin-bottom: .15rem; }
+    .ac-modelo { font-size: .78rem; color: var(--text-light); margin-bottom: .85rem; }
+
+    .ac-datos { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem .75rem; margin-bottom: .9rem; }
+    .ac-dato-item { }
+    .ac-dato-lbl { font-size: .67rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; }
+    .ac-dato-val { font-size: .82rem; font-weight: 600; color: var(--text-mid); margin-top: .08rem; }
+
+    .hw-badge { display: inline-flex; align-items: center; gap: .3rem; background: #F0FDF4; border: 1px solid #BBF7D0; color: #166534; font-size: .7rem; font-weight: 600; padding: .2rem .55rem; border-radius: 6px; }
+
+    .ac-card-footer { display: flex; gap: .4rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+    .btn-icon { display: flex; align-items: center; gap: .35rem; padding: .38rem .75rem; border-radius: 7px; font-size: .75rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface); color: var(--text-mid); cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif; }
+    .btn-icon:hover { border-color: var(--azul-light); color: var(--azul); background: var(--azul-pale); }
+    .btn-icon.danger:hover { border-color: var(--danger); color: var(--danger); background: #FFF5F5; }
+    .btn-icon.warning:hover { border-color: var(--warning); color: #92400E; background: #FFFBEB; }
+    .btn-icon.ml-auto { margin-left: auto; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-light); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: .75rem; display: block; opacity: .3; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--text-mid); margin-bottom: .4rem; }
+    .empty-state p { font-size: .83rem; }
+
+    /* ══ MODAL ══ */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(13,27,62,.45); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 560px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); animation: modalIn .25s ease; }
+    @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(12px); } to { opacity:1; transform:none; } }
+    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .modal-close { width: 32px; height: 32px; border: none; background: var(--surface2); border-radius: 8px; cursor: pointer; color: var(--text-light); font-size: .9rem; display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .modal-close:hover { background: #FEE2E2; color: var(--danger); }
+    .modal-body { padding: 1.25rem 1.5rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: .6rem; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: .35rem; }
+    .form-label { font-size: .76rem; font-weight: 700; color: var(--text-mid); letter-spacing: .02em; }
+    .form-input, .form-select, .form-textarea {
+      padding: .65rem .9rem;
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      background: var(--surface2);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .875rem;
+      color: var(--text);
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--azul-light);
+      box-shadow: 0 0 0 3px rgba(26,117,255,.1);
+      background: #fff;
+    }
+    .form-input.error { border-color: var(--danger); }
+    .form-textarea { resize: vertical; min-height: 80px; }
+    .form-hint { font-size: .7rem; color: var(--text-light); }
+    .section-label { font-size: .72rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .08em; margin: .75rem 0 .5rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); grid-column: 1 / -1; }
+
+    .btn-cancel { padding: .55rem 1.1rem; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text-mid); cursor: pointer; transition: all .15s; }
+    .btn-cancel:hover { border-color: var(--text-light); }
+    .btn-save { display: flex; align-items: center; gap: .45rem; padding: .55rem 1.25rem; background: var(--azul); border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background .2s; }
+    .btn-save:hover { background: var(--azul-mid); }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-danger-full { padding: .55rem 1.1rem; background: #FEE2E2; border: 1.5px solid #FECACA; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #991B1B; cursor: pointer; transition: all .15s; }
+    .btn-danger-full:hover { background: #FECACA; }
+
+    /* Modal de confirmación */
+    .modal-confirm .modal { max-width: 400px; }
+    .confirm-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 1rem; }
+    .confirm-icon.danger  { background: #FEE2E2; color: var(--danger); }
+    .confirm-icon.warning { background: #FEF3C7; color: var(--warning); }
+    .modal-body.center { text-align: center; }
+    .confirm-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
+    .confirm-desc  { font-size: .84rem; color: var(--text-light); line-height: 1.5; }
+
+    /* Toast */
+    .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
+    .toast { padding: .7rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: .55rem; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: fadeIn .3s ease; max-width: 280px; }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+    .toast.info    { background: var(--azul); }
+
+    @media (max-width: 768px) {
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: 1; }
+      .ac-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="fa-solid fa-wind"></i></div>
+      <div>
+        <div class="logo-text">SIMGECA</div>
+        <div class="logo-sub">TecNM — Lázaro Cárdenas</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-house"></i> Inicio</a>
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item active" href="acs.html"><i class="fa-solid fa-snowflake"></i> Aires Acondicionados</a>
+    <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
+    <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
+    <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
+      <span class="nav-badge" id="navBadgeSol">0</span></a>
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
+    <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item" href="programacion.html"><i class="fa-solid fa-calendar-check"></i> Programación AC</a>
+    <a class="nav-item" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Administrador</div>
+        <div class="user-role">Admin del sistema</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Cerrar sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Aires Acondicionados</h1>
+      <p>Registro y gestión de equipos AC del instituto</p>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-primary" onclick="abrirModalRegistro()">
+        <i class="fa-solid fa-plus"></i> Registrar AC
+      </button>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="cambiarTab('activos', this)">
+        <i class="fa-solid fa-check-circle"></i> Activos <span id="tabCountActivos" style="margin-left:.3rem;opacity:.6"></span>
+      </button>
+      <button class="tab" onclick="cambiarTab('baja', this)">
+        <i class="fa-solid fa-ban"></i> Dados de baja <span id="tabCountBaja" style="margin-left:.3rem;opacity:.6"></span>
+      </button>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i class="fa-solid fa-magnifying-glass"></i>
+        <input type="text" class="search-input" id="searchInput" placeholder="Buscar por nombre, aula o modelo..." oninput="filtrar()"/>
+      </div>
+      <select class="filter-select" id="filtroEstado" onchange="filtrar()">
+        <option value="">Todos los estados</option>
+        <option value="encendido">Encendidos</option>
+        <option value="apagado">Apagados</option>
+        <option value="mantenimiento">En mantenimiento</option>
+      </select>
+      <select class="filter-select" id="filtroHardware" onchange="filtrar()">
+        <option value="">Todos los dispositivos</option>
+        <option value="Sonoff">Sonoff</option>
+        <option value="M5StickC">M5StickC Plus2</option>
+        <option value="Otro">Otro</option>
+      </select>
+      <span class="count-badge" id="countLabel">Cargando...</span>
+    </div>
+
+    <!-- Grid de ACs -->
+    <div class="ac-grid" id="acGrid">
+      <div class="empty-state" style="grid-column:1/-1">
+        <i class="fa-solid fa-snowflake"></i>
+        <h3>Cargando equipos...</h3>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL REGISTRO / EDICIÓN ══ -->
+<div class="modal-overlay" id="modalRegistro">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modalTitulo">Registrar Aire Acondicionado</span>
+      <button class="modal-close" onclick="cerrarModal('modalRegistro')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="section-label">Información del equipo</div>
+
+        <div class="form-group full">
+          <label class="form-label">Nombre / Identificador *</label>
+          <input type="text" class="form-input" id="fNombre" placeholder="Ej: AC-Aula 204"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Marca *</label>
+          <input type="text" class="form-input" id="fMarca" placeholder="Ej: Mabe, Samsung..."/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Modelo *</label>
+          <input type="text" class="form-input" id="fModelo" placeholder="Ej: MO-18000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Potencia</label>
+          <input type="number" class="form-input" id="fPotencia" placeholder="Ej: 1500" min="0"/>
+          <span class="form-hint">En watts (W)</span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Capacidad (BTU)</label>
+          <input type="number" class="form-input" id="fBtu" placeholder="Ej: 18000" min="0"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Número de serie</label>
+          <input type="text" class="form-input" id="fSerie" placeholder="Ej: SN-2024-001"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Año de adquisición</label>
+          <input type="number" class="form-input" id="fAnio" placeholder="Ej: 2022" min="2000" max="2099"/>
+        </div>
+
+        <div class="section-label">Ubicación y turno</div>
+
+        <div class="form-group">
+          <label class="form-label">Aula asignada *</label>
+          <select class="form-select" id="fAula">
+            <option value="">Selecciona un aula...</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Turno</label>
+          <select class="form-select" id="fTurno">
+            <option value="">Sin turno definido</option>
+            <option value="matutino">Matutino</option>
+            <option value="vespertino">Vespertino</option>
+            <option value="ambos">Ambos turnos</option>
+          </select>
+        </div>
+
+        <div class="section-label">Hardware externo</div>
+
+        <div class="form-group">
+          <label class="form-label">Dispositivo IoT</label>
+          <select class="form-select" id="fHardware" onchange="toggleHwId()">
+            <option value="">Sin dispositivo</option>
+            <option value="Sonoff">Sonoff</option>
+            <option value="M5StickC">M5StickC Plus2</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="form-group" id="hwIdGroup" style="display:none">
+          <label class="form-label">ID / Device Key</label>
+          <input type="text" class="form-input" id="fHwId" placeholder="ID del dispositivo"/>
+        </div>
+
+        <div class="section-label">Estado actual</div>
+
+        <div class="form-group full">
+          <label class="form-label">Estado del equipo</label>
+          <select class="form-select" id="fEstado">
+            <option value="apagado">Apagado</option>
+            <option value="encendido">Encendido</option>
+            <option value="mantenimiento">En mantenimiento</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Observaciones</label>
+          <textarea class="form-textarea" id="fObservaciones" placeholder="Notas adicionales sobre el equipo..."></textarea>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalRegistro')">Cancelar</button>
+      <button class="btn-save" id="btnGuardar" onclick="guardarAC()">
+        <i class="fa-solid fa-floppy-disk"></i> Guardar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR BAJA ══ -->
+<div class="modal-overlay modal-confirm" id="modalBaja">
+  <div class="modal">
+    <div class="modal-body center">
+      <div class="confirm-icon warning"><i class="fa-solid fa-ban"></i></div>
+      <div class="confirm-title">¿Dar de baja este equipo?</div>
+      <p class="confirm-desc">El equipo quedará inactivo y no podrá ser controlado, pero su historial se conservará en el sistema.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalBaja')">Cancelar</button>
+      <button class="btn-danger-full" onclick="confirmarBaja()">
+        <i class="fa-solid fa-ban"></i> Dar de baja
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL CONFIRMAR ELIMINAR ══ -->
+<div class="modal-overlay modal-confirm" id="modalEliminar">
+  <div class="modal">
+    <div class="modal-body center">
+      <div class="confirm-icon danger"><i class="fa-solid fa-trash"></i></div>
+      <div class="confirm-title">¿Eliminar este equipo?</div>
+      <p class="confirm-desc">Esta acción es permanente y eliminará todos los datos del equipo del sistema. <strong>No se puede deshacer.</strong></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalEliminar')">Cancelar</button>
+      <button class="btn-danger-full" onclick="confirmarEliminar()">
+        <i class="fa-solid fa-trash"></i> Eliminar permanentemente
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
+    authDomain: "simgeca-26297.firebaseapp.com",
+    projectId: "simgeca-26297",
+    storageBucket: "simgeca-26297.firebasestorage.app",
+    messagingSenderId: "28195458236",
+    appId: "1:28195458236:web:9250f82b845665d82cd4b9"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  // Protección de ruta
+  auth.onAuthStateChanged(user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    document.getElementById('userName').textContent   = user.email.split('@')[0];
+    document.getElementById('userAvatar').textContent = user.email.charAt(0).toUpperCase();
+    cargarSolicitudesBadge();
+    cargarAulas();
+    cargarACs();
+  });
+
+  function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
+
+  // ── Estado global ──
+  let todosACs   = [];       // todos los docs de Firestore
+  let tabActual  = 'activos';
+  let docIdEditar  = null;
+  let docIdAccion  = null;   // para baja/eliminar
+
+  // ── Badge solicitudes en sidebar ──
+  async function cargarSolicitudesBadge() {
+    try {
+      const snap = await db.collection('solicitudes').where('estado','==','pendiente').get();
+      const badge = document.getElementById('navBadgeSol');
+      badge.textContent   = snap.size;
+      badge.style.display = snap.size > 0 ? 'inline' : 'none';
+    } catch(e) {}
+  }
+
+  // ── Cargar aulas para el select del modal ──
+  async function cargarAulas() {
+    try {
+      const snap = await db.collection('aulas').orderBy('nombre').get();
+      const sel = document.getElementById('fAula');
+      sel.innerHTML = '<option value="">Selecciona un aula...</option>';
+      snap.forEach(doc => {
+        const op = document.createElement('option');
+        op.value       = doc.data().nombre;
+        op.textContent = doc.data().nombre;
+        sel.appendChild(op);
+      });
+      // Si no hay aulas aún, dejamos el select con opción manual
+      if (snap.empty) {
+        sel.innerHTML = '<option value="">Sin aulas registradas aún</option>';
+        const op = document.createElement('option');
+        op.value = 'manual'; op.textContent = 'Ingresar manualmente';
+        sel.appendChild(op);
+      }
+    } catch(e) {}
+  }
+
+  // ── Cargar todos los ACs de Firestore ──
+  function cargarACs() {
+    db.collection('aires_acondicionados')
+      .orderBy('fecha_registro', 'desc')
+      .onSnapshot(snap => {
+        todosACs = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        filtrar();
+        actualizarContadores();
+      }, e => {
+        console.error(e);
+        renderGrid([]);
+      });
+  }
+
+  function actualizarContadores() {
+    const activos = todosACs.filter(a => a.dado_de_baja !== true).length;
+    const baja    = todosACs.filter(a => a.dado_de_baja === true).length;
+    document.getElementById('tabCountActivos').textContent = `(${activos})`;
+    document.getElementById('tabCountBaja').textContent    = `(${baja})`;
+  }
+
+  // ── Filtrar ──
+  function filtrar() {
+    const q       = document.getElementById('searchInput').value.toLowerCase();
+    const estado  = document.getElementById('filtroEstado').value;
+    const hw      = document.getElementById('filtroHardware').value;
+    const esBaja  = tabActual === 'baja';
+
+    let resultado = todosACs.filter(a => {
+      if (esBaja && a.dado_de_baja !== true)  return false;
+      if (!esBaja && a.dado_de_baja === true) return false;
+      if (estado && a.estado !== estado)       return false;
+      if (hw && !(a.hardware || '').includes(hw)) return false;
+      if (q) {
+        const haystack = `${a.nombre} ${a.marca} ${a.modelo} ${a.aula}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      return true;
+    });
+
+    document.getElementById('countLabel').textContent = `${resultado.length} equipo${resultado.length !== 1 ? 's' : ''}`;
+    renderGrid(resultado);
+  }
+
+  // ── Render cards ──
+  function renderGrid(lista) {
+    const grid = document.getElementById('acGrid');
+    if (lista.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <i class="fa-solid fa-snowflake"></i>
+          <h3>${tabActual === 'baja' ? 'Sin equipos dados de baja' : 'Sin equipos registrados'}</h3>
+          <p>${tabActual === 'activos' ? 'Haz clic en "Registrar AC" para agregar el primer equipo.' : ''}</p>
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = lista.map(ac => {
+      const esBaja  = ac.dado_de_baja === true;
+      const estado  = esBaja ? 'baja' : (ac.estado || 'apagado');
+      const estadoMap = {
+        encendido:     { cls: 'estado-encendido',     icon: '🟢', lbl: 'Encendido' },
+        apagado:       { cls: 'estado-apagado',       icon: '⚪', lbl: 'Apagado' },
+        mantenimiento: { cls: 'estado-mantenimiento', icon: '🟡', lbl: 'Mantenimiento' },
+        baja:          { cls: 'estado-baja',          icon: '🔴', lbl: 'De baja' },
+      };
+      const est = estadoMap[estado] || estadoMap.apagado;
+      const hw  = ac.hardware ? `<span class="hw-badge"><i class="fa-solid fa-microchip"></i>${ac.hardware}</span>` : '—';
+
+      return `
+        <div class="ac-card ${esBaja ? 'baja' : ''}">
+          <div class="ac-card-header">
+            <div class="ac-icon"><i class="fa-solid fa-snowflake"></i></div>
+            <span class="ac-estado ${est.cls}">${est.icon} ${est.lbl}</span>
+          </div>
+          <div class="ac-nombre">${ac.nombre || '—'}</div>
+          <div class="ac-modelo">${ac.marca || ''} ${ac.modelo || ''}</div>
+          <div class="ac-datos">
+            <div class="ac-dato-item">
+              <div class="ac-dato-lbl">Aula</div>
+              <div class="ac-dato-val">${ac.aula || '—'}</div>
+            </div>
+            <div class="ac-dato-item">
+              <div class="ac-dato-lbl">Potencia</div>
+              <div class="ac-dato-val">${ac.potencia_w ? ac.potencia_w + ' W' : '—'}</div>
+            </div>
+            <div class="ac-dato-item">
+              <div class="ac-dato-lbl">Capacidad</div>
+              <div class="ac-dato-val">${ac.btu ? ac.btu + ' BTU' : '—'}</div>
+            </div>
+            <div class="ac-dato-item">
+              <div class="ac-dato-lbl">Turno</div>
+              <div class="ac-dato-val" style="text-transform:capitalize">${ac.turno || '—'}</div>
+            </div>
+            <div class="ac-dato-item" style="grid-column:1/-1">
+              <div class="ac-dato-lbl">Dispositivo IoT</div>
+              <div class="ac-dato-val">${hw}</div>
+            </div>
+          </div>
+          <div class="ac-card-footer">
+            <button class="btn-icon" onclick="editarAC('${ac.id}')">
+              <i class="fa-solid fa-pen"></i> Editar
+            </button>
+            ${!esBaja
+              ? `<button class="btn-icon warning" onclick="pedirBaja('${ac.id}')">
+                   <i class="fa-solid fa-ban"></i> Dar de baja
+                 </button>`
+              : `<button class="btn-icon" onclick="reactivarAC('${ac.id}')">
+                   <i class="fa-solid fa-rotate-left"></i> Reactivar
+                 </button>`
+            }
+            <button class="btn-icon danger ml-auto" onclick="pedirEliminar('${ac.id}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Tabs ──
+  function cambiarTab(tab, el) {
+    tabActual = tab;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('filtroEstado').value  = '';
+    document.getElementById('filtroHardware').value = '';
+    document.getElementById('searchInput').value   = '';
+    filtrar();
+  }
+
+  // ── Modal registro ──
+  function abrirModalRegistro() {
+    docIdEditar = null;
+    document.getElementById('modalTitulo').textContent = 'Registrar Aire Acondicionado';
+    limpiarForm();
+    document.getElementById('modalRegistro').classList.add('open');
+  }
+
+  function editarAC(id) {
+    const ac = todosACs.find(a => a.id === id);
+    if (!ac) return;
+    docIdEditar = id;
+    document.getElementById('modalTitulo').textContent = 'Editar Aire Acondicionado';
+    document.getElementById('fNombre').value       = ac.nombre       || '';
+    document.getElementById('fMarca').value        = ac.marca        || '';
+    document.getElementById('fModelo').value       = ac.modelo       || '';
+    document.getElementById('fPotencia').value     = ac.potencia_w   || '';
+    document.getElementById('fBtu').value          = ac.btu          || '';
+    document.getElementById('fSerie').value        = ac.num_serie    || '';
+    document.getElementById('fAnio').value         = ac.anio         || '';
+    document.getElementById('fAula').value         = ac.aula         || '';
+    document.getElementById('fTurno').value        = ac.turno        || '';
+    document.getElementById('fHardware').value     = ac.hardware     || '';
+    document.getElementById('fHwId').value         = ac.hw_id        || '';
+    document.getElementById('fEstado').value       = ac.estado       || 'apagado';
+    document.getElementById('fObservaciones').value= ac.observaciones|| '';
+    toggleHwId();
+    document.getElementById('modalRegistro').classList.add('open');
+  }
+
+  function limpiarForm() {
+    ['fNombre','fMarca','fModelo','fPotencia','fBtu','fSerie','fAnio','fHwId','fObservaciones'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+    document.getElementById('fAula').value    = '';
+    document.getElementById('fTurno').value   = '';
+    document.getElementById('fHardware').value= '';
+    document.getElementById('fEstado').value  = 'apagado';
+    toggleHwId();
+  }
+
+  function toggleHwId() {
+    const hw = document.getElementById('fHardware').value;
+    document.getElementById('hwIdGroup').style.display = hw ? 'flex' : 'none';
+  }
+
+  async function guardarAC() {
+    const nombre = document.getElementById('fNombre').value.trim();
+    const marca  = document.getElementById('fMarca').value.trim();
+    const modelo = document.getElementById('fModelo').value.trim();
+    const aula   = document.getElementById('fAula').value;
+
+    // Validación básica
+    document.getElementById('fNombre').classList.toggle('error', !nombre);
+    document.getElementById('fMarca').classList.toggle('error',  !marca);
+    document.getElementById('fModelo').classList.toggle('error', !modelo);
+    if (!nombre || !marca || !modelo) { showToast('Completa los campos obligatorios (*)','error'); return; }
+
+    const datos = {
+      nombre,
+      marca,
+      modelo,
+      potencia_w:    Number(document.getElementById('fPotencia').value) || 0,
+      btu:           Number(document.getElementById('fBtu').value)       || 0,
+      num_serie:     document.getElementById('fSerie').value.trim(),
+      anio:          Number(document.getElementById('fAnio').value)      || null,
+      aula:          aula,
+      turno:         document.getElementById('fTurno').value,
+      hardware:      document.getElementById('fHardware').value,
+      hw_id:         document.getElementById('fHwId').value.trim(),
+      estado:        document.getElementById('fEstado').value,
+      observaciones: document.getElementById('fObservaciones').value.trim(),
+      consumo_mes:   0,
+    };
+
+    const btn = document.getElementById('btnGuardar');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+
+    try {
+      if (docIdEditar) {
+        await db.collection('aires_acondicionados').doc(docIdEditar).update(datos);
+        showToast('Equipo actualizado correctamente', 'success');
+      } else {
+        datos.fecha_registro  = firebase.firestore.FieldValue.serverTimestamp();
+        datos.dado_de_baja    = false;
+        datos.horas_uso_total = 0;
+        await db.collection('aires_acondicionados').add(datos);
+        // Registrar en historial
+        await db.collection('historial_eventos').add({
+          tipo: 'usuario', titulo: 'Nuevo AC registrado',
+          descripcion: `${datos.nombre} — ${datos.aula}`,
+          fecha: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        showToast('Equipo registrado correctamente', 'success');
+      }
+      cerrarModal('modalRegistro');
+    } catch(e) {
+      console.error(e);
+      showToast('Error al guardar el equipo', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar';
+    }
+  }
+
+  // ── Dar de baja ──
+  function pedirBaja(id) {
+    docIdAccion = id;
+    document.getElementById('modalBaja').classList.add('open');
+  }
+  async function confirmarBaja() {
+    if (!docIdAccion) return;
+    try {
+      await db.collection('aires_acondicionados').doc(docIdAccion).update({
+        dado_de_baja: true, estado: 'apagado',
+        fecha_baja: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('Equipo dado de baja', 'info');
+      cerrarModal('modalBaja');
+    } catch(e) { showToast('Error al dar de baja', 'error'); }
+  }
+
+  // ── Reactivar ──
+  async function reactivarAC(id) {
+    try {
+      await db.collection('aires_acondicionados').doc(id).update({ dado_de_baja: false, fecha_baja: null });
+      showToast('Equipo reactivado', 'success');
+    } catch(e) { showToast('Error al reactivar', 'error'); }
+  }
+
+  // ── Eliminar ──
+  function pedirEliminar(id) {
+    docIdAccion = id;
+    document.getElementById('modalEliminar').classList.add('open');
+  }
+  async function confirmarEliminar() {
+    if (!docIdAccion) return;
+    try {
+      await db.collection('aires_acondicionados').doc(docIdAccion).delete();
+      showToast('Equipo eliminado permanentemente', 'error');
+      cerrarModal('modalEliminar');
+    } catch(e) { showToast('Error al eliminar', 'error'); }
+  }
+
+  // ── Helpers ──
+  function cerrarModal(id) {
+    document.getElementById(id).classList.remove('open');
+    docIdAccion = null;
+  }
+
+  // Cerrar modal al hacer clic fuera
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  });
+
+  function showToast(msg, type = 'info') {
+    const icons = { success:'circle-check', error:'circle-xmark', info:'circle-info' };
+    const wrap = document.getElementById('toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i> ${msg}`;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>
