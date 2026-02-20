@@ -403,32 +403,56 @@
     }, () => generarSimulados());
   }
 
+  // Misma lógica de horarios que acs.html
+  function calcularEstadoPorHorario(ac) {
+    if (ac.estado === 'mantenimiento') return 'mantenimiento';
+    if (ac.dado_de_baja === true)      return 'apagado';
+    const ahora = new Date();
+    const dia   = ahora.getDay();
+    const hhmm  = ahora.getHours() * 60 + ahora.getMinutes();
+    const turno = ac.turno || 'ambos';
+    const horarios = [];
+    if ([1,2,4,5].includes(dia)) horarios.push({ turno:'matutino',  inicio:6*60+45,  fin:13*60 });
+    if (dia === 3)                horarios.push({ turno:'matutino',  inicio:8*60+45,  fin:13*60 });
+    if ([1,2,3,4].includes(dia)) horarios.push({ turno:'vespertino', inicio:13*60+45, fin:20*60 });
+    if (dia === 5)                horarios.push({ turno:'vespertino', inicio:15*60+45, fin:20*60 });
+    if (dia === 6)                horarios.push({ turno:'matutino',  inicio:7*60+45,  fin:13*60 });
+    for (const h of horarios) {
+      const turnoMatch = turno === 'ambos' || turno === h.turno || turno === '';
+      if (turnoMatch && hhmm >= h.inicio && hhmm < h.fin) return 'encendido';
+    }
+    return 'apagado';
+  }
+
   function enriquecerAC(doc) {
-    const d = doc.data();
-    const estadosSim = ['encendido','encendido','encendido','apagado','mantenimiento'];
-    const estado = d.estado || estadosSim[Math.floor(Math.random()*estadosSim.length)];
+    const d      = doc.data();
+    const estado = d.dado_de_baja === true ? 'apagado' : calcularEstadoPorHorario(d);
     return {
       id:          doc.id,
-      nombre:      d.nombre    || `AC-${doc.id.slice(-4).toUpperCase()}`,
-      aula:        d.aula      || d.ubicacion || 'Sin asignar',
+      nombre:      d.nombre      || `AC-${doc.id.slice(-4).toUpperCase()}`,
+      aula:        d.aula        || d.ubicacion || 'Sin asignar',
+      turno:       d.turno       || 'ambos',
       estado,
       temperatura: d.temperatura || (estado === 'encendido' ? +(18 + Math.random()*6).toFixed(1) : null),
       consumo_mes: d.consumo_mes || +(20 + Math.random()*80).toFixed(1),
-      horas_mes:   d.horas_mes  || +(40 + Math.random()*120).toFixed(0),
-      marca:       d.marca      || 'Carrier',
+      horas_mes:   d.horas_mes   || +(40 + Math.random()*120).toFixed(0),
+      marca:       d.marca       || 'Carrier',
     };
   }
 
   function generarSimulados() {
     const aulas  = ['Aula 1A','Aula 1B','Aula 2A','Aula 2B','Lab Cómputo','Sala Maestros','Dirección','Aula 3A','Lab Electrónica','Biblioteca'];
     const marcas = ['Carrier','LG','Samsung','Daikin','Trane'];
-    const posibles = ['encendido','encendido','encendido','apagado','mantenimiento'];
+    const turnos = ['matutino','vespertino','ambos','ambos','ambos'];
     todosACs = Array.from({length:12}, (_,i) => {
-      const estado = posibles[Math.floor(Math.random()*posibles.length)];
+      const turno = turnos[i % turnos.length];
+      const acSim = { turno, estado: i < 2 ? 'mantenimiento' : 'auto' };
+      const estado = calcularEstadoPorHorario(acSim);
       return {
         id: `sim-${i+1}`,
         nombre: `AC-${String(i+1).padStart(3,'0')}`,
         aula:   aulas[i % aulas.length],
+        turno,
         estado,
         temperatura: estado === 'encendido' ? +(18+Math.random()*6).toFixed(1) : null,
         consumo_mes: +(20+Math.random()*80).toFixed(1),
