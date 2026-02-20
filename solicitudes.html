@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIMGECA — Solicitudes</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --azul:       #003B8E;
+      --azul-mid:   #0057CC;
+      --azul-light: #1A75FF;
+      --azul-pale:  #E8F0FE;
+      --accent:     #00C2A8;
+      --danger:     #EF4444;
+      --success:    #10B981;
+      --warning:    #F59E0B;
+      --bg:         #F0F4FA;
+      --surface:    #FFFFFF;
+      --surface2:   #F8FAFF;
+      --text:       #0D1B3E;
+      --text-mid:   #3D5280;
+      --text-light: #7A90B8;
+      --border:     #DDE5F4;
+      --sidebar-w:  265px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar { width: var(--sidebar-w); background: var(--azul); min-height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-row { display: flex; align-items: center; gap: .7rem; }
+    .logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .logo-sub  { font-size: .62rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
+    .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
+    .nav-section { font-size: .6rem; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: .85rem 1.25rem .3rem; }
+    .nav-item { display: flex; align-items: center; gap: .7rem; padding: .65rem 1.25rem; color: rgba(255,255,255,.55); font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; border-left: 3px solid transparent; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+    .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--accent); }
+    .nav-item i { width: 17px; text-align: center; font-size: .9rem; }
+    .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 700; padding: .12rem .42rem; border-radius: 20px; display: none; }
+    .sidebar-footer { padding: .9rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .user-card { display: flex; align-items: center; gap: .65rem; }
+    .user-avatar { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: .8rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: .68rem; color: rgba(255,255,255,.38); }
+    .btn-logout { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35); font-size: .88rem; padding: .25rem; border-radius: 6px; transition: color .2s; }
+    .btn-logout:hover { color: var(--danger); }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: .9rem 1.75rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
+
+    .page-content { padding: 1.5rem 1.75rem; flex: 1; }
+
+    /* ══ TABS PRINCIPALES ══ */
+    .main-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+    .main-tab { padding: .7rem 1.4rem; font-size: .9rem; font-weight: 600; cursor: pointer; color: var(--text-light); border: none; background: none; font-family: 'DM Sans', sans-serif; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; display: flex; align-items: center; gap: .5rem; }
+    .main-tab:hover { color: var(--text-mid); }
+    .main-tab.active { color: var(--azul); border-bottom-color: var(--azul); }
+    .main-tab .tab-badge { background: var(--danger); color: #fff; font-size: .65rem; font-weight: 700; padding: .1rem .4rem; border-radius: 20px; }
+    .main-tab.active .tab-badge { background: var(--azul); }
+
+    /* ══ TOOLBAR ══ */
+    .toolbar { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .search-wrap { position: relative; flex: 1; min-width: 220px; max-width: 340px; }
+    .search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-light); font-size: .85rem; pointer-events: none; }
+    .search-input { width: 100%; padding: .6rem 1rem .6rem 2.35rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: .85rem; color: var(--text); outline: none; transition: border-color .2s; }
+    .search-input:focus { border-color: var(--azul-light); }
+    .filter-select { padding: .6rem .9rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: .83rem; color: var(--text-mid); outline: none; cursor: pointer; }
+    .count-badge { margin-left: auto; font-size: .78rem; color: var(--text-light); font-weight: 500; }
+
+    /* ══ CARDS SOLICITUDES ══ */
+    .sol-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); gap: 1rem; }
+
+    .sol-card {
+      background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+      animation: fadeIn .3s ease both;
+    }
+    .sol-card:hover { box-shadow: 0 6px 24px rgba(0,59,142,.09); transform: translateY(-1px); }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
+
+    /* barra lateral por estado */
+    .sol-card-bar { width: 4px; position: absolute; top: 0; left: 0; bottom: 0; border-radius: 4px 0 0 4px; }
+    .sol-card-inner { position: relative; padding: 1.1rem 1.1rem 1.1rem 1.3rem; }
+
+    .sol-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: .75rem; }
+    .sol-user { display: flex; align-items: center; gap: .65rem; }
+    .sol-avatar { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .9rem; font-weight: 700; color: #fff; flex-shrink: 0; }
+    .sol-name { font-weight: 700; font-size: .9rem; color: var(--text); }
+    .sol-email { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
+
+    .status-badge { padding: .22rem .65rem; border-radius: 6px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .st-pendiente { background: #FEF3C7; color: #92400E; }
+    .st-aprobada  { background: #D1FAE5; color: #065F46; }
+    .st-rechazada { background: #FEE2E2; color: #991B1B; }
+
+    /* info grid dentro de la card */
+    .sol-info { display: grid; grid-template-columns: 1fr 1fr; gap: .45rem .8rem; margin-bottom: .85rem; }
+    .sol-info-lbl { font-size: .67rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; }
+    .sol-info-val { font-size: .82rem; font-weight: 600; color: var(--text-mid); margin-top: .05rem; }
+    .sol-info-full { grid-column: 1 / -1; }
+
+    /* motivo / mensaje */
+    .sol-motivo { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: .55rem .8rem; font-size: .8rem; color: var(--text-mid); margin-bottom: .85rem; line-height: 1.5; }
+    .sol-motivo-lbl { font-size: .67rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .3rem; }
+
+    /* nota de rechazo */
+    .nota-rechazo { background: #FFF5F5; border: 1px solid #FECACA; border-radius: 8px; padding: .5rem .75rem; font-size: .78rem; color: #991B1B; margin-bottom: .75rem; }
+
+    .sol-footer { display: flex; align-items: center; justify-content: space-between; padding-top: .75rem; border-top: 1px solid var(--border); }
+    .sol-fecha { font-size: .75rem; color: var(--text-light); }
+
+    .sol-actions { display: flex; gap: .4rem; }
+    .btn-aprobar { display: flex; align-items: center; gap: .35rem; padding: .4rem .9rem; border-radius: 7px; font-size: .78rem; font-weight: 700; border: none; background: var(--success); color: #fff; cursor: pointer; transition: background .15s; font-family: 'DM Sans', sans-serif; }
+    .btn-aprobar:hover { background: #059669; }
+    .btn-rechazar { display: flex; align-items: center; gap: .35rem; padding: .4rem .9rem; border-radius: 7px; font-size: .78rem; font-weight: 700; border: 1.5px solid #FECACA; background: #FEE2E2; color: #991B1B; cursor: pointer; transition: all .15s; font-family: 'DM Sans', sans-serif; }
+    .btn-rechazar:hover { background: #FECACA; }
+
+    .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-light); grid-column: 1/-1; }
+    .empty-state i { font-size: 2.5rem; margin-bottom: .75rem; display: block; opacity: .3; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--text-mid); margin-bottom: .4rem; }
+    .empty-state p { font-size: .83rem; }
+
+    /* ══ MODAL ══ */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(13,27,62,.45); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.open { display: flex; }
+    .modal { background: var(--surface); border-radius: 18px; width: 100%; max-width: 460px; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.2); animation: modalIn .25s ease; }
+    @keyframes modalIn { from { opacity:0; transform:scale(.96) translateY(12px); } to { opacity:1; transform:none; } }
+    .modal-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .modal-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); }
+    .modal-close { width: 32px; height: 32px; border: none; background: var(--surface2); border-radius: 8px; cursor: pointer; color: var(--text-light); display: flex; align-items: center; justify-content: center; transition: all .15s; }
+    .modal-close:hover { background: #FEE2E2; color: var(--danger); }
+    .modal-body { padding: 1.25rem 1.5rem; }
+    .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: .6rem; }
+
+    .form-group { display: flex; flex-direction: column; gap: .35rem; margin-bottom: .9rem; }
+    .form-label { font-size: .76rem; font-weight: 700; color: var(--text-mid); letter-spacing: .02em; }
+    .form-input, .form-select, .form-textarea { padding: .65rem .9rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface2); font-family: 'DM Sans', sans-serif; font-size: .875rem; color: var(--text); outline: none; transition: border-color .2s; }
+    .form-input:focus, .form-select:focus, .form-textarea:focus { border-color: var(--azul-light); box-shadow: 0 0 0 3px rgba(26,117,255,.1); background: #fff; }
+    .form-hint { font-size: .7rem; color: var(--text-light); }
+
+    .btn-cancel { padding: .55rem 1.1rem; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text-mid); cursor: pointer; }
+    .btn-save { display: flex; align-items: center; gap: .45rem; padding: .55rem 1.25rem; background: var(--azul); border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background .2s; }
+    .btn-save:hover { background: var(--azul-mid); }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; }
+    .btn-danger-red { display: flex; align-items: center; gap: .45rem; padding: .55rem 1.25rem; background: var(--danger); border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background .2s; }
+    .btn-danger-red:hover { background: #DC2626; }
+
+    /* toast */
+    .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
+    .toast { padding: .7rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: .55rem; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: fadeIn .3s ease; max-width: 300px; }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+    .toast.info    { background: var(--azul); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+      .sol-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="fa-solid fa-wind"></i></div>
+      <div>
+        <div class="logo-text">SIMGECA</div>
+        <div class="logo-sub">TecNM — Lázaro Cárdenas</div>
+      </div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-house"></i> Inicio</a>
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item" href="acs.html"><i class="fa-solid fa-snowflake"></i> Aires Acondicionados</a>
+    <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
+    <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
+    <a class="nav-item active" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
+      <span class="nav-badge" id="navBadgeSol">0</span></a>
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
+    <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item" href="programacion.html"><i class="fa-solid fa-calendar-check"></i> Programación AC</a>
+    <a class="nav-item" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Administrador</div>
+        <div class="user-role">Admin del sistema</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Cerrar sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Solicitudes</h1>
+      <p>Revisión y aprobación de solicitudes del sistema</p>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- Tabs principales -->
+    <div class="main-tabs">
+      <button class="main-tab active" id="mainTabRegistro" onclick="cambiarMainTab('registro', this)">
+        <i class="fa-solid fa-user-plus"></i>
+        Registro de usuarios
+        <span class="tab-badge" id="badgeRegistro">0</span>
+      </button>
+      <button class="main-tab" id="mainTabAC" onclick="cambiarMainTab('ac', this)">
+        <i class="fa-solid fa-snowflake"></i>
+        Uso de AC fuera de horario
+        <span class="tab-badge" id="badgeAC">0</span>
+      </button>
+    </div>
+
+    <!-- ── SECCIÓN REGISTRO DE USUARIOS ── -->
+    <div id="seccionRegistro">
+      <!-- subtabs -->
+      <div style="display:flex;gap:.35rem;margin-bottom:1.25rem;background:var(--surface);border:1.5px solid var(--border);border-radius:11px;padding:.3rem;width:fit-content;">
+        <button class="tab active" id="tabRegPend" onclick="cambiarTabReg('pendiente', this)" style="padding:.45rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;">
+          <i class="fa-solid fa-clock"></i> Pendientes <span id="cntRegPend" style="opacity:.6"></span>
+        </button>
+        <button class="tab" id="tabRegApro" onclick="cambiarTabReg('aprobada', this)" style="padding:.45rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;">
+          <i class="fa-solid fa-circle-check"></i> Aprobadas <span id="cntRegApro" style="opacity:.6"></span>
+        </button>
+        <button class="tab" id="tabRegRech" onclick="cambiarTabReg('rechazada', this)" style="padding:.45rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;">
+          <i class="fa-solid fa-circle-xmark"></i> Rechazadas <span id="cntRegRech" style="opacity:.6"></span>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="search-input" id="searchReg" placeholder="Buscar por nombre o correo..." oninput="filtrarReg()"/>
+        </div>
+        <span class="count-badge" id="countReg">Cargando...</span>
+      </div>
+
+      <div class="sol-grid" id="gridRegistro">
+        <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Cargando...</h3></div>
+      </div>
+    </div>
+
+    <!-- ── SECCIÓN USO DE AC ── -->
+    <div id="seccionAC" style="display:none;">
+      <div style="display:flex;gap:.35rem;margin-bottom:1.25rem;background:var(--surface);border:1.5px solid var(--border);border-radius:11px;padding:.3rem;width:fit-content;">
+        <button class="tab active" id="tabACPend" onclick="cambiarTabAC('pendiente', this)" style="padding:.45rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;">
+          <i class="fa-solid fa-clock"></i> Pendientes <span id="cntACPend" style="opacity:.6"></span>
+        </button>
+        <button class="tab" id="tabACApro" onclick="cambiarTabAC('aprobada', this)" style="padding:.45rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;">
+          <i class="fa-solid fa-circle-check"></i> Aprobadas <span id="cntACApro" style="opacity:.6"></span>
+        </button>
+        <button class="tab" id="tabACRech" onclick="cambiarTabAC('rechazada', this)" style="padding:.45rem 1.1rem;border-radius:8px;font-size:.83rem;font-weight:600;cursor:pointer;color:var(--text-light);transition:all .2s;border:none;background:none;font-family:'DM Sans',sans-serif;">
+          <i class="fa-solid fa-circle-xmark"></i> Rechazadas <span id="cntACRech" style="opacity:.6"></span>
+        </button>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input type="text" class="search-input" id="searchAC" placeholder="Buscar por usuario o aula..." oninput="filtrarAC()"/>
+        </div>
+        <select class="filter-select" id="filtroAulaAC" onchange="filtrarAC()">
+          <option value="">Todas las aulas</option>
+        </select>
+        <span class="count-badge" id="countAC">Cargando...</span>
+      </div>
+
+      <div class="sol-grid" id="gridAC">
+        <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Cargando...</h3></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ MODAL RECHAZAR (con motivo) ══ -->
+<div class="modal-overlay" id="modalRechazar">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modalRechTitulo">Rechazar solicitud</div>
+      <button class="modal-close" onclick="cerrarModal('modalRechazar')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.85rem;color:var(--text-mid);margin-bottom:1rem;">Indica el motivo del rechazo. Se notificará al usuario desde la app.</p>
+      <div class="form-group">
+        <label class="form-label">Motivo del rechazo *</label>
+        <textarea class="form-textarea" id="motivoRechazo" rows="3" placeholder="Ej. El correo no pertenece a la institución, documentación incompleta..." style="resize:vertical;"></textarea>
+        <span class="form-hint">Este mensaje será visible para el usuario en la app</span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalRechazar')">Cancelar</button>
+      <button class="btn-danger-red" id="btnConfRechazo" onclick="confirmarRechazo()">
+        <i class="fa-solid fa-circle-xmark"></i> Rechazar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL APROBAR REGISTRO (asignar rol/turno) ══ -->
+<div class="modal-overlay" id="modalAprobarReg">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Aprobar solicitud de registro</div>
+        <div style="font-size:.75rem;color:var(--text-light);margin-top:.15rem;" id="aprobarRegSubtitle"></div>
+      </div>
+      <button class="modal-close" onclick="cerrarModal('modalAprobarReg')"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.84rem;color:var(--text-mid);margin-bottom:1rem;">Asigna el rol y turno antes de aprobar. El usuario quedará activo en el sistema.</p>
+      <div class="form-group">
+        <label class="form-label">Rol *</label>
+        <select class="form-select" id="aprobarRol" onchange="toggleAprobarControl()">
+          <option value="">Seleccionar...</option>
+          <option value="admin">Administrador</option>
+          <option value="docente">Docente</option>
+          <option value="alumno">Alumno</option>
+          <option value="tecnico">Técnico</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Turno</label>
+        <select class="form-select" id="aprobarTurno">
+          <option value="">Sin turno</option>
+          <option value="matutino">Matutino</option>
+          <option value="vespertino">Vespertino</option>
+          <option value="ambos">Ambos</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label" id="aprobarLblControl">No. de Control</label>
+        <input type="text" class="form-input" id="aprobarControl" placeholder="Ej. L21xxxxxx"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Departamento / Carrera</label>
+        <input type="text" class="form-input" id="aprobarDepto" placeholder="Ej. Sistemas Computacionales"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarModal('modalAprobarReg')">Cancelar</button>
+      <button class="btn-save" id="btnConfAprobar" onclick="confirmarAprobarRegistro()">
+        <i class="fa-solid fa-circle-check"></i> Aprobar y activar
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ══ FIREBASE ══ -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
+    authDomain: "simgeca-26297.firebaseapp.com",
+    projectId: "simgeca-26297",
+    storageBucket: "simgeca-26297.firebasestorage.app",
+    messagingSenderId: "28195458236",
+    appId: "1:28195458236:web:9250f82b845665d82cd4b9"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  auth.onAuthStateChanged(user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    document.getElementById('userName').textContent   = user.email.split('@')[0];
+    document.getElementById('userAvatar').textContent = user.email.charAt(0).toUpperCase();
+    iniciarListeners();
+    cargarAulas();
+  });
+  function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
+
+  // ── Estado ──
+  let mainTab       = 'registro';
+  let tabReg        = 'pendiente';
+  let tabAC         = 'pendiente';
+  let todasSolReg   = [];  // solicitudes_registro
+  let todasSolAC    = [];  // solicitudes
+  let accionId      = null;
+  let accionTipo    = null; // 'registro' | 'ac'
+
+  // ── Listeners en tiempo real ──
+  function iniciarListeners() {
+    // Solicitudes de registro (de la app)
+    db.collection('solicitudes_registro').orderBy('fecha','desc').onSnapshot(snap => {
+      todasSolReg = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      actualizarBadgesReg();
+      filtrarReg();
+    }, e => console.error('solicitudes_registro:', e));
+
+    // Solicitudes de uso de AC
+    db.collection('solicitudes').orderBy('fecha','desc').onSnapshot(snap => {
+      todasSolAC = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      actualizarBadgesAC();
+      filtrarAC();
+    }, e => console.error('solicitudes:', e));
+  }
+
+  async function cargarAulas() {
+    try {
+      const snap = await db.collection('aulas').orderBy('nombre').get();
+      const sel  = document.getElementById('filtroAulaAC');
+      snap.forEach(d => {
+        const op = document.createElement('option');
+        op.value = d.data().nombre; op.textContent = d.data().nombre;
+        sel.appendChild(op);
+      });
+    } catch(e) {}
+  }
+
+  // ── Badges ──
+  function actualizarBadgesReg() {
+    const pend = todasSolReg.filter(s => s.estado === 'pendiente').length;
+    const apro = todasSolReg.filter(s => s.estado === 'aprobada').length;
+    const rech = todasSolReg.filter(s => s.estado === 'rechazada').length;
+    document.getElementById('cntRegPend').textContent = `(${pend})`;
+    document.getElementById('cntRegApro').textContent = `(${apro})`;
+    document.getElementById('cntRegRech').textContent = `(${rech})`;
+    const b = document.getElementById('badgeRegistro');
+    b.textContent = pend; b.style.display = pend > 0 ? 'inline' : 'none';
+    // badge sidebar
+    const total = pend + todasSolAC.filter(s => s.estado === 'pendiente').length;
+    const nb = document.getElementById('navBadgeSol');
+    nb.textContent = total; nb.style.display = total > 0 ? 'inline' : 'none';
+  }
+
+  function actualizarBadgesAC() {
+    const pend = todasSolAC.filter(s => s.estado === 'pendiente').length;
+    const apro = todasSolAC.filter(s => s.estado === 'aprobada').length;
+    const rech = todasSolAC.filter(s => s.estado === 'rechazada').length;
+    document.getElementById('cntACPend').textContent = `(${pend})`;
+    document.getElementById('cntACApro').textContent = `(${apro})`;
+    document.getElementById('cntACRech').textContent = `(${rech})`;
+    const b = document.getElementById('badgeAC');
+    b.textContent = pend; b.style.display = pend > 0 ? 'inline' : 'none';
+  }
+
+  // ── Tabs ──
+  function cambiarMainTab(tab, el) {
+    mainTab = tab;
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    document.getElementById('seccionRegistro').style.display = tab === 'registro' ? '' : 'none';
+    document.getElementById('seccionAC').style.display       = tab === 'ac'       ? '' : 'none';
+  }
+
+  function cambiarTabReg(tab, el) {
+    tabReg = tab;
+    document.querySelectorAll('#seccionRegistro .tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    filtrarReg();
+  }
+  function cambiarTabAC(tab, el) {
+    tabAC = tab;
+    document.querySelectorAll('#seccionAC .tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    filtrarAC();
+  }
+
+  // ── Filtrar Registro ──
+  function filtrarReg() {
+    const q = document.getElementById('searchReg').value.toLowerCase();
+    let lista = todasSolReg.filter(s => s.estado === tabReg);
+    if (q) lista = lista.filter(s => `${s.nombre||''} ${s.apellidos||''} ${s.correo||''}`.toLowerCase().includes(q));
+    document.getElementById('countReg').textContent = `${lista.length} solicitud${lista.length !== 1 ? 'es' : ''}`;
+    renderGridReg(lista);
+  }
+
+  // ── Filtrar AC ──
+  function filtrarAC() {
+    const q     = document.getElementById('searchAC').value.toLowerCase();
+    const aula  = document.getElementById('filtroAulaAC').value;
+    let lista = todasSolAC.filter(s => s.estado === tabAC);
+    if (q)    lista = lista.filter(s => `${s.usuario_nombre||''} ${s.usuario_correo||''} ${s.aula||''}`.toLowerCase().includes(q));
+    if (aula) lista = lista.filter(s => s.aula === aula);
+    document.getElementById('countAC').textContent = `${lista.length} solicitud${lista.length !== 1 ? 'es' : ''}`;
+    renderGridAC(lista);
+  }
+
+  // ── Render Registro ──
+  function renderGridReg(lista) {
+    const grid = document.getElementById('gridRegistro');
+    if (lista.length === 0) {
+      grid.innerHTML = `<div class="empty-state">
+        <i class="fa-solid fa-user-plus"></i>
+        <h3>Sin solicitudes ${tabReg === 'pendiente' ? 'pendientes' : tabReg === 'aprobada' ? 'aprobadas' : 'rechazadas'}</h3>
+        <p>${tabReg === 'pendiente' ? 'Cuando alguien se registre desde la app aparecerá aquí.' : 'No hay solicitudes en este estado.'}</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = lista.map(s => {
+      const ini   = ((s.nombre||'')[0] || 'U').toUpperCase();
+      const fecha = s.fecha ? fmtDate(s.fecha) : '—';
+      const isPend = s.estado === 'pendiente';
+
+      return `<div class="sol-card" style="position:relative;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${isPend ? 'var(--warning)' : s.estado==='aprobada' ? 'var(--success)' : 'var(--danger)'};border-radius:4px 0 0 4px;"></div>
+        <div style="padding:1.1rem 1.1rem 1.1rem 1.4rem;">
+          <div class="sol-header">
+            <div class="sol-user">
+              <div class="sol-avatar" style="background:var(--azul-light)">${ini}</div>
+              <div>
+                <div class="sol-name">${s.nombre||''} ${s.apellidos||''}</div>
+                <div class="sol-email">${s.correo||''}</div>
+              </div>
+            </div>
+            <span class="status-badge st-${s.estado}">${labelEstado(s.estado)}</span>
+          </div>
+
+          <div class="sol-info">
+            <div>
+              <div class="sol-info-lbl">Teléfono</div>
+              <div class="sol-info-val">${s.telefono||'—'}</div>
+            </div>
+            <div>
+              <div class="sol-info-lbl">No. Control</div>
+              <div class="sol-info-val">${s.noControl||'—'}</div>
+            </div>
+            <div class="sol-info-full">
+              <div class="sol-info-lbl">Carrera / Departamento</div>
+              <div class="sol-info-val">${s.departamento||'—'}</div>
+            </div>
+          </div>
+
+          ${s.mensaje ? `<div class="sol-motivo"><div class="sol-motivo-lbl">Mensaje del solicitante</div>${s.mensaje}</div>` : ''}
+          ${s.nota_rechazo ? `<div class="nota-rechazo"><i class="fa-solid fa-circle-xmark"></i> <strong>Motivo de rechazo:</strong> ${s.nota_rechazo}</div>` : ''}
+
+          <div class="sol-footer">
+            <span class="sol-fecha"><i class="fa-regular fa-clock"></i> ${fecha}</span>
+            ${isPend ? `<div class="sol-actions">
+              <button class="btn-aprobar" onclick="abrirAprobarRegistro('${s.id}','${(s.nombre||'')} ${(s.apellidos||'')}')".trim()>
+                <i class="fa-solid fa-circle-check"></i> Aprobar
+              </button>
+              <button class="btn-rechazar" onclick="abrirRechazar('${s.id}','registro')">
+                <i class="fa-solid fa-circle-xmark"></i> Rechazar
+              </button>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Render AC ──
+  function renderGridAC(lista) {
+    const grid = document.getElementById('gridAC');
+    if (lista.length === 0) {
+      grid.innerHTML = `<div class="empty-state">
+        <i class="fa-solid fa-snowflake"></i>
+        <h3>Sin solicitudes ${tabAC === 'pendiente' ? 'pendientes' : tabAC === 'aprobada' ? 'aprobadas' : 'rechazadas'}</h3>
+        <p>${tabAC === 'pendiente' ? 'Las solicitudes de uso de AC fuera de horario aparecerán aquí.' : 'No hay solicitudes en este estado.'}</p>
+      </div>`;
+      return;
+    }
+
+    grid.innerHTML = lista.map(s => {
+      const ini    = ((s.usuario_nombre||'')[0] || 'U').toUpperCase();
+      const fecha  = s.fecha      ? fmtDate(s.fecha)      : '—';
+      const fechaUso = s.fecha_uso ? fmtDate(s.fecha_uso)  : '—';
+      const isPend = s.estado === 'pendiente';
+
+      return `<div class="sol-card" style="position:relative;">
+        <div style="position:absolute;left:0;top:0;bottom:0;width:4px;background:${isPend ? 'var(--warning)' : s.estado==='aprobada' ? 'var(--success)' : 'var(--danger)'};border-radius:4px 0 0 4px;"></div>
+        <div style="padding:1.1rem 1.1rem 1.1rem 1.4rem;">
+          <div class="sol-header">
+            <div class="sol-user">
+              <div class="sol-avatar" style="background:var(--azul)">${ini}</div>
+              <div>
+                <div class="sol-name">${s.usuario_nombre||'Usuario'}</div>
+                <div class="sol-email">${s.usuario_correo||''}</div>
+              </div>
+            </div>
+            <span class="status-badge st-${s.estado}">${labelEstado(s.estado)}</span>
+          </div>
+
+          <div class="sol-info">
+            <div>
+              <div class="sol-info-lbl">Aula</div>
+              <div class="sol-info-val"><i class="fa-solid fa-school" style="color:var(--azul-light);font-size:.7rem;"></i> ${s.aula||'—'}</div>
+            </div>
+            <div>
+              <div class="sol-info-lbl">Fecha solicitada</div>
+              <div class="sol-info-val">${fechaUso}</div>
+            </div>
+            <div>
+              <div class="sol-info-lbl">Hora inicio</div>
+              <div class="sol-info-val">${s.hora_inicio||'—'}</div>
+            </div>
+            <div>
+              <div class="sol-info-lbl">Hora fin</div>
+              <div class="sol-info-val">${s.hora_fin||'—'}</div>
+            </div>
+          </div>
+
+          ${s.motivo ? `<div class="sol-motivo"><div class="sol-motivo-lbl">Motivo</div>${s.motivo}</div>` : ''}
+          ${s.nota_rechazo ? `<div class="nota-rechazo"><i class="fa-solid fa-circle-xmark"></i> <strong>Motivo de rechazo:</strong> ${s.nota_rechazo}</div>` : ''}
+
+          <div class="sol-footer">
+            <span class="sol-fecha"><i class="fa-regular fa-clock"></i> Enviada: ${fecha}</span>
+            ${isPend ? `<div class="sol-actions">
+              <button class="btn-aprobar" onclick="aprobarSolicitudAC('${s.id}')">
+                <i class="fa-solid fa-circle-check"></i> Aprobar
+              </button>
+              <button class="btn-rechazar" onclick="abrirRechazar('${s.id}','ac')">
+                <i class="fa-solid fa-circle-xmark"></i> Rechazar
+              </button>
+            </div>` : ''}
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ── Aprobar Registro ──
+  function abrirAprobarRegistro(id, nombre) {
+    accionId = id;
+    document.getElementById('aprobarRegSubtitle').textContent = nombre.trim();
+    document.getElementById('aprobarRol').value      = '';
+    document.getElementById('aprobarTurno').value    = '';
+    document.getElementById('aprobarControl').value  = '';
+    document.getElementById('aprobarDepto').value    = '';
+    document.getElementById('modalAprobarReg').classList.add('open');
+  }
+  function toggleAprobarControl() {
+    const r = document.getElementById('aprobarRol').value;
+    const m = { admin:'ID Admin', docente:'No. Empleado', alumno:'No. de Control', tecnico:'ID Técnico' };
+    document.getElementById('aprobarLblControl').textContent = m[r] || 'Identificador';
+  }
+
+  async function confirmarAprobarRegistro() {
+    if (!accionId) return;
+    const rol = document.getElementById('aprobarRol').value;
+    if (!rol) { showToast('Selecciona un rol para el usuario', 'error'); return; }
+
+    const sol = todasSolReg.find(s => s.id === accionId);
+    if (!sol) return;
+
+    // Validar correo institucional
+    if (sol.correo && !sol.correo.endsWith('@lcardenas.tecnm.mx')) {
+      showToast('El correo del solicitante no es institucional (@lcardenas.tecnm.mx)', 'error'); return;
+    }
+
+    // Verificar duplicado de correo en usuarios
+    const dup = await db.collection('usuarios').where('correo','==',sol.correo).get();
+    if (!dup.empty) {
+      showToast('Este correo ya está registrado como usuario activo', 'error'); return;
+    }
+
+    const btn = document.getElementById('btnConfAprobar');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+
+    try {
+      // Crear usuario en Firestore
+      await db.collection('usuarios').add({
+        nombre:        sol.nombre   || '',
+        apellidos:     sol.apellidos|| '',
+        correo:        sol.correo   || '',
+        telefono:      sol.telefono || '',
+        rol,
+        turno:         document.getElementById('aprobarTurno').value,
+        noControl:     document.getElementById('aprobarControl').value.trim(),
+        departamento:  document.getElementById('aprobarDepto').value.trim(),
+        activo:        true,
+        uid:           sol.uid || '',
+        fecha_registro: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Actualizar solicitud
+      await db.collection('solicitudes_registro').doc(accionId).update({
+        estado: 'aprobada',
+        aprobado_en: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      // Historial
+      await db.collection('historial_eventos').add({
+        tipo: 'usuario_aprobado',
+        descripcion: `Solicitud de registro aprobada: ${sol.nombre||''} ${sol.apellidos||''} (${rol})`,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('Solicitud aprobada. Usuario activado en el sistema.', 'success');
+      cerrarModal('modalAprobarReg');
+    } catch(e) {
+      console.error(e); showToast('Error al aprobar la solicitud', 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Aprobar y activar';
+    }
+  }
+
+  // ── Aprobar AC ──
+  async function aprobarSolicitudAC(id) {
+    try {
+      await db.collection('solicitudes').doc(id).update({
+        estado: 'aprobada',
+        aprobado_en: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      const s = todasSolAC.find(x => x.id === id);
+      await db.collection('historial_eventos').add({
+        tipo: 'solicitud_aprobada',
+        usuario_id: s?.usuario_id || '',
+        descripcion: `Solicitud de AC aprobada para ${s?.aula||'—'} el ${s?.fecha_uso ? fmtDate(s.fecha_uso) : '—'}`,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      showToast('Solicitud de AC aprobada', 'success');
+    } catch(e) { showToast('Error al aprobar', 'error'); }
+  }
+
+  // ── Rechazar ──
+  function abrirRechazar(id, tipo) {
+    accionId   = id;
+    accionTipo = tipo;
+    document.getElementById('motivoRechazo').value = '';
+    document.getElementById('modalRechTitulo').textContent = tipo === 'registro'
+      ? 'Rechazar solicitud de registro' : 'Rechazar solicitud de AC';
+    document.getElementById('modalRechazar').classList.add('open');
+  }
+
+  async function confirmarRechazo() {
+    const motivo = document.getElementById('motivoRechazo').value.trim();
+    if (!motivo) { showToast('Escribe el motivo del rechazo', 'error'); return; }
+
+    const col = accionTipo === 'registro' ? 'solicitudes_registro' : 'solicitudes';
+    const btn = document.getElementById('btnConfRechazo');
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Procesando...';
+
+    try {
+      await db.collection(col).doc(accionId).update({
+        estado: 'rechazada',
+        nota_rechazo: motivo,
+        rechazado_en: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+
+      const lista = accionTipo === 'registro' ? todasSolReg : todasSolAC;
+      const s = lista.find(x => x.id === accionId);
+      await db.collection('historial_eventos').add({
+        tipo: 'solicitud_rechazada',
+        descripcion: `Solicitud de ${accionTipo === 'registro' ? 'registro' : 'AC'} rechazada: ${motivo}`,
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+      showToast('Solicitud rechazada', 'info');
+      cerrarModal('modalRechazar');
+    } catch(e) {
+      console.error(e); showToast('Error al rechazar la solicitud', 'error');
+    } finally {
+      btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-circle-xmark"></i> Rechazar';
+    }
+  }
+
+  // ── Helpers ──
+  function labelEstado(e) {
+    return { pendiente:'Pendiente', aprobada:'Aprobada', rechazada:'Rechazada' }[e] || e;
+  }
+  function fmtDate(ts) {
+    try { const d = ts?.toDate ? ts.toDate() : new Date(ts); return d.toLocaleDateString('es-MX', { day:'2-digit', month:'short', year:'numeric' }); }
+    catch { return '—'; }
+  }
+  function cerrarModal(id) {
+    document.getElementById(id).classList.remove('open');
+    accionId = null; accionTipo = null;
+  }
+  document.querySelectorAll('.modal-overlay').forEach(o => {
+    o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+  });
+  function showToast(msg, type = 'info') {
+    const icons = { success:'circle-check', error:'circle-xmark', info:'circle-info' };
+    const wrap = document.getElementById('toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i> ${msg}`;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3500);
+  }
+</script>
+</body>
+</html>
