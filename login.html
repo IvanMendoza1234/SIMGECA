@@ -297,16 +297,16 @@
       </p>
       <div class="stats">
         <div class="stat">
-          <div class="stat-val">48</div>
+          <div class="stat-val" id="statACs">—</div>
           <div class="stat-lbl">Equipos AC</div>
         </div>
         <div class="stat">
-          <div class="stat-val">12</div>
+          <div class="stat-val" id="statAulas">—</div>
           <div class="stat-lbl">Aulas</div>
         </div>
         <div class="stat">
-          <div class="stat-val">3</div>
-          <div class="stat-lbl">Roles</div>
+          <div class="stat-val" id="statSolicitudes">—</div>
+          <div class="stat-lbl">Solicitudes</div>
         </div>
       </div>
     </div>
@@ -367,7 +367,7 @@
       <div class="divider"><span>Instituto Tecnológico de Lázaro Cárdenas</span></div>
       <div class="login-footer">
         ¿Eres docente o alumno? Usa la <a href="#">app móvil SIMGECA</a><br/>
-        ¿Problemas de acceso? <a href="mailto:simgecaoficial@gmail.com">Contacta a soporte</a>
+        ¿Problemas de acceso? <a href="/cdn-cgi/l/email-protection#5d2e34303a383e3c323b343e343c311d3a303c3431733e3230">Contacta a soporte</a>
       </div>
 
     </div>
@@ -379,6 +379,7 @@
 <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <script>
     const firebaseConfig = {
       apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
@@ -391,11 +392,26 @@
     };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
+    const db   = firebase.firestore();
 
     // Si ya hay sesión activa, redirigir directo al dashboard
     auth.onAuthStateChanged(user => {
       if (user) window.location.href = 'dashboard.html';
     });
+
+    // Contadores en tiempo real
+    db.collection('aires_acondicionados').onSnapshot(
+      s => { document.getElementById('statACs').textContent = s.size; },
+      () => { document.getElementById('statACs').textContent = '0'; }
+    );
+    db.collection('aulas').onSnapshot(
+      s => { document.getElementById('statAulas').textContent = s.size; },
+      () => { document.getElementById('statAulas').textContent = '0'; }
+    );
+    db.collection('solicitudes').where('estado','==','pendiente').onSnapshot(
+      s => { document.getElementById('statSolicitudes').textContent = s.size; },
+      () => { document.getElementById('statSolicitudes').textContent = '0'; }
+    );
   </script>
 
 <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
@@ -494,10 +510,4 @@
       'auth/user-disabled':          'Esta cuenta ha sido deshabilitada.',
       'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
       'auth/invalid-credential':     'Correo o contraseña incorrectos.',
-      'auth/network-request-failed': 'Error de red. Verifica tu conexión.'
-    };
-    return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
-  }
-</script>
-</body>
-</html>
+      'auth/network-request-f
