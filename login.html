@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIMGECA — Iniciar sesión</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --azul:       #003B8E;
+      --azul-mid:   #0057CC;
+      --azul-light: #1A75FF;
+      --azul-pale:  #E8F0FE;
+      --accent:     #00C2A8;
+      --danger:     #EF4444;
+      --success:    #10B981;
+      --bg:         #F0F4FA;
+      --surface:    #FFFFFF;
+      --text:       #0D1B3E;
+      --text-mid:   #3D5280;
+      --text-light: #7A90B8;
+      --border:     #DDE5F4;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ── PANEL IZQUIERDO ─────────────────────────────────────── */
+    .left {
+      width: 48%;
+      background: var(--azul);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3.5rem;
+    }
+
+    /* Fondo cuadrícula */
+    .left-grid {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+
+    /* Círculos decorativos */
+    .left::before {
+      content: '';
+      position: absolute; top: -130px; right: -130px;
+      width: 440px; height: 440px; border-radius: 50%;
+      background: rgba(255,255,255,.05);
+    }
+    .left::after {
+      content: '';
+      position: absolute; bottom: -90px; left: -90px;
+      width: 320px; height: 320px; border-radius: 50%;
+      background: rgba(0,194,168,.14);
+    }
+
+    .left-content { position: relative; z-index: 1; }
+
+    /* Ícono principal */
+    .brand-icon {
+      width: 68px; height: 68px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.9rem; color: #fff;
+      margin-bottom: 1.75rem;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 3rem; font-weight: 800;
+      color: #fff; letter-spacing: -1.5px;
+      line-height: 1; margin-bottom: .6rem;
+    }
+
+    .brand-sub {
+      font-size: .85rem; color: rgba(255,255,255,.6);
+      line-height: 1.6; max-width: 320px;
+      margin-bottom: 2.75rem;
+    }
+
+    /* Tarjetas de stats */
+    .stats { display: flex; gap: 1rem; }
+    .stat {
+      background: rgba(255,255,255,.09);
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 14px;
+      padding: 1rem 1.25rem;
+      backdrop-filter: blur(8px);
+    }
+    .stat-val {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.7rem; font-weight: 700;
+      color: var(--accent); line-height: 1;
+    }
+    .stat-lbl {
+      font-size: .7rem; color: rgba(255,255,255,.5);
+      text-transform: uppercase; letter-spacing: .06em;
+      margin-top: .2rem;
+    }
+
+    /* Texto inferior */
+    .left-footer {
+      position: absolute; bottom: 2rem; left: 3.5rem; right: 3.5rem;
+      z-index: 1;
+      font-size: .72rem; color: rgba(255,255,255,.3);
+      border-top: 1px solid rgba(255,255,255,.08);
+      padding-top: 1rem;
+      display: flex; justify-content: space-between;
+    }
+
+    /* ── PANEL DERECHO ───────────────────────────────────────── */
+    .right {
+      flex: 1;
+      display: flex; align-items: center; justify-content: center;
+      padding: 2.5rem;
+    }
+
+    .login-box {
+      width: 100%; max-width: 400px;
+      animation: fadeUp .45s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-box-header { margin-bottom: 2rem; }
+    .login-box-header h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.9rem; font-weight: 700;
+      color: var(--text); margin-bottom: .3rem;
+    }
+    .login-box-header p { font-size: .85rem; color: var(--text-light); }
+
+    /* Roles */
+    .roles { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+    .role {
+      flex: 1; padding: .55rem .5rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px; text-align: center;
+      font-size: .75rem; font-weight: 500;
+      color: var(--text-mid); cursor: pointer;
+      transition: all .2s; user-select: none;
+    }
+    .role i { display: block; font-size: 1.15rem; margin-bottom: .25rem; }
+    .role:hover, .role.active {
+      border-color: var(--azul-light);
+      background: var(--azul-pale);
+      color: var(--azul);
+    }
+
+    /* Formulario */
+    .form-group { margin-bottom: 1.1rem; }
+    .form-label {
+      display: block; font-size: .78rem; font-weight: 600;
+      color: var(--text-mid); margin-bottom: .4rem; letter-spacing: .02em;
+    }
+    .input-wrap { position: relative; }
+    .input-wrap .ico {
+      position: absolute; left: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-light); font-size: .88rem; pointer-events: none;
+    }
+    .form-input {
+      width: 100%;
+      padding: .75rem 1rem .75rem 2.65rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      background: var(--surface);
+      color: var(--text); font-size: .9rem;
+      outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .form-input:focus {
+      border-color: var(--azul-light);
+      box-shadow: 0 0 0 3px rgba(26,117,255,.11);
+    }
+    .form-input.error { border-color: var(--danger); }
+
+    .toggle-pass {
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%);
+      background: none; border: none; cursor: pointer;
+      color: var(--text-light); font-size: .88rem; padding: 4px;
+    }
+
+    .forgot {
+      text-align: right; margin-top: .35rem;
+      font-size: .78rem;
+    }
+    .forgot a { color: var(--azul-light); font-weight: 500; }
+    .forgot a:hover { text-decoration: underline; }
+
+    /* Error msg */
+    .error-msg {
+      display: none;
+      font-size: .78rem; color: var(--danger);
+      margin-top: .3rem;
+    }
+    .error-msg.show { display: block; }
+
+    /* Botón login */
+    .btn-login {
+      width: 100%; margin-top: .5rem;
+      padding: .88rem;
+      background: var(--azul); color: #fff;
+      border: none; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem; font-weight: 600;
+      letter-spacing: .02em; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: background .2s, box-shadow .2s, transform .1s;
+    }
+    .btn-login:hover {
+      background: var(--azul-mid);
+      box-shadow: 0 6px 20px rgba(0,59,142,.3);
+    }
+    .btn-login:active { transform: scale(.98); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Divider */
+    .divider {
+      text-align: center; margin: 1.3rem 0;
+      position: relative;
+    }
+    .divider::before {
+      content: ''; position: absolute;
+      top: 50%; left: 0; right: 0;
+      height: 1px; background: var(--border);
+    }
+    .divider span {
+      background: var(--bg); position: relative;
+      padding: 0 .9rem; font-size: .73rem; color: var(--text-light);
+    }
+
+    .login-footer {
+      text-align: center; font-size: .8rem;
+      color: var(--text-light);
+    }
+    .login-footer a { color: var(--azul-light); font-weight: 500; }
+    .login-footer a:hover { text-decoration: underline; }
+
+    /* Toast */
+    .toast-wrap {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      z-index: 999; display: flex; flex-direction: column; gap: .5rem;
+    }
+    .toast {
+      padding: .75rem 1.2rem;
+      border-radius: 10px; font-size: .82rem; font-weight: 500;
+      display: flex; align-items: center; gap: .6rem;
+      color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18);
+      animation: fadeUp .3s ease both; max-width: 280px;
+    }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+    .toast.info    { background: var(--azul); }
+  </style>
+</head>
+<body>
+
+  <!-- ── PANEL IZQUIERDO ─────────────────────────────────────── -->
+  <div class="left">
+    <div class="left-grid"></div>
+    <div class="left-content">
+      <div class="brand-icon"><i class="fa-solid fa-wind"></i></div>
+      <div class="brand-title">SIMGECA</div>
+      <p class="brand-sub">
+        Sistema de Monitoreo, Gestión y Control de Aires Acondicionados del
+        Instituto Tecnológico de Lázaro Cárdenas, Michoacán.
+      </p>
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-val">48</div>
+          <div class="stat-lbl">Equipos AC</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">12</div>
+          <div class="stat-lbl">Aulas</div>
+        </div>
+        <div class="stat">
+          <div class="stat-val">3</div>
+          <div class="stat-lbl">Roles</div>
+        </div>
+      </div>
+    </div>
+    <div class="left-footer">
+      <span>TecNM — Campus Lázaro Cárdenas</span>
+      <span>tecnm.xyz</span>
+    </div>
+  </div>
+
+  <!-- ── PANEL DERECHO ───────────────────────────────────────── -->
+  <div class="right">
+    <div class="login-box">
+
+      <div class="login-box-header">
+        <h2>Bienvenido</h2>
+        <p>Ingresa con tu cuenta institucional para continuar</p>
+      </div>
+
+      <!-- Badge de acceso -->
+      <div style="display:inline-flex;align-items:center;gap:.5rem;background:#E8F0FE;border:1.5px solid #C5D8FF;border-radius:10px;padding:.5rem 1rem;margin-bottom:1.5rem;">
+        <i class="fa-solid fa-user-shield" style="color:var(--azul);font-size:.95rem"></i>
+        <span style="font-size:.82rem;font-weight:600;color:var(--azul)">Acceso exclusivo — Administrador</span>
+      </div>
+
+      <!-- Correo -->
+      <div class="form-group">
+        <label class="form-label">Correo institucional</label>
+        <div class="input-wrap">
+          <i class="ico fa-regular fa-envelope"></i>
+          <input id="email" type="email" class="form-input"
+                 placeholder="admin@itlc.edu.mx"/>
+        </div>
+        <div class="error-msg" id="emailErr">Ingresa un correo válido.</div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label class="form-label">Contraseña</label>
+        <div class="input-wrap">
+          <i class="ico fa-solid fa-lock"></i>
+          <input id="password" type="password" class="form-input"
+                 placeholder="••••••••"/>
+          <button class="toggle-pass" type="button" onclick="togglePass()">
+            <i id="eyeIcon" class="fa-regular fa-eye"></i>
+          </button>
+        </div>
+        <div class="error-msg" id="passErr">La contraseña debe tener al menos 8 caracteres.</div>
+        <div class="forgot"><a href="#" onclick="forgotPass(event)">¿Olvidaste tu contraseña?</a></div>
+      </div>
+
+      <!-- Botón -->
+      <button class="btn-login" id="btnLogin" onclick="doLogin()">
+        <div class="spinner" id="spinner"></div>
+        <i class="fa-solid fa-right-to-bracket" id="btnIcon"></i>
+        <span id="btnText">Iniciar sesión</span>
+      </button>
+
+      <div class="divider"><span>Instituto Tecnológico de Lázaro Cárdenas</span></div>
+      <div class="login-footer">
+        ¿Eres docente o alumno? Usa la <a href="#">app móvil SIMGECA</a><br/>
+        ¿Problemas de acceso? <a href="mailto:soporte@itlc.edu.mx">Contacta a soporte</a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toasts -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+  // ── MOSTRAR/OCULTAR CONTRASEÑA ─────────────────────────────────
+  function togglePass() {
+    const inp  = document.getElementById('password');
+    const icon = document.getElementById('eyeIcon');
+    const show = inp.type === 'password';
+    inp.type   = show ? 'text' : 'password';
+    icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+  }
+
+  // ── VALIDACIÓN ─────────────────────────────────────────────────
+  function validar() {
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
+    let ok = true;
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.getElementById('emailErr').classList.toggle('show', !emailOk);
+    document.getElementById('email').classList.toggle('error', !emailOk);
+    if (!emailOk) ok = false;
+
+    const passOk = pass.length >= 8;
+    document.getElementById('passErr').classList.toggle('show', !passOk);
+    document.getElementById('password').classList.toggle('error', !passOk);
+    if (!passOk) ok = false;
+
+    return ok;
+  }
+
+  // ── LOGIN ──────────────────────────────────────────────────────
+  function doLogin() {
+    if (!validar()) return;
+
+    // Simula carga (aquí irá Firebase Authentication)
+    const btn     = document.getElementById('btnLogin');
+    const spinner = document.getElementById('spinner');
+    const icon    = document.getElementById('btnIcon');
+    const txt     = document.getElementById('btnText');
+
+    btn.disabled      = true;
+    spinner.style.display = 'block';
+    icon.style.display    = 'none';
+    txt.textContent       = 'Verificando...';
+
+    setTimeout(() => {
+      // TODO: reemplazar con Firebase Auth
+      // firebase.auth().signInWithEmailAndPassword(email, pass)
+      //   .then(() => window.location.href = 'dashboard.html')
+      //   .catch(err => showToast(err.message, 'error'));
+
+      // Por ahora redirige al menú principal
+      window.location.href = 'dashboard.html';
+    }, 1400);
+  }
+
+  // ── RECUPERAR CONTRASEÑA ───────────────────────────────────────
+  function forgotPass(e) {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    if (!email) {
+      showToast('Ingresa tu correo primero', 'error'); return;
+    }
+    // TODO: firebase.auth().sendPasswordResetEmail(email)
+    showToast('Se enviará un enlace a ' + email, 'info');
+  }
+
+  // ── ENTER para enviar ──────────────────────────────────────────
+  document.getElementById('password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') doLogin();
+  });
+
+  // ── TOASTS ────────────────────────────────────────────────────
+  function showToast(msg, type = 'info') {
+    const icons = { success: 'circle-check', error: 'circle-xmark', info: 'circle-info' };
+    const wrap  = document.getElementById('toastWrap');
+    const t     = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i>${msg}`;
+    wrap.appendChild(t);
+    setTimeout(() => t.remove(), 3000);
+  }
+</script>
+</body>
+</html>
