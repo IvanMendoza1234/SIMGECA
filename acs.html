@@ -373,15 +373,14 @@
           <input type="text" class="form-input" id="fHwId" placeholder="ID del dispositivo"/>
         </div>
 
-        <div class="section-label">Estado actual</div>
+        <div class="section-label">Estado especial</div>
 
         <div class="form-group full">
-          <label class="form-label">Estado del equipo</label>
-          <select class="form-select" id="fEstado">
-            <option value="apagado">Apagado</option>
-            <option value="encendido">Encendido</option>
-            <option value="mantenimiento">En mantenimiento</option>
-          </select>
+          <label class="form-label" style="display:flex;align-items:center;gap:.6rem;cursor:pointer;font-weight:500">
+            <input type="checkbox" id="fMantenimiento" style="width:16px;height:16px;accent-color:var(--warning);cursor:pointer"/>
+            Marcar como <strong>En mantenimiento</strong>
+          </label>
+          <span class="form-hint">El estado de encendido/apagado se determina automáticamente según el horario institucional. Solo activa esta opción si el equipo está temporalmente fuera de servicio.</span>
         </div>
         <div class="form-group full">
           <label class="form-label">Observaciones</label>
@@ -546,6 +545,51 @@
     renderGrid(resultado);
   }
 
+  // ── Calcular estado según horario institucional ──
+  function calcularEstadoPorHorario(ac) {
+    // Si está en mantenimiento (manual), respetar eso
+    if (ac.estado === 'mantenimiento') return 'mantenimiento';
+
+    const ahora  = new Date();
+    const dia    = ahora.getDay(); // 0=Dom,1=Lun,2=Mar,3=Mié,4=Jue,5=Vie,6=Sáb
+    const hhmm   = ahora.getHours() * 60 + ahora.getMinutes();
+    const turno  = ac.turno || 'ambos';
+
+    // Horarios institucionales (con 15 min de pre-encendido)
+    // formato: [diaInicio, diaFin, horaInicioMin, horaFinMin]
+    const horarios = [];
+
+    // Matutino: Lun(1),Mar(2),Jue(4),Vie(5) → 7am-1pm (pre-encendido 6:45)
+    if ([1,2,4,5].includes(dia)) {
+      horarios.push({ turno: 'matutino', inicio: 6*60+45, fin: 13*60 });
+    }
+    // Matutino: Mié(3) → 9am-1pm (pre-encendido 8:45)
+    if (dia === 3) {
+      horarios.push({ turno: 'matutino', inicio: 8*60+45, fin: 13*60 });
+    }
+    // Vespertino: Lun(1),Mar(2),Mié(3),Jue(4) → 2pm-8pm (pre-encendido 1:45pm)
+    if ([1,2,3,4].includes(dia)) {
+      horarios.push({ turno: 'vespertino', inicio: 13*60+45, fin: 20*60 });
+    }
+    // Vespertino: Vie(5) → 4pm-8pm (pre-encendido 3:45pm)
+    if (dia === 5) {
+      horarios.push({ turno: 'vespertino', inicio: 15*60+45, fin: 20*60 });
+    }
+    // Sábado: 8am-1pm (pre-encendido 7:45)
+    if (dia === 6) {
+      horarios.push({ turno: 'matutino', inicio: 7*60+45, fin: 13*60 });
+    }
+
+    // Verificar si el turno del AC aplica en algún horario activo
+    for (const h of horarios) {
+      const turnoMatch = turno === 'ambos' || turno === h.turno || turno === '';
+      if (turnoMatch && hhmm >= h.inicio && hhmm < h.fin) {
+        return 'encendido';
+      }
+    }
+    return 'apagado';
+  }
+
   // ── Render cards ──
   function renderGrid(lista) {
     const grid = document.getElementById('acGrid');
@@ -561,7 +605,7 @@
 
     grid.innerHTML = lista.map(ac => {
       const esBaja  = ac.dado_de_baja === true;
-      const estado  = esBaja ? 'baja' : (ac.estado || 'apagado');
+      const estado  = esBaja ? 'baja' : calcularEstadoPorHorario(ac);
       const estadoMap = {
         encendido:     { cls: 'estado-encendido',     icon: '🟢', lbl: 'Encendido' },
         apagado:       { cls: 'estado-apagado',       icon: '⚪', lbl: 'Apagado' },
@@ -656,7 +700,7 @@
     document.getElementById('fTurno').value        = ac.turno        || '';
     document.getElementById('fHardware').value     = ac.hardware     || '';
     document.getElementById('fHwId').value         = ac.hw_id        || '';
-    document.getElementById('fEstado').value       = ac.estado       || 'apagado';
+    document.getElementById('fMantenimiento').checked = ac.estado === 'mantenimiento';
     document.getElementById('fObservaciones').value= ac.observaciones|| '';
     toggleHwId();
     document.getElementById('modalRegistro').classList.add('open');
@@ -666,10 +710,10 @@
     ['fNombre','fMarca','fModelo','fPotencia','fBtu','fSerie','fAnio','fHwId','fObservaciones'].forEach(id => {
       document.getElementById(id).value = '';
     });
-    document.getElementById('fAula').value    = '';
-    document.getElementById('fTurno').value   = '';
-    document.getElementById('fHardware').value= '';
-    document.getElementById('fEstado').value  = 'apagado';
+    document.getElementById('fAula').value     = '';
+    document.getElementById('fTurno').value    = '';
+    document.getElementById('fHardware').value = '';
+    document.getElementById('fMantenimiento').checked = false;
     toggleHwId();
   }
 
@@ -702,7 +746,7 @@
       turno:         document.getElementById('fTurno').value,
       hardware:      document.getElementById('fHardware').value,
       hw_id:         document.getElementById('fHwId').value.trim(),
-      estado:        document.getElementById('fEstado').value,
+      estado:        document.getElementById('fMantenimiento').checked ? 'mantenimiento' : 'auto',
       observaciones: document.getElementById('fObservaciones').value.trim(),
       consumo_mes:   0,
     };
