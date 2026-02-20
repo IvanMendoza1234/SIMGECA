@@ -367,7 +367,7 @@
       <div class="divider"><span>Instituto Tecnológico de Lázaro Cárdenas</span></div>
       <div class="login-footer">
         ¿Eres docente o alumno? Usa la <a href="#">app móvil SIMGECA</a><br/>
-        ¿Problemas de acceso? <a href="mailto:soporte@itlc.edu.mx">Contacta a soporte</a>
+        ¿Problemas de acceso? <a href="/cdn-cgi/l/email-protection#087b6778677a7c6d48617c646b266d6c7d266570">Contacta a soporte</a>
       </div>
 
     </div>
@@ -376,7 +376,29 @@
   <!-- Toasts -->
   <div class="toast-wrap" id="toastWrap"></div>
 
-<script>
+<!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
+      authDomain: "simgeca-26297.firebaseapp.com",
+      projectId: "simgeca-26297",
+      storageBucket: "simgeca-26297.firebasestorage.app",
+      messagingSenderId: "28195458236",
+      appId: "1:28195458236:web:9250f82b845665d82cd4b9",
+      measurementId: "G-LYJ4CGG5CR"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+
+    // Si ya hay sesión activa, redirigir directo al dashboard
+    auth.onAuthStateChanged(user => {
+      if (user) window.location.href = 'dashboard.html';
+    });
+  </script>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
   // ── MOSTRAR/OCULTAR CONTRASEÑA ─────────────────────────────────
   function togglePass() {
     const inp  = document.getElementById('password');
@@ -415,31 +437,36 @@
     const icon    = document.getElementById('btnIcon');
     const txt     = document.getElementById('btnText');
 
-    btn.disabled      = true;
+    btn.disabled          = true;
     spinner.style.display = 'block';
     icon.style.display    = 'none';
     txt.textContent       = 'Verificando...';
 
-    setTimeout(() => {
-      // TODO: reemplazar con Firebase Auth
-      // firebase.auth().signInWithEmailAndPassword(email, pass)
-      //   .then(() => window.location.href = 'dashboard.html')
-      //   .catch(err => showToast(err.message, 'error'));
+    const email = document.getElementById('email').value.trim();
+    const pass  = document.getElementById('password').value;
 
-      // Por ahora redirige al menú principal
-      window.location.href = 'dashboard.html';
-    }, 1400);
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(() => {
+        showToast('Sesión iniciada correctamente', 'success');
+        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+      })
+      .catch(err => {
+        btn.disabled          = false;
+        spinner.style.display = 'none';
+        icon.style.display    = 'inline';
+        txt.textContent       = 'Iniciar sesión';
+        showToast(traducirError(err.code), 'error');
+      });
   }
 
   // ── RECUPERAR CONTRASEÑA ───────────────────────────────────────
   function forgotPass(e) {
     e.preventDefault();
     const email = document.getElementById('email').value.trim();
-    if (!email) {
-      showToast('Ingresa tu correo primero', 'error'); return;
-    }
-    // TODO: firebase.auth().sendPasswordResetEmail(email)
-    showToast('Se enviará un enlace a ' + email, 'info');
+    if (!email) { showToast('Ingresa tu correo primero', 'error'); return; }
+    auth.sendPasswordResetEmail(email)
+      .then(() => showToast('Enlace enviado a ' + email, 'success'))
+      .catch(() => showToast('No se encontró una cuenta con ese correo', 'error'));
   }
 
   // ── ENTER para enviar ──────────────────────────────────────────
@@ -453,9 +480,23 @@
     const wrap  = document.getElementById('toastWrap');
     const t     = document.createElement('div');
     t.className = `toast ${type}`;
-    t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i>${msg}`;
+    t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i> ${msg}`;
     wrap.appendChild(t);
-    setTimeout(() => t.remove(), 3000);
+    setTimeout(() => t.remove(), 4000);
+  }
+
+  // ── TRADUCIR ERRORES FIREBASE ──────────────────────────────────
+  function traducirError(code) {
+    const map = {
+      'auth/user-not-found':         'No existe una cuenta con ese correo.',
+      'auth/wrong-password':         'Contraseña incorrecta.',
+      'auth/invalid-email':          'Formato de correo inválido.',
+      'auth/user-disabled':          'Esta cuenta ha sido deshabilitada.',
+      'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
+      'auth/invalid-credential':     'Correo o contraseña incorrectos.',
+      'auth/network-request-failed': 'Error de red. Verifica tu conexión.'
+    };
+    return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
   }
 </script>
 </body>
