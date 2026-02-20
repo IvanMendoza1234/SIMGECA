@@ -367,7 +367,7 @@
       <div class="divider"><span>Instituto Tecnológico de Lázaro Cárdenas</span></div>
       <div class="login-footer">
         ¿Eres docente o alumno? Usa la <a href="#">app móvil SIMGECA</a><br/>
-        ¿Problemas de acceso? <a href="mailto:simgecaoficial@gmail.com">Contacta a soporte</a>
+        ¿Problemas de acceso? <a href="/cdn-cgi/l/email-protection#65160c08020006040a030c060c0409250208040c094b060a08">Contacta a soporte</a>
       </div>
 
     </div>
@@ -377,7 +377,7 @@
   <div class="toast-wrap" id="toastWrap"></div>
 
 <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script>
     const firebaseConfig = {
@@ -445,7 +445,10 @@
     const email = document.getElementById('email').value.trim();
     const pass  = document.getElementById('password').value;
 
-    auth.signInWithEmailAndPassword(email, pass)
+    // SESSION = la sesión dura solo mientras la pestaña esté abierta.
+    // Al cerrar el navegador o la pestaña, Firebase borra la sesión automáticamente.
+    auth.setPersistence(firebase.auth.Auth.Persistence.SESSION)
+      .then(() => auth.signInWithEmailAndPassword(email, pass))
       .then(() => {
         showToast('Sesión iniciada correctamente', 'success');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
@@ -494,10 +497,4 @@
       'auth/user-disabled':          'Esta cuenta ha sido deshabilitada.',
       'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
       'auth/invalid-credential':     'Correo o contraseña incorrectos.',
-      'auth/network-request-failed': 'Error de red. Verifica tu conexión.'
-    };
-    return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
-  }
-</script>
-</body>
-</html>
+      'auth/network-request-f
