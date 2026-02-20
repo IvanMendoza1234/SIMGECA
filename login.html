@@ -394,7 +394,7 @@
     const auth = firebase.auth();
     const db   = firebase.firestore();
 
-    // Si ya hay sesión activa, redirigir directo al dashboard
+    // Si ya hay sesión activa, redirigir al dashboard
     auth.onAuthStateChanged(user => {
       if (user) window.location.href = 'dashboard.html';
     });
@@ -412,102 +412,105 @@
       s => { document.getElementById('statSolicitudes').textContent = s.size; },
       () => { document.getElementById('statSolicitudes').textContent = '0'; }
     );
+
+    // ── MOSTRAR/OCULTAR CONTRASEÑA ──────────────────────────────
+    function togglePass() {
+      const inp  = document.getElementById('password');
+      const icon = document.getElementById('eyeIcon');
+      const show = inp.type === 'password';
+      inp.type       = show ? 'text' : 'password';
+      icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
+    }
+
+    // ── VALIDACIÓN ──────────────────────────────────────────────
+    function validar() {
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+      let ok = true;
+
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+      document.getElementById('emailErr').classList.toggle('show', !emailOk);
+      document.getElementById('email').classList.toggle('error', !emailOk);
+      if (!emailOk) ok = false;
+
+      const passOk = pass.length >= 6;
+      document.getElementById('passErr').classList.toggle('show', !passOk);
+      document.getElementById('password').classList.toggle('error', !passOk);
+      if (!passOk) ok = false;
+
+      return ok;
+    }
+
+    // ── LOGIN ────────────────────────────────────────────────────
+    function doLogin() {
+      if (!validar()) return;
+
+      const btn     = document.getElementById('btnLogin');
+      const spinner = document.getElementById('spinner');
+      const icon    = document.getElementById('btnIcon');
+      const txt     = document.getElementById('btnText');
+
+      btn.disabled          = true;
+      spinner.style.display = 'block';
+      icon.style.display    = 'none';
+      txt.textContent       = 'Verificando...';
+
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(() => {
+          showToast('Sesión iniciada correctamente', 'success');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        })
+        .catch(err => {
+          btn.disabled          = false;
+          spinner.style.display = 'none';
+          icon.style.display    = 'inline';
+          txt.textContent       = 'Iniciar sesión';
+          showToast(traducirError(err.code), 'error');
+        });
+    }
+
+    // ── RECUPERAR CONTRASEÑA ─────────────────────────────────────
+    function forgotPass(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!email) { showToast('Ingresa tu correo primero', 'error'); return; }
+      auth.sendPasswordResetEmail(email)
+        .then(() => showToast('Enlace enviado a ' + email, 'success'))
+        .catch(() => showToast('No se encontró una cuenta con ese correo', 'error'));
+    }
+
+    // ── ENTER para enviar ────────────────────────────────────────
+    document.getElementById('password').addEventListener('keydown', e => {
+      if (e.key === 'Enter') doLogin();
+    });
+
+    // ── TOASTS ──────────────────────────────────────────────────
+    function showToast(msg, type = 'info') {
+      const icons = { success: 'circle-check', error: 'circle-xmark', info: 'circle-info' };
+      const wrap  = document.getElementById('toastWrap');
+      const t     = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i> ${msg}`;
+      wrap.appendChild(t);
+      setTimeout(() => t.remove(), 4000);
+    }
+
+    // ── TRADUCIR ERRORES FIREBASE ────────────────────────────────
+    function traducirError(code) {
+      const map = {
+        'auth/user-not-found':         'No existe una cuenta con ese correo.',
+        'auth/wrong-password':         'Contraseña incorrecta.',
+        'auth/invalid-email':          'Formato de correo inválido.',
+        'auth/user-disabled':          'Esta cuenta ha sido deshabilitada.',
+        'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
+        'auth/invalid-credential':     'Correo o contraseña incorrectos.',
+        'auth/network-request-failed': 'Error de red. Verifica tu conexión.',
+      };
+      return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
+    }
   </script>
-
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-  // ── MOSTRAR/OCULTAR CONTRASEÑA ─────────────────────────────────
-  function togglePass() {
-    const inp  = document.getElementById('password');
-    const icon = document.getElementById('eyeIcon');
-    const show = inp.type === 'password';
-    inp.type   = show ? 'text' : 'password';
-    icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
-  }
-
-  // ── VALIDACIÓN ─────────────────────────────────────────────────
-  function validar() {
-    const email = document.getElementById('email').value.trim();
-    const pass  = document.getElementById('password').value;
-    let ok = true;
-
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    document.getElementById('emailErr').classList.toggle('show', !emailOk);
-    document.getElementById('email').classList.toggle('error', !emailOk);
-    if (!emailOk) ok = false;
-
-    const passOk = pass.length >= 8;
-    document.getElementById('passErr').classList.toggle('show', !passOk);
-    document.getElementById('password').classList.toggle('error', !passOk);
-    if (!passOk) ok = false;
-
-    return ok;
-  }
-
-  // ── LOGIN ──────────────────────────────────────────────────────
-  function doLogin() {
-    if (!validar()) return;
-
-    // Simula carga (aquí irá Firebase Authentication)
-    const btn     = document.getElementById('btnLogin');
-    const spinner = document.getElementById('spinner');
-    const icon    = document.getElementById('btnIcon');
-    const txt     = document.getElementById('btnText');
-
-    btn.disabled          = true;
-    spinner.style.display = 'block';
-    icon.style.display    = 'none';
-    txt.textContent       = 'Verificando...';
-
-    const email = document.getElementById('email').value.trim();
-    const pass  = document.getElementById('password').value;
-
-    auth.signInWithEmailAndPassword(email, pass)
-      .then(() => {
-        showToast('Sesión iniciada correctamente', 'success');
-        setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
-      })
-      .catch(err => {
-        btn.disabled          = false;
-        spinner.style.display = 'none';
-        icon.style.display    = 'inline';
-        txt.textContent       = 'Iniciar sesión';
-        showToast(traducirError(err.code), 'error');
-      });
-  }
-
-  // ── RECUPERAR CONTRASEÑA ───────────────────────────────────────
-  function forgotPass(e) {
-    e.preventDefault();
-    const email = document.getElementById('email').value.trim();
-    if (!email) { showToast('Ingresa tu correo primero', 'error'); return; }
-    auth.sendPasswordResetEmail(email)
-      .then(() => showToast('Enlace enviado a ' + email, 'success'))
-      .catch(() => showToast('No se encontró una cuenta con ese correo', 'error'));
-  }
-
-  // ── ENTER para enviar ──────────────────────────────────────────
-  document.getElementById('password').addEventListener('keydown', e => {
-    if (e.key === 'Enter') doLogin();
-  });
-
-  // ── TOASTS ────────────────────────────────────────────────────
-  function showToast(msg, type = 'info') {
-    const icons = { success: 'circle-check', error: 'circle-xmark', info: 'circle-info' };
-    const wrap  = document.getElementById('toastWrap');
-    const t     = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.innerHTML = `<i class="fa-solid fa-${icons[type]}"></i> ${msg}`;
-    wrap.appendChild(t);
-    setTimeout(() => t.remove(), 4000);
-  }
-
-  // ── TRADUCIR ERRORES FIREBASE ──────────────────────────────────
-  function traducirError(code) {
-    const map = {
-      'auth/user-not-found':         'No existe una cuenta con ese correo.',
-      'auth/wrong-password':         'Contraseña incorrecta.',
-      'auth/invalid-email':          'Formato de correo inválido.',
-      'auth/user-disabled':          'Esta cuenta ha sido deshabilitada.',
-      'auth/too-many-requests':      'Demasiados intentos. Espera unos minutos.',
-      'auth/invalid-credential':     'Correo o contraseña incorrectos.',
-      'auth/network-request-f
+</body>
+</html>
