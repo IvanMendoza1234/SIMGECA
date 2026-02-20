@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIMGECA — Monitoreo</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --azul:       #003B8E;
+      --azul-mid:   #0057CC;
+      --azul-light: #1A75FF;
+      --azul-pale:  #E8F0FE;
+      --accent:     #00C2A8;
+      --danger:     #EF4444;
+      --success:    #10B981;
+      --warning:    #F59E0B;
+      --bg:         #F0F4FA;
+      --surface:    #FFFFFF;
+      --surface2:   #F8FAFF;
+      --text:       #0D1B3E;
+      --text-mid:   #3D5280;
+      --text-light: #7A90B8;
+      --border:     #DDE5F4;
+      --sidebar-w:  265px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar { width: var(--sidebar-w); background: var(--azul); min-height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-row { display: flex; align-items: center; gap: .7rem; }
+    .logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .logo-sub  { font-size: .62rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
+    .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
+    .nav-section { font-size: .6rem; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: .85rem 1.25rem .3rem; }
+    .nav-item { display: flex; align-items: center; gap: .7rem; padding: .65rem 1.25rem; color: rgba(255,255,255,.55); font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; border-left: 3px solid transparent; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+    .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--accent); }
+    .nav-item i { width: 17px; text-align: center; font-size: .9rem; }
+    .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 700; padding: .12rem .42rem; border-radius: 20px; display: none; }
+    .sidebar-footer { padding: .9rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .user-card { display: flex; align-items: center; gap: .65rem; }
+    .user-avatar { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name  { font-size: .8rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role  { font-size: .68rem; color: rgba(255,255,255,.38); }
+    .btn-logout { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35); font-size: .88rem; padding: .25rem; border-radius: 6px; transition: color .2s; }
+    .btn-logout:hover { color: var(--danger); }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: .9rem 1.75rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
+    .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
+    .topbar-right   { display: flex; align-items: center; gap: .6rem; }
+    .last-update { font-size: .75rem; color: var(--text-light); display: flex; align-items: center; gap: .4rem; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: livepulse 2s infinite; }
+    @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+    .btn-reload { display:flex; align-items:center; gap:.4rem; padding:.5rem .9rem; border:1.5px solid var(--border); border-radius:9px; background:var(--surface); font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:600; color:var(--text-mid); cursor:pointer; transition:all .15s; }
+    .btn-reload:hover { border-color:var(--azul-light); color:var(--azul); }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .page-content { padding: 1.5rem 1.75rem; flex: 1; }
+
+    /* ══ KPIs ══ */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .kpi-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
+    .kpi-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .ki-blue   { background: var(--azul-pale); color: var(--azul); }
+    .ki-green  { background: #D1FAE5; color: var(--success); }
+    .ki-yellow { background: #FEF3C7; color: var(--warning); }
+    .ki-cyan   { background: #CCFBF1; color: #0D9488; }
+    .kpi-val  { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 700; color: var(--text); line-height: 1; }
+    .kpi-lbl  { font-size: .72rem; color: var(--text-light); margin-top: .2rem; }
+    .kpi-sub  { font-size: .7rem; color: var(--text-light); margin-top: .15rem; }
+
+    /* ══ TABS ══ */
+    .main-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+    .main-tab { padding: .65rem 1.3rem; font-size: .875rem; font-weight: 600; cursor: pointer; color: var(--text-light); border: none; background: none; font-family: 'DM Sans', sans-serif; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; display: flex; align-items: center; gap: .45rem; }
+    .main-tab:hover { color: var(--text-mid); }
+    .main-tab.active { color: var(--azul); border-bottom-color: var(--azul); }
+
+    /* ══ ESTADO EN TIEMPO REAL ══ */
+    .filter-row { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .filter-btn { padding: .38rem .85rem; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 600; color: var(--text-light); cursor: pointer; transition: all .15s; }
+    .filter-btn.active { background: var(--azul); border-color: var(--azul); color: #fff; }
+    .filter-btn.fenc.active  { background: var(--success); border-color: var(--success); }
+    .filter-btn.fapag.active { background: var(--text-light); border-color: var(--text-light); }
+    .filter-btn.fmant.active { background: var(--warning); border-color: var(--warning); }
+    .filter-count { margin-left: auto; font-size: .78rem; color: var(--text-light); }
+
+    .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
+    .ac-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.1rem; position: relative; overflow: hidden; transition: box-shadow .2s, transform .15s; animation: fadeIn .3s ease both; }
+    .ac-card:hover { box-shadow: 0 6px 24px rgba(0,59,142,.09); transform: translateY(-2px); }
+    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
+    .ac-top-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+    .ac-top-bar.encendido    { background: linear-gradient(90deg, var(--success), var(--accent)); }
+    .ac-top-bar.apagado      { background: var(--border); }
+    .ac-top-bar.mantenimiento{ background: linear-gradient(90deg, var(--warning), #FCA5A5); }
+    .ac-header { display: flex; align-items: flex-start; justify-content: space-between; margin: .4rem 0 .75rem; }
+    .ac-nombre { font-weight: 700; font-size: .9rem; }
+    .ac-aula   { font-size: .72rem; color: var(--text-light); margin-top: .1rem; }
+    .estado-badge { padding: .2rem .55rem; border-radius: 20px; font-size: .7rem; font-weight: 700; white-space: nowrap; }
+    .estado-badge.encendido     { background:#D1FAE5; color:#065F46; }
+    .estado-badge.apagado       { background:var(--surface2); color:var(--text-light); }
+    .estado-badge.mantenimiento { background:#FEF3C7; color:#92400E; }
+    .ac-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+    .ac-stat { background: var(--surface2); border-radius: 8px; padding: .5rem .65rem; }
+    .ac-stat-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+    .ac-stat-lbl { font-size: .63rem; color: var(--text-light); margin-top: .05rem; text-transform: uppercase; letter-spacing: .04em; }
+    .ac-footer { display: flex; align-items: center; gap: .4rem; margin-top: .7rem; padding-top: .65rem; border-top: 1px solid var(--border); font-size: .78rem; color: var(--text-light); }
+
+    /* ══ GRÁFICAS ══ */
+    .chart-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
+    .chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.1rem; }
+    .chart-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
+    .chart-sub   { font-size: .73rem; color: var(--text-light); margin-top: .1rem; }
+    .chart-select { padding: .42rem .8rem; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface2); font-family: 'DM Sans', sans-serif; font-size: .8rem; color: var(--text-mid); outline: none; cursor: pointer; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+    /* ranking */
+    .ranking-list { display: flex; flex-direction: column; gap: .45rem; }
+    .rank-item { display: flex; align-items: center; gap: .7rem; padding: .55rem .75rem; border-radius: 9px; background: var(--surface2); border: 1px solid var(--border); }
+    .rank-num  { font-family: 'Syne', sans-serif; font-size: .78rem; font-weight: 700; color: var(--text-light); width: 16px; text-align: center; flex-shrink: 0; }
+    .rank-info { flex: 1; min-width: 0; }
+    .rank-name { font-size: .82rem; font-weight: 600; }
+    .rank-aula { font-size: .7rem; color: var(--text-light); }
+    .rank-bar-wrap { width: 80px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
+    .rank-bar  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--azul-light), var(--accent)); transition: width .8s ease; }
+    .rank-val  { font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 700; color: var(--azul); width: 58px; text-align: right; flex-shrink: 0; }
+
+    /* periodo tabs */
+    .period-tabs { display: flex; gap: .3rem; }
+    .period-tab { padding: .35rem .8rem; border-radius: 7px; font-size: .78rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text-light); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
+    .period-tab.active { background: var(--azul); border-color: var(--azul); color: #fff; }
+
+    .consumo-kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-bottom: 1.25rem; }
+    .consumo-kpi { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; text-align: center; }
+    .consumo-kpi-val { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--azul); }
+    .consumo-kpi-lbl { font-size: .67rem; color: var(--text-light); margin-top: .15rem; text-transform: uppercase; letter-spacing: .04em; }
+
+    /* uptime */
+    .uptime-list { display: flex; flex-direction: column; gap: .55rem; }
+    .uptime-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: .8rem 1rem; display: flex; align-items: center; gap: .9rem; }
+    .uptime-rank { font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; color: var(--text-light); width: 20px; text-align: center; flex-shrink: 0; }
+    .uptime-rank.r1 { color: #F59E0B; }
+    .uptime-rank.r2 { color: #9CA3AF; }
+    .uptime-rank.r3 { color: #CD7F32; }
+    .uptime-info { flex: 1; min-width: 0; }
+    .uptime-name { font-weight: 700; font-size: .87rem; }
+    .uptime-aula { font-size: .7rem; color: var(--text-light); margin-top: .05rem; }
+    .uptime-bar-wrap { flex: 2; height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
+    .uptime-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
+    .uptime-right { text-align: right; flex-shrink: 0; width: 68px; }
+    .uptime-hours { font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; }
+    .uptime-pct   { font-size: .68rem; color: var(--text-light); }
+
+    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-light); grid-column: 1/-1; }
+    .empty-state i { font-size: 2rem; margin-bottom: .75rem; display: block; opacity: .3; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1rem; color: var(--text-mid); margin-bottom: .3rem; }
+
+    .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
+    .toast { padding: .7rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: .55rem; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: fadeIn .3s ease; max-width: 280px; }
+    .toast.success { background: var(--success); }
+    .toast.info    { background: var(--azul); }
+
+    @media (max-width: 1000px) { .kpi-row { grid-template-columns: 1fr 1fr; } .two-col { grid-template-columns: 1fr; } }
+    @media (max-width: 600px) { .sidebar { display: none; } .main { margin-left: 0; } }
+  </style>
+</head>
+<body>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="fa-solid fa-wind"></i></div>
+      <div><div class="logo-text">SIMGECA</div><div class="logo-sub">TecNM — Lázaro Cárdenas</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-house"></i> Inicio</a>
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item" href="acs.html"><i class="fa-solid fa-snowflake"></i> Aires Acondicionados</a>
+    <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
+    <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
+    <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
+      <span class="nav-badge" id="navBadgeSol">0</span></a>
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item active" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
+    <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item" href="programacion.html"><i class="fa-solid fa-calendar-check"></i> Programación AC</a>
+    <a class="nav-item" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Administrador</div>
+        <div class="user-role">Admin del sistema</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Monitoreo</h1>
+      <p>Consumo energético y estado de los equipos AC</p>
+    </div>
+    <div class="topbar-right">
+      <div class="last-update">
+        <div class="live-dot"></div>
+        Actualizado: <span id="horaUpdate">—</span>
+      </div>
+      <button class="btn-reload" onclick="recargarDatos()">
+        <i class="fa-solid fa-rotate-right" id="iconRecargar"></i> Recargar
+      </button>
+    </div>
+  </header>
+
+  <div class="page-content">
+
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <div class="kpi-icon ki-blue"><i class="fa-solid fa-snowflake"></i></div>
+        <div>
+          <div class="kpi-val" id="kpiTotal">—</div>
+          <div class="kpi-lbl">Total equipos AC</div>
+          <div class="kpi-sub" id="kpiEncSub">— encendidos ahora</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon ki-green"><i class="fa-solid fa-bolt"></i></div>
+        <div>
+          <div class="kpi-val" id="kpiKwh">—</div>
+          <div class="kpi-lbl">kWh consumidos (mes)</div>
+          <div class="kpi-sub" id="kpiKwhSub">— kWh estimado hoy</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon ki-yellow"><i class="fa-solid fa-clock"></i></div>
+        <div>
+          <div class="kpi-val" id="kpiHoras">—</div>
+          <div class="kpi-lbl">Horas promedio (mes)</div>
+          <div class="kpi-sub">Promedio por equipo</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon ki-cyan"><i class="fa-solid fa-temperature-half"></i></div>
+        <div>
+          <div class="kpi-val" id="kpiTemp">—</div>
+          <div class="kpi-lbl">Temperatura promedio</div>
+          <div class="kpi-sub">Equipos encendidos</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="main-tabs">
+      <button class="main-tab active" onclick="cambiarTab('estado',this)"><i class="fa-solid fa-circle-dot"></i> Estado en tiempo real</button>
+      <button class="main-tab" onclick="cambiarTab('kwh',this)"><i class="fa-solid fa-bolt"></i> Consumo kWh por equipo</button>
+      <button class="main-tab" onclick="cambiarTab('general',this)"><i class="fa-solid fa-chart-area"></i> Consumo general</button>
+      <button class="main-tab" onclick="cambiarTab('uptime',this)"><i class="fa-solid fa-clock"></i> Tiempo encendido</button>
+    </div>
+
+    <!-- TAB ESTADO -->
+    <div id="secEstado">
+      <div class="filter-row">
+        <button class="filter-btn active" onclick="filtrarEstado('todos',this)"><i class="fa-solid fa-border-all"></i> Todos</button>
+        <button class="filter-btn fenc"  onclick="filtrarEstado('encendido',this)">🟢 Encendidos</button>
+        <button class="filter-btn fapag" onclick="filtrarEstado('apagado',this)">⚫ Apagados</button>
+        <button class="filter-btn fmant" onclick="filtrarEstado('mantenimiento',this)">🟡 Mantenimiento</button>
+        <span class="filter-count" id="countEstado">— equipos</span>
+      </div>
+      <div class="ac-grid" id="gridEstado">
+        <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Cargando...</h3></div>
+      </div>
+    </div>
+
+    <!-- TAB kWh POR EQUIPO -->
+    <div id="secKwh" style="display:none">
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Consumo kWh por equipo</div><div class="chart-sub">Mes actual — datos simulados</div></div>
+            <select class="chart-select" id="selectAulaKwh" onchange="actualizarGraficaKwh()">
+              <option value="todos">Todas las aulas</option>
+            </select>
+          </div>
+          <canvas id="chartKwh" height="270"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header">
+            <div><div class="chart-title">Ranking de consumo</div><div class="chart-sub">Top equipos con más kWh este mes</div></div>
+          </div>
+          <div class="ranking-list" id="rankingKwh"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB CONSUMO GENERAL -->
+    <div id="secGeneral" style="display:none">
+      <div class="chart-card" style="margin-bottom:1rem">
+        <div class="chart-header">
+          <div><div class="chart-title">Consumo energético total</div><div class="chart-sub">Todos los equipos combinados</div></div>
+          <div class="period-tabs">
+            <button class="period-tab active" id="tabSemana" onclick="cambiarPeriodo('semana',this)">Semana</button>
+            <button class="period-tab" id="tabMes" onclick="cambiarPeriodo('mes',this)">Mes</button>
+            <button class="period-tab" id="tabAnio" onclick="cambiarPeriodo('anio',this)">Año</button>
+          </div>
+        </div>
+        <div class="consumo-kpi-row">
+          <div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPTotal">—</div><div class="consumo-kpi-lbl">kWh totales</div></div>
+          <div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPProm">—</div><div class="consumo-kpi-lbl">kWh promedio/día</div></div>
+          <div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPCosto">—</div><div class="consumo-kpi-lbl">Costo est. MXN</div></div>
+        </div>
+        <canvas id="chartGeneral" height="200"></canvas>
+      </div>
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Distribución por estado</div><div class="chart-sub">Cantidad actual de equipos</div></div></div>
+          <canvas id="chartDonut" height="230"></canvas>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Consumo por aula</div><div class="chart-sub">kWh acumulados este mes</div></div></div>
+          <canvas id="chartAulas" height="230"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB UPTIME -->
+    <div id="secUptime" style="display:none">
+      <div class="two-col">
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Horas encendido por equipo</div><div class="chart-sub">Este mes — mayor a menor</div></div></div>
+          <div class="uptime-list" id="uptimeList"></div>
+        </div>
+        <div class="chart-card">
+          <div class="chart-header"><div><div class="chart-title">Horas totales por día</div><div class="chart-sub">Semana actual — suma de todos los equipos</div></div></div>
+          <canvas id="chartUptime" height="270"></canvas>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
+    authDomain: "simgeca-26297.firebaseapp.com",
+    projectId: "simgeca-26297",
+    storageBucket: "simgeca-26297.firebasestorage.app",
+    messagingSenderId: "28195458236",
+    appId: "1:28195458236:web:9250f82b845665d82cd4b9"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  var todosACs   = [];
+  var tabActual  = 'estado';
+  var filtroAct  = 'todos';
+  var periodoAct = 'semana';
+  var chKwh, chGeneral, chDonut, chAulas, chUptime;
+
+  auth.onAuthStateChanged(user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    document.getElementById('userName').textContent   = user.email.split('@')[0];
+    document.getElementById('userAvatar').textContent = user.email.charAt(0).toUpperCase();
+    db.collection('solicitudes').where('estado','==','pendiente').onSnapshot(s => {
+      const b = document.getElementById('navBadgeSol');
+      b.textContent = s.size; b.style.display = s.size > 0 ? 'inline' : 'none';
+    }, ()=>{});
+    iniciarListener();
+  });
+
+  function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
+
+  // ── Listener Firestore ──
+  function iniciarListener() {
+    db.collection('aires_acondicionados').onSnapshot(snap => {
+      if (snap.empty) { generarSimulados(); return; }
+      todosACs = snap.docs.map(enriquecerAC);
+      refrescar();
+    }, () => generarSimulados());
+  }
+
+  function enriquecerAC(doc) {
+    const d = doc.data();
+    const estadosSim = ['encendido','encendido','encendido','apagado','mantenimiento'];
+    const estado = d.estado || estadosSim[Math.floor(Math.random()*estadosSim.length)];
+    return {
+      id:          doc.id,
+      nombre:      d.nombre    || `AC-${doc.id.slice(-4).toUpperCase()}`,
+      aula:        d.aula      || d.ubicacion || 'Sin asignar',
+      estado,
+      temperatura: d.temperatura || (estado === 'encendido' ? +(18 + Math.random()*6).toFixed(1) : null),
+      consumo_mes: d.consumo_mes || +(20 + Math.random()*80).toFixed(1),
+      horas_mes:   d.horas_mes  || +(40 + Math.random()*120).toFixed(0),
+      marca:       d.marca      || 'Carrier',
+    };
+  }
+
+  function generarSimulados() {
+    const aulas  = ['Aula 1A','Aula 1B','Aula 2A','Aula 2B','Lab Cómputo','Sala Maestros','Dirección','Aula 3A','Lab Electrónica','Biblioteca'];
+    const marcas = ['Carrier','LG','Samsung','Daikin','Trane'];
+    const posibles = ['encendido','encendido','encendido','apagado','mantenimiento'];
+    todosACs = Array.from({length:12}, (_,i) => {
+      const estado = posibles[Math.floor(Math.random()*posibles.length)];
+      return {
+        id: `sim-${i+1}`,
+        nombre: `AC-${String(i+1).padStart(3,'0')}`,
+        aula:   aulas[i % aulas.length],
+        estado,
+        temperatura: estado === 'encendido' ? +(18+Math.random()*6).toFixed(1) : null,
+        consumo_mes: +(20+Math.random()*80).toFixed(1),
+        horas_mes:   +(40+Math.random()*120).toFixed(0),
+        marca: marcas[i % marcas.length],
+      };
+    });
+    refrescar();
+  }
+
+  function refrescar() {
+    actualizarKPIs();
+    actualizarHora();
+    renderSeccion();
+  }
+
+  function actualizarHora() {
+    document.getElementById('horaUpdate').textContent = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  }
+
+  function recargarDatos() {
+    const ic = document.getElementById('iconRecargar');
+    ic.style.animation = 'spin .5s linear';
+    setTimeout(() => ic.style.animation = '', 600);
+    generarSimulados();
+    showToast('Datos actualizados','success');
+  }
+
+  // ── KPIs ──
+  function actualizarKPIs() {
+    const enc   = todosACs.filter(a => a.estado === 'encendido');
+    const kwh   = todosACs.reduce((s,a) => s + a.consumo_mes, 0);
+    const horas = todosACs.reduce((s,a) => s + a.horas_mes, 0);
+    const tempProm = enc.length
+      ? (enc.reduce((s,a) => s + (a.temperatura||0), 0) / enc.length).toFixed(1)
+      : null;
+
+    document.getElementById('kpiTotal').textContent   = todosACs.length;
+    document.getElementById('kpiEncSub').textContent  = `${enc.length} encendidos ahora`;
+    document.getElementById('kpiKwh').textContent     = kwh.toFixed(1);
+    document.getElementById('kpiKwhSub').textContent  = `~${(kwh/30).toFixed(1)} kWh estimado hoy`;
+    document.getElementById('kpiHoras').textContent   = todosACs.length ? (horas/todosACs.length).toFixed(0) : '—';
+    document.getElementById('kpiTemp').textContent    = tempProm ? `${tempProm}°C` : '—°C';
+  }
+
+  // ── Tabs ──
+  function cambiarTab(tab, el) {
+    tabActual = tab;
+    document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    ['Estado','Kwh','General','Uptime'].forEach(s => {
+      document.getElementById('sec'+s).style.display = tab === s.toLowerCase() ? '' : 'none';
+    });
+    renderSeccion();
+  }
+
+  function renderSeccion() {
+    if (tabActual === 'estado')  renderEstado();
+    if (tabActual === 'kwh')     renderKwh();
+    if (tabActual === 'general') renderGeneral();
+    if (tabActual === 'uptime')  renderUptime();
+  }
+
+  // ════ TAB: ESTADO ════
+  function filtrarEstado(f, el) {
+    filtroAct = f;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    el.classList.add('active');
+    renderEstado();
+  }
+
+  function renderEstado() {
+    const lista = filtroAct === 'todos' ? todosACs : todosACs.filter(a => a.estado === filtroAct);
+    document.getElementById('countEstado').textContent = `${lista.length} equipo${lista.length!==1?'s':''}`;
+    const grid = document.getElementById('gridEstado');
+    if (!lista.length) {
+      grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-snowflake"></i><h3>Sin equipos con este estado</h3></div>`;
+      return;
+    }
+    const lblEstado = { encendido:'Encendido', apagado:'Apagado', mantenimiento:'Mantenimiento' };
+    grid.innerHTML = lista.map((ac,i) => `
+      <div class="ac-card" style="animation-delay:${i*.04}s">
+        <div class="ac-top-bar ${ac.estado}"></div>
+        <div class="ac-header">
+          <div><div class="ac-nombre">${ac.nombre}</div><div class="ac-aula"><i class="fa-solid fa-school" style="font-size:.6rem;opacity:.5"></i> ${ac.aula}</div></div>
+          <span class="estado-badge ${ac.estado}">${lblEstado[ac.estado]||ac.estado}</span>
+        </div>
+        <div class="ac-stats">
+          <div class="ac-stat">
+            <div class="ac-stat-val">${ac.consumo_mes}<span style="font-size:.65rem;font-weight:400"> kWh</span></div>
+            <div class="ac-stat-lbl">Consumo mes</div>
+          </div>
+          <div class="ac-stat">
+            <div class="ac-stat-val">${ac.horas_mes}<span style="font-size:.65rem;font-weight:400"> h</span></div>
+            <div class="ac-stat-lbl">Horas mes</div>
+          </div>
+        </div>
+        <div class="ac-footer">
+          ${ac.temperatura
+            ? `<i class="fa-solid fa-temperature-half" style="color:var(--azul-light)"></i> ${ac.temperatura}°C`
+            : `<i class="fa-solid fa-circle-minus" style="opacity:.4"></i> Sin temperatura`}
+          <span style="margin-left:auto">${ac.marca}</span>
+        </div>
+      </div>`).join('');
+  }
+
+  // ════ TAB: kWh POR EQUIPO ════
+  function renderKwh() {
+    const sel = document.getElementById('selectAulaKwh');
+    if (sel.options.length === 1) {
+      [...new Set(todosACs.map(a => a.aula))].sort().forEach(au => {
+        const op = document.createElement('option'); op.value = au; op.textContent = au; sel.appendChild(op);
+      });
+    }
+    actualizarGraficaKwh();
+  }
+
+  function actualizarGraficaKwh() {
+    const aula  = document.getElementById('selectAulaKwh').value;
+    const lista = aula === 'todos' ? todosACs : todosACs.filter(a => a.aula === aula);
+    const sorted = [...lista].sort((a,b) => b.consumo_mes - a.consumo_mes);
+    const max = sorted[0]?.consumo_mes || 1;
+
+    const colores = sorted.map(a =>
+      a.estado === 'encendido' ? '#1A75FF' : a.estado === 'mantenimiento' ? '#F59E0B' : '#DDE5F4');
+
+    if (chKwh) chKwh.destroy();
+    chKwh = new Chart(document.getElementById('chartKwh'), {
+      type: 'bar',
+      data: { labels: sorted.map(a => a.nombre), datasets: [{ label:'kWh', data: sorted.map(a => a.consumo_mes), backgroundColor: colores, borderRadius: 6, borderSkipped: false }] },
+      options: {
+        responsive: true,
+        plugins: { legend:{display:false}, tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}} },
+        scales: {
+          y: { beginAtZero:true, grid:{color:'#EEF1F8'}, ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'} },
+          x: { grid:{display:false}, ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8',maxRotation:45} }
+        }
+      }
+    });
+
+    document.getElementById('rankingKwh').innerHTML = sorted.slice(0,8).map((ac,i) => `
+      <div class="rank-item">
+        <span class="rank-num">${i+1}</span>
+        <div class="rank-info"><div class="rank-name">${ac.nombre}</div><div class="rank-aula">${ac.aula}</div></div>
+        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(ac.consumo_mes/max*100).toFixed(0)}%"></div></div>
+        <span class="rank-val">${ac.consumo_mes} kWh</span>
+      </div>`).join('');
+  }
+
+  // ════ TAB: CONSUMO GENERAL ════
+  function renderGeneral() {
+    cambiarPeriodo(periodoAct, document.getElementById('tab' + periodoAct.charAt(0).toUpperCase() + periodoAct.slice(1)));
+  }
+
+  function cambiarPeriodo(periodo, el) {
+    periodoAct = periodo;
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
+    if (el) el.classList.add('active');
+
+    const labels = periodo === 'semana'
+      ? ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
+      : periodo === 'mes'
+      ? Array.from({length:30},(_,i)=>`${i+1}`)
+      : ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+
+    const base = todosACs.length * 3.2;
+    const data  = labels.map(() => +(base*(0.55+Math.random()*.9)).toFixed(1));
+    const total = data.reduce((s,v)=>s+v,0);
+    const prom  = (total/data.length).toFixed(1);
+    const costo = (total*2.5).toFixed(0);
+
+    document.getElementById('kpiPTotal').textContent  = total.toFixed(1);
+    document.getElementById('kpiPProm').textContent   = prom;
+    document.getElementById('kpiPCosto').textContent  = `$${Number(costo).toLocaleString('es-MX')}`;
+
+    if (chGeneral) chGeneral.destroy();
+    chGeneral = new Chart(document.getElementById('chartGeneral'), {
+      type: 'line',
+      data: { labels, datasets: [{
+        label: 'kWh', data,
+        borderColor:'#1A75FF', backgroundColor:'rgba(26,117,255,.07)',
+        borderWidth:2.5, pointRadius: periodo==='mes'?2:4,
+        pointBackgroundColor:'#1A75FF', fill:true, tension:.4
+      }]},
+      options: {
+        responsive:true,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},
+        scales:{
+          y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},
+          x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}}
+        }
+      }
+    });
+
+    // Donut
+    const enc  = todosACs.filter(a=>a.estado==='encendido').length   || 1;
+    const apag = todosACs.filter(a=>a.estado==='apagado').length     || 1;
+    const mant = todosACs.filter(a=>a.estado==='mantenimiento').length;
+    if (chDonut) chDonut.destroy();
+    chDonut = new Chart(document.getElementById('chartDonut'), {
+      type:'doughnut',
+      data:{labels:['Encendidos','Apagados','Mantenimiento'],datasets:[{data:[enc,apag,mant],backgroundColor:['#1A75FF','#DDE5F4','#F59E0B'],borderWidth:0,hoverOffset:6}]},
+      options:{cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11},color:'#3D5280',boxWidth:12,padding:14}}}}
+    });
+
+    // Barras horizontales por aula
+    const aulasMap = {};
+    todosACs.forEach(a => { aulasMap[a.aula] = (aulasMap[a.aula]||0) + a.consumo_mes; });
+    const aulasArr = Object.entries(aulasMap).sort((a,b)=>b[1]-a[1]);
+    if (chAulas) chAulas.destroy();
+    chAulas = new Chart(document.getElementById('chartAulas'), {
+      type:'bar',
+      data:{labels:aulasArr.map(a=>a[0]),datasets:[{label:'kWh',data:aulasArr.map(a=>+a[1].toFixed(1)),backgroundColor:'#00C2A8',borderRadius:5,borderSkipped:false}]},
+      options:{
+        indexAxis:'y',responsive:true,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},
+        scales:{
+          x:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8'}},
+          y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8'}}
+        }
+      }
+    });
+  }
+
+  // ════ TAB: UPTIME ════
+  function renderUptime() {
+    const sorted = [...todosACs].sort((a,b)=>b.horas_mes-a.horas_mes);
+    const maxH = sorted[0]?.horas_mes || 1;
+    const colMap = { encendido:'#1A75FF', mantenimiento:'#F59E0B', apagado:'#DDE5F4' };
+
+    document.getElementById('uptimeList').innerHTML = sorted.map((ac,i) => {
+      const pct   = Math.min((ac.horas_mes/(30*8)*100),100).toFixed(0);
+      const rCls  = i===0?'r1':i===1?'r2':i===2?'r3':'';
+      return `<div class="uptime-item">
+        <span class="uptime-rank ${rCls}">${i+1}</span>
+        <div class="uptime-info"><div class="uptime-name">${ac.nombre}</div><div class="uptime-aula">${ac.aula}</div></div>
+        <div class="uptime-bar-wrap"><div class="uptime-bar" style="width:${(ac.horas_mes/maxH*100).toFixed(0)}%;background:${colMap[ac.estado]||'#DDE5F4'}"></div></div>
+        <div class="uptime-right"><div class="uptime-hours">${ac.horas_mes}h</div><div class="uptime-pct">${pct}%</div></div>
+      </div>`;
+    }).join('');
+
+    const dias  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    const hDia  = dias.map(() => +(todosACs.length*(2+Math.random()*4)).toFixed(0));
+    if (chUptime) chUptime.destroy();
+    chUptime = new Chart(document.getElementById('chartUptime'), {
+      type:'bar',
+      data:{labels:dias,datasets:[{label:'Horas',data:hDia,backgroundColor:'#1A75FF',borderRadius:7,borderSkipped:false}]},
+      options:{
+        responsive:true,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} h encendido`}}},
+        scales:{
+          y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},
+          x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}}
+        }
+      }
+    });
+  }
+
+  function showToast(msg, type='info') {
+    const icons = {success:'circle-check',info:'circle-info'};
+    const wrap = document.getElementById('toastWrap');
+    const t = document.createElement('div');
+    t.className = `toast ${type}`;
+    t.innerHTML = `<i class="fa-solid fa-${icons[type]||'circle-info'}"></i> ${msg}`;
+    wrap.appendChild(t);
+    setTimeout(()=>t.remove(), 3000);
+  }
+</script>
+</body>
+</html>
