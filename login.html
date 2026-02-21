@@ -281,6 +281,61 @@
     .toast.success { background: var(--success); }
     .toast.error   { background: var(--danger); }
     .toast.info    { background: var(--azul); }
+  
+    /* ══ PRELOADER ══ */
+    #simgeca-preloader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #003B8E;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 1.5rem;
+      transition: opacity .5s ease, visibility .5s ease;
+    }
+    #simgeca-preloader.fade-out {
+      opacity: 0; visibility: hidden;
+    }
+    .pre-logo {
+      display: flex; flex-direction: column; align-items: center; gap: .6rem;
+    }
+    .pre-icon {
+      width: 64px; height: 64px;
+      background: rgba(255,255,255,.1);
+      border: 1.5px solid rgba(255,255,255,.2);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.75rem; color: #00C2A8;
+      animation: pre-pulse 1.8s ease-in-out infinite;
+    }
+    .pre-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.5rem; font-weight: 800;
+      color: #fff; letter-spacing: -.5px;
+    }
+    .pre-sub {
+      font-size: .68rem; color: rgba(255,255,255,.35);
+      text-transform: uppercase; letter-spacing: .1em;
+    }
+    .pre-bar-wrap {
+      width: 180px; height: 3px;
+      background: rgba(255,255,255,.12);
+      border-radius: 99px; overflow: hidden;
+    }
+    .pre-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, #00C2A8, #1A75FF);
+      border-radius: 99px;
+      animation: pre-load 1.6s cubic-bezier(.4,0,.2,1) forwards;
+    }
+    @keyframes pre-load {
+      0%   { width: 0%; }
+      60%  { width: 75%; }
+      100% { width: 100%; }
+    }
+    @keyframes pre-pulse {
+      0%, 100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(0,194,168,.3); }
+      50%       { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(0,194,168,0); }
+    }
+
   </style>
 </head>
 <body>
@@ -512,5 +567,17 @@
       return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
     }
   </script>
+
+  <!-- Preloader dismiss -->
+  <script>
+    (function(){
+      var el = document.getElementById('simgeca-preloader');
+      if(!el) return;
+      function dismiss(){ el.classList.add('fade-out'); setTimeout(function(){ el.remove(); }, 550); }
+      if(document.readyState === 'complete'){ setTimeout(dismiss, 400); }
+      else { window.addEventListener('load', function(){ setTimeout(dismiss, 400); }); }
+    })();
+  </script>
+
 </body>
 </html>
