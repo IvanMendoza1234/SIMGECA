@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIMGECA — Control AC</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --azul:       #003B8E;
+      --azul-mid:   #0057CC;
+      --azul-light: #1A75FF;
+      --azul-pale:  #E8F0FE;
+      --accent:     #00C2A8;
+      --danger:     #EF4444;
+      --success:    #10B981;
+      --warning:    #F59E0B;
+      --bg:         #F0F4FA;
+      --surface:    #FFFFFF;
+      --surface2:   #F8FAFF;
+      --text:       #0D1B3E;
+      --text-mid:   #3D5280;
+      --text-light: #7A90B8;
+      --border:     #DDE5F4;
+      --sidebar-w:  265px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    /* PRELOADER */
+    #simgeca-preloader { position: fixed; inset: 0; z-index: 9999; background: #003B8E; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; transition: opacity .5s ease, visibility .5s ease; }
+    #simgeca-preloader.fade-out { opacity: 0; visibility: hidden; }
+    .pre-logo { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
+    .pre-icon { width: 64px; height: 64px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: #00C2A8; animation: pre-pulse 1.8s ease-in-out infinite; }
+    .pre-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .pre-sub { font-size: .68rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .1em; }
+    .pre-bar-wrap { width: 180px; height: 3px; background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden; }
+    .pre-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00C2A8, #1A75FF); border-radius: 99px; animation: pre-load 1.6s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes pre-load { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
+    @keyframes pre-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,194,168,.3)} 50%{transform:scale(1.06);box-shadow:0 0 0 12px rgba(0,194,168,0)} }
+
+    /* SIDEBAR */
+    .sidebar { width: var(--sidebar-w); background: var(--azul); min-height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
+    .sidebar-logo { padding: 1.5rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-row { display: flex; align-items: center; gap: .7rem; }
+    .logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .logo-sub  { font-size: .62rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
+    .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
+    .nav-section { font-size: .6rem; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: .85rem 1.25rem .3rem; }
+    .nav-item { display: flex; align-items: center; gap: .7rem; padding: .65rem 1.25rem; color: rgba(255,255,255,.55); font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; border-left: 3px solid transparent; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+    .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--accent); }
+    .nav-item i { width: 17px; text-align: center; font-size: .9rem; }
+    .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 700; padding: .12rem .42rem; border-radius: 20px; display: none; }
+    .sidebar-footer { padding: .9rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .user-card { display: flex; align-items: center; gap: .65rem; }
+    .user-avatar { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: .8rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: .68rem; color: rgba(255,255,255,.38); }
+    .btn-logout { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35); font-size: .88rem; padding: .25rem; border-radius: 6px; transition: color .2s; }
+    .btn-logout:hover { color: var(--danger); }
+
+    /* MAIN */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: .9rem 1.75rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; gap: 1rem; flex-wrap: wrap; }
+    .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
+    .topbar-right { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; }
+    .chip-reloj { display: flex; align-items: center; gap: .4rem; background: var(--azul-pale); border: 1.5px solid #C5D8FF; border-radius: 8px; padding: .35rem .8rem; font-size: .8rem; font-weight: 600; color: var(--azul); font-variant-numeric: tabular-nums; white-space: nowrap; }
+    .btn-global-apag { display: flex; align-items: center; gap: .45rem; padding: .5rem 1rem; background: #FEE2E2; border: 1.5px solid #FECACA; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600; color: #991B1B; cursor: pointer; transition: all .2s; }
+    .btn-global-apag:hover { background: #FECACA; }
+    .btn-global-enc { display: flex; align-items: center; gap: .45rem; padding: .5rem 1rem; background: #D1FAE5; border: 1.5px solid #A7F3D0; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600; color: #065F46; cursor: pointer; transition: all .2s; }
+    .btn-global-enc:hover { background: #A7F3D0; }
+
+    .page-content { padding: 1.5rem 1.75rem; flex: 1; }
+
+    /* KPIs */
+    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .kpi-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1rem 1.25rem; display: flex; align-items: center; gap: .9rem; }
+    .kpi-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.05rem; flex-shrink: 0; }
+    .ki-enc  { background: #D1FAE5; color: var(--success); }
+    .ki-apag { background: var(--surface2); color: var(--text-light); border: 1.5px solid var(--border); }
+    .ki-mant { background: #FEF3C7; color: var(--warning); }
+    .ki-man  { background: var(--azul-pale); color: var(--azul); }
+    .kpi-val { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .kpi-lbl { font-size: .71rem; color: var(--text-light); margin-top: .18rem; }
+
+    /* Leyenda */
+    .leyenda { display: flex; align-items: center; gap: 1.1rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .leyenda-item { display: flex; align-items: center; gap: .4rem; font-size: .74rem; color: var(--text-mid); font-weight: 500; }
+    .ley-dot { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+    .ld-enc  { background: var(--success); }
+    .ld-apag { background: #CBD5E1; }
+    .ld-mant { background: var(--warning); }
+    .ld-forz { background: var(--azul-light); }
+    .ld-sin  { background: var(--surface2); border: 1.5px dashed var(--border); }
+    .ley-sep { width: 1px; height: 14px; background: var(--border); }
+
+    /* Edificio */
+    .edificio-section { margin-bottom: 2rem; }
+    .edificio-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; }
+    .edificio-pill { display: flex; align-items: center; gap: .5rem; background: var(--azul); color: #fff; border-radius: 10px; padding: .42rem 1rem; font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; }
+    .edificio-count { font-size: .7rem; opacity: .65; font-weight: 500; }
+    .edificio-line { flex: 1; height: 1.5px; background: var(--border); }
+    .piso-label { font-size: .69rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; margin-top: .25rem; }
+
+    /* Grid de rooms */
+    .mapa-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(165px, 1fr)); gap: .75rem; margin-bottom: 1rem; }
+
+    /* Room block */
+    .room-block {
+      position: relative; border-radius: 14px; border: 2px solid var(--border);
+      overflow: hidden; cursor: pointer; min-height: 138px;
+      display: flex; flex-direction: column; background: var(--surface);
+      transition: all .22s cubic-bezier(.4,0,.2,1);
+      animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+    .room-block:hover { transform: translateY(-3px); box-shadow: 0 8px 28px rgba(0,59,142,.12); border-color: var(--azul-light); }
+    .room-block.st-enc  { border-color: rgba(16,185,129,.45);  background: #F0FDF8; }
+    .room-block.st-apag { border-color: var(--border); }
+    .room-block.st-mant { border-color: rgba(245,158,11,.45); background: #FFFDF0; }
+    .room-block.st-fenc { border-color: rgba(26,117,255,.5); background: #EFF6FF; }
+    .room-block.st-fapag{ border-color: rgba(239,68,68,.4);  background: #FFF5F5; }
+    .room-block.st-sin  { border-style: dashed; opacity: .72; }
+
+    /* Barra coloreada arriba */
+    .room-bar { height: 5px; flex-shrink: 0; transition: background .4s; }
+    .rb-enc  { background: linear-gradient(90deg,#10B981,#34D399); }
+    .rb-apag { background: var(--border); }
+    .rb-mant { background: linear-gradient(90deg,#F59E0B,#FBBF24); }
+    .rb-fenc { background: linear-gradient(90deg,#00C2A8,#1A75FF); }
+    .rb-fapag{ background: linear-gradient(90deg,#EF4444,#F87171); }
+    .rb-sin  { background: var(--border); }
+
+    /* Dot pulsante */
+    .room-dot { position: absolute; top: 12px; right: 12px; width: 9px; height: 9px; border-radius: 50%; background: #CBD5E1; transition: background .4s; }
+    .room-block.st-enc  .room-dot,
+    .room-block.st-fenc .room-dot { background: var(--success); animation: dotP 1.8s ease-in-out infinite; }
+    .room-block.st-mant .room-dot { background: var(--warning); }
+    .room-block.st-fapag .room-dot { background: var(--danger); }
+    @keyframes dotP { 0%,100%{box-shadow:0 0 0 0 rgba(16,185,129,.5)} 60%{box-shadow:0 0 0 6px rgba(16,185,129,0)} }
+
+    .room-inner { padding: .72rem .85rem .65rem; display: flex; flex-direction: column; flex: 1; }
+    .room-nombre { font-family: 'Syne', sans-serif; font-size: .91rem; font-weight: 800; color: var(--text); margin-bottom: .1rem; line-height: 1.2; }
+    .room-tipo   { font-size: .66rem; color: var(--text-light); margin-bottom: .55rem; }
+    .room-temp   { display: flex; align-items: center; gap: .28rem; font-size: .77rem; font-weight: 700; color: var(--azul); margin-bottom: .45rem; }
+    .room-temp i { font-size: .65rem; }
+    .room-ac-chip { display: flex; align-items: center; gap: .28rem; font-size: .68rem; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: .18rem .52rem; width: fit-content; max-width: 100%; }
+    .room-ac-chip span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .room-ac-chip.sin { color: var(--text-light); border-style: dashed; }
+    .room-est-lbl { margin-top: auto; padding-top: .45rem; font-size: .64rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+    .lbl-enc  { color: var(--success); }
+    .lbl-apag { color: var(--text-light); }
+    .lbl-mant { color: var(--warning); }
+    .lbl-fenc { color: var(--azul-light); }
+    .lbl-fapag{ color: var(--danger); }
+    .lbl-sin  { color: var(--border); }
+
+    /* PANEL LATERAL */
+    .panel-overlay { position: fixed; inset: 0; background: rgba(13,27,62,.38); backdrop-filter: blur(3px); z-index: 150; display: none; }
+    .panel-overlay.open { display: block; }
+    .panel {
+      position: fixed; top: 0; right: -480px; width: 460px; max-width: 96vw;
+      height: 100vh; background: var(--surface);
+      box-shadow: -8px 0 40px rgba(0,0,0,.15);
+      z-index: 151; display: flex; flex-direction: column;
+      transition: right .35s cubic-bezier(.4,0,.2,1); overflow: hidden;
+    }
+    .panel.open { right: 0; }
+
+    .panel-header { padding: 1.2rem 1.5rem; display: flex; align-items: flex-start; justify-content: space-between; border-bottom: 1px solid var(--border); }
+    .panel-nombre { font-family: 'Syne', sans-serif; font-size: 1.12rem; font-weight: 800; color: var(--text); }
+    .panel-sub    { font-size: .74rem; color: var(--text-light); margin-top: .18rem; }
+    .panel-close  { width: 34px; height: 34px; background: var(--surface2); border: none; border-radius: 9px; cursor: pointer; color: var(--text-light); font-size: .95rem; display: flex; align-items: center; justify-content: center; transition: all .15s; margin-left: .75rem; flex-shrink: 0; }
+    .panel-close:hover { background: #FEE2E2; color: var(--danger); }
+
+    .panel-body { flex: 1; overflow-y: auto; padding: 1.2rem 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; }
+
+    /* Status en panel */
+    .panel-status { border-radius: 12px; padding: 1rem 1.1rem; display: flex; align-items: center; gap: .85rem; transition: all .4s; }
+    .pst-enc  { background: #ECFDF5; border: 1.5px solid #A7F3D0; }
+    .pst-apag { background: var(--surface2); border: 1.5px solid var(--border); }
+    .pst-mant { background: #FFFBEB; border: 1.5px solid #FCD34D; }
+    .pst-fenc { background: #EFF6FF; border: 1.5px solid #93C5FD; }
+    .pst-fapag{ background: #FFF5F5; border: 1.5px solid #FECACA; }
+    .ps-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
+    .psi-enc  { background: #D1FAE5; color: var(--success); }
+    .psi-apag { background: var(--surface2); color: var(--text-light); border: 1.5px solid var(--border); }
+    .psi-mant { background: #FEF3C7; color: var(--warning); }
+    .psi-fenc { background: #DBEAFE; color: var(--azul-light); }
+    .psi-fapag{ background: #FEE2E2; color: var(--danger); }
+    .ps-dot-b { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .pdb-enc  { background: var(--success); animation: dotP 1.8s ease-in-out infinite; }
+    .pdb-apag { background: var(--border); }
+    .pdb-mant { background: var(--warning); }
+    .pdb-fenc { background: var(--azul-light); animation: dotP 1.8s ease-in-out infinite; }
+    .pdb-fapag{ background: var(--danger); }
+    .ps-lbl   { font-size: .93rem; font-weight: 700; color: var(--text); }
+    .ps-sub   { font-size: .71rem; color: var(--text-light); margin-top: .06rem; }
+    .ps-acn   { font-size: .73rem; color: var(--text-mid); font-weight: 500; margin-top: .18rem; }
+
+    .sec-tit { font-size: .67rem; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem; padding-bottom: .32rem; border-bottom: 1px solid var(--border); }
+
+    /* Botones control */
+    .ctrl-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: .5rem; }
+    .ctrl-btn {
+      display: flex; flex-direction: column; align-items: center; gap: .38rem;
+      padding: .82rem .4rem; border-radius: 11px; border: 1.5px solid var(--border);
+      background: var(--surface2); cursor: pointer; font-family: 'DM Sans', sans-serif;
+      font-size: .77rem; font-weight: 600; color: var(--text-mid); transition: all .2s;
+    }
+    .ctrl-btn i { font-size: 1.12rem; }
+    .ctrl-btn:hover:not(:disabled) { border-color: var(--azul-light); color: var(--azul); background: var(--azul-pale); transform: translateY(-1px); }
+    .ctrl-btn:disabled { opacity: .38; cursor: not-allowed; transform: none !important; }
+    .ctrl-btn.sel-enc  { background: #D1FAE5; border-color: #6EE7B7; color: #065F46; }
+    .ctrl-btn.sel-enc i { color: var(--success); }
+    .ctrl-btn.sel-apag { background: #FEE2E2; border-color: #FECACA; color: #991B1B; }
+    .ctrl-btn.sel-apag i { color: var(--danger); }
+    .ctrl-btn.sel-auto { background: var(--azul-pale); border-color: #93C5FD; color: var(--azul); }
+    .ctrl-btn.sel-auto i { color: var(--azul-light); }
+
+    /* Temperatura */
+    .temp-ctrl { display: flex; align-items: center; gap: .85rem; }
+    .temp-btn  { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; color: var(--text-mid); transition: all .15s; flex-shrink: 0; }
+    .temp-btn:hover:not(:disabled) { border-color: var(--azul-light); color: var(--azul); background: var(--azul-pale); }
+    .temp-btn:disabled { opacity: .38; cursor: not-allowed; }
+    .temp-disp { flex: 1; text-align: center; }
+    .temp-num  { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .temp-unit { font-size: .78rem; color: var(--text-light); margin-top: .12rem; }
+    .temp-slider { width: 100%; margin-top: .55rem; -webkit-appearance: none; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--azul-light) var(--pct,50%), var(--border) var(--pct,50%)); outline: none; cursor: pointer; }
+    .temp-slider:disabled { cursor: not-allowed; opacity: .4; }
+    .temp-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--azul); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,59,142,.3); cursor: pointer; }
+    .temp-range-row { display: flex; justify-content: space-between; font-size: .66rem; color: var(--text-light); margin-top: .3rem; }
+
+    /* Programación */
+    .prog-toggle-row { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: .75rem; }
+    .ios-toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+    .ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .ios-sl { position: absolute; inset: 0; background: #CBD5E1; border-radius: 24px; transition: background .2s; }
+    .ios-sl::before { content:''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
+    .ios-toggle input:checked + .ios-sl { background: var(--success); }
+    .ios-toggle input:checked + .ios-sl::before { transform: translateX(20px); }
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+    .form-group { display: flex; flex-direction: column; gap: .28rem; }
+    .form-label { font-size: .72rem; font-weight: 700; color: var(--text-mid); }
+    .form-input { padding: .58rem .85rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface2); font-family: 'DM Sans', sans-serif; font-size: .88rem; color: var(--text); outline: none; transition: border-color .2s; }
+    .form-input:focus { border-color: var(--azul-light); box-shadow: 0 0 0 3px rgba(26,117,255,.1); background: #fff; }
+    .form-input:disabled { opacity: .45; cursor: not-allowed; }
+    .form-hint { font-size: .67rem; color: var(--text-light); grid-column: 1/-1; }
+
+    /* Info pills */
+    .info-pills { display: flex; flex-wrap: wrap; gap: .45rem; }
+    .info-pill { display: flex; align-items: center; gap: .3rem; font-size: .71rem; font-weight: 500; color: var(--text-mid); background: var(--surface2); border: 1px solid var(--border); border-radius: 7px; padding: .28rem .68rem; }
+    .info-pill i { font-size: .63rem; color: var(--text-light); }
+
+    /* Panel footer */
+    .panel-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border); display: flex; gap: .6rem; justify-content: flex-end; }
+    .btn-cancel { padding: .55rem 1.1rem; background: var(--surface2); border: 1.5px solid var(--border); border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: var(--text-mid); cursor: pointer; }
+    .btn-save   { display: flex; align-items: center; gap: .4rem; padding: .55rem 1.25rem; background: var(--azul); border: none; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #fff; cursor: pointer; transition: background .2s; }
+    .btn-save:hover { background: var(--azul-mid); }
+    .btn-save:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* Empty */
+    .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-light); }
+    .empty-state i { font-size: 2.5rem; margin-bottom: .75rem; display: block; opacity: .3; }
+    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1.1rem; color: var(--text-mid); margin-bottom: .4rem; }
+    .empty-state p { font-size: .83rem; }
+
+    /* Toast */
+    .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
+    .toast { padding: .7rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: .55rem; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: fadeUp .3s ease; max-width: 300px; }
+    .toast.success { background: var(--success); }
+    .toast.error   { background: var(--danger); }
+    .toast.info    { background: var(--azul); }
+
+    @media (max-width:960px){ .kpi-row{ grid-template-columns:1fr 1fr; } }
+    @media (max-width:600px){ .kpi-row{ grid-template-columns:1fr; } .mapa-grid{ grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); } .panel{ width:100%; max-width:100%; } }
+  </style>
+</head>
+<body>
+
+<!-- PRELOADER -->
+<div id="simgeca-preloader">
+  <div class="pre-logo">
+    <div class="pre-icon"><i class="fa-solid fa-wind"></i></div>
+    <div><div class="pre-title">SIMGECA</div><div class="pre-sub">Sistema de Gestión de Clima</div></div>
+  </div>
+  <div class="pre-bar-wrap"><div class="pre-bar"></div></div>
+</div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="fa-solid fa-wind"></i></div>
+      <div><div class="logo-text">SIMGECA</div><div class="logo-sub">TecNM — Lázaro Cárdenas</div></div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-house"></i> Inicio</a>
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item" href="acs.html"><i class="fa-solid fa-snowflake"></i> Aires Acondicionados</a>
+    <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
+    <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
+    <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
+      <span class="nav-badge" id="navBadgeSol">0</span></a>
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
+    <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item active" href="control.html"><i class="fa-solid fa-sliders"></i> Control AC</a>
+    <a class="nav-item" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Administrador</div>
+        <div class="user-role">Admin del sistema</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()"><i class="fa-solid fa-right-from-bracket"></i></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left">
+      <h1>Control AC</h1>
+      <p>Mapa de aulas — control en tiempo real</p>
+    </div>
+    <div class="topbar-right">
+      <div class="chip-reloj"><i class="fa-regular fa-clock"></i><span id="reloj">--:--:--</span></div>
+      <button class="btn-global-enc"  onclick="accionGlobal('encendido')"><i class="fa-solid fa-power-off"></i> Encender todos</button>
+      <button class="btn-global-apag" onclick="accionGlobal('apagado')"><i class="fa-solid fa-circle"></i> Apagar todos</button>
+    </div>
+  </header>
+
+  <div class="page-content">
+    <div class="kpi-row">
+      <div class="kpi-card"><div class="kpi-icon ki-enc"><i class="fa-solid fa-power-off"></i></div><div><div class="kpi-val" id="kpiEnc">—</div><div class="kpi-lbl">Encendidos</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-apag"><i class="fa-solid fa-circle"></i></div><div><div class="kpi-val" id="kpiApag">—</div><div class="kpi-lbl">Apagados</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-mant"><i class="fa-solid fa-wrench"></i></div><div><div class="kpi-val" id="kpiMant">—</div><div class="kpi-lbl">Mantenimiento</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-man"><i class="fa-solid fa-hand"></i></div><div><div class="kpi-val" id="kpiManual">—</div><div class="kpi-lbl">Modo manual</div></div></div>
+    </div>
+
+    <div class="leyenda">
+      <div class="leyenda-item"><div class="ley-dot ld-enc"></div> Encendido (auto)</div>
+      <div class="leyenda-item"><div class="ley-dot ld-apag"></div> Apagado (auto)</div>
+      <div class="leyenda-item"><div class="ley-dot ld-mant"></div> Mantenimiento</div>
+      <div class="ley-sep"></div>
+      <div class="leyenda-item"><div class="ley-dot ld-forz"></div> Forzado manual</div>
+      <div class="leyenda-item"><div class="ley-dot ld-sin"></div> Sin AC asignado</div>
+    </div>
+
+    <div id="mapaContainer">
+      <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Cargando mapa...</h3><p>Conectando con Firestore</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- PANEL -->
+<div class="panel-overlay" id="panelOverlay" onclick="cerrarPanel()"></div>
+<div class="panel" id="panel">
+  <div class="panel-header">
+    <div>
+      <div class="panel-nombre" id="panelNombre">Aula</div>
+      <div class="panel-sub"    id="panelSub">—</div>
+    </div>
+    <button class="panel-close" onclick="cerrarPanel()"><i class="fa-solid fa-xmark"></i></button>
+  </div>
+
+  <div class="panel-body">
+    <!-- Estado -->
+    <div>
+      <div class="sec-tit">Estado actual</div>
+      <div class="panel-status" id="panelStatus">
+        <div class="ps-ico" id="psIco"><i class="fa-solid fa-snowflake"></i></div>
+        <div style="flex:1">
+          <div class="ps-lbl" id="psLbl">—</div>
+          <div class="ps-sub" id="psSub">—</div>
+          <div class="ps-acn" id="psAcn">—</div>
+        </div>
+        <div class="ps-dot-b" id="psDot"></div>
+      </div>
+    </div>
+
+    <!-- Control manual -->
+    <div>
+      <div class="sec-tit">Control manual</div>
+      <div class="ctrl-btns">
+        <button class="ctrl-btn" id="btnEnc"  onclick="setPanelModo('encendido')"><i class="fa-solid fa-power-off"></i>Encender</button>
+        <button class="ctrl-btn" id="btnApag" onclick="setPanelModo('apagado')"><i class="fa-solid fa-circle"></i>Apagar</button>
+        <button class="ctrl-btn" id="btnAuto" onclick="setPanelModo('auto')"><i class="fa-solid fa-rotate"></i>Automático</button>
+      </div>
+    </div>
+
+    <!-- Temperatura -->
+    <div>
+      <div class="sec-tit">Temperatura objetivo</div>
+      <div class="temp-ctrl">
+        <button class="temp-btn" id="btnTMenos" onclick="cambiarTemp(-1)"><i class="fa-solid fa-minus"></i></button>
+        <div class="temp-disp">
+          <div class="temp-num" id="tempNum">24</div>
+          <div class="temp-unit">°C</div>
+        </div>
+        <button class="temp-btn" id="btnTMas" onclick="cambiarTemp(+1)"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <input type="range" class="temp-slider" id="tempSlider" min="16" max="30" value="24" oninput="onSlider(this.value)"/>
+      <div class="temp-range-row"><span>16 °C (mín)</span><span>30 °C (máx)</span></div>
+    </div>
+
+    <!-- Programación -->
+    <div>
+      <div class="sec-tit">Programación de encendido</div>
+      <div class="prog-toggle-row">
+        <label class="ios-toggle">
+          <input type="checkbox" id="progActivo" onchange="onProgToggle()"/>
+          <span class="ios-sl"></span>
+        </label>
+        Activar programación manual
+      </div>
+      <div class="time-grid">
+        <div class="form-group">
+          <label class="form-label">Hora de encendido</label>
+          <input type="time" class="form-input" id="horaEnc" disabled/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora de apagado</label>
+          <input type="time" class="form-input" id="horaApag" disabled/>
+        </div>
+        <span class="form-hint"><i class="fa-solid fa-circle-info" style="color:var(--azul-light)"></i> La programación sobrescribe el horario institucional solo para este equipo.</span>
+      </div>
+    </div>
+
+    <!-- Info aula -->
+    <div>
+      <div class="sec-tit">Información del aula</div>
+      <div class="info-pills" id="infoPills"></div>
+    </div>
+  </div>
+
+  <div class="panel-footer">
+    <button class="btn-cancel" onclick="cerrarPanel()">Cancelar</button>
+    <button class="btn-save" id="btnGuardar" onclick="guardarCambios()">
+      <i class="fa-solid fa-floppy-disk"></i> Guardar cambios
+    </button>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
+    authDomain: "simgeca-26297.firebaseapp.com",
+    projectId: "simgeca-26297",
+    storageBucket: "simgeca-26297.firebasestorage.app",
+    messagingSenderId: "28195458236",
+    appId: "1:28195458236:web:9250f82b845665d82cd4b9"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var auth = firebase.auth();
+  var db   = firebase.firestore();
+
+  var todasAulas = [], todosACs = [];
+  var panelAula  = null, panelAC = null;
+  var panelModo  = 'auto', panelTemp = 24;
+
+  /* AUTH */
+  auth.onAuthStateChanged(function(user){
+    if (!user){ window.location.replace('login.html'); return; }
+    var nom = user.displayName || user.email;
+    document.getElementById('userName').textContent   = nom;
+    document.getElementById('userAvatar').textContent = nom.charAt(0).toUpperCase();
+    cargarDatos();
+    badgeSolicitudes();
+  });
+  function doLogout(){ auth.signOut().then(function(){ window.location.replace('login.html'); }); }
+
+  /* RELOJ */
+  function tick(){
+    var n = new Date();
+    document.getElementById('reloj').textContent =
+      String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+    if(n.getSeconds()===0) renderMapa();
+  }
+  setInterval(tick,1000); tick();
+
+  /* BADGE */
+  function badgeSolicitudes(){
+    db.collection('solicitudes').where('estado','==','pendiente').onSnapshot(function(s){
+      var b=document.getElementById('navBadgeSol');
+      if(s.size>0){b.textContent=s.size;b.style.display='inline-block';}else b.style.display='none';
+    });
+  }
+
+  /* CARGAR DATOS */
+  function cargarDatos(){
+    db.collection('aires_acondicionados').onSnapshot(function(snapAC){
+      todosACs=[];
+      snapAC.forEach(function(d){ var x=Object.assign({id:d.id},d.data()); if(!x.dado_de_baja) todosACs.push(x); });
+      db.collection('aulas').orderBy('nombre').onSnapshot(function(snapA){
+        todasAulas=[];
+        snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id},d.data())); });
+        renderMapa();
+        if(panelAula){ var a=todasAulas.find(function(x){return x.id===panelAula.id;}); if(a) actualizarPanelStatus(a); }
+      });
+    });
+  }
+
+  /* HORARIO */
+  function horarioEstado(turno){
+    var n=new Date(), dia=n.getDay(), t=turno||'ambos', hm=n.getHours()*60+n.getMinutes(), H=[];
+    if([1,2,4,5].indexOf(dia)!==-1) H.push({t:'matutino',  i:6*60+45, f:13*60});
+    if(dia===3)                      H.push({t:'matutino',  i:8*60+45, f:13*60});
+    if([1,2,3,4].indexOf(dia)!==-1) H.push({t:'vespertino',i:13*60+45,f:20*60});
+    if(dia===5)                      H.push({t:'vespertino',i:15*60+45,f:20*60});
+    if(dia===6)                      H.push({t:'matutino',  i:7*60+45, f:13*60});
+    for(var i=0;i<H.length;i++){ if((t==='ambos'||t===H[i].t||t==='')&&hm>=H[i].i&&hm<H[i].f) return 'encendido'; }
+    return 'apagado';
+  }
+
+  /* ESTADO REAL */
+  function estadoReal(ac){
+    if(!ac) return {est:'sin', manual:false};
+    if(ac.estado==='mantenimiento') return {est:'mant', manual:false};
+    var prog=ac.programacion||{};
+    if(prog.activado){
+      var hm=new Date().getHours()*60+new Date().getMinutes();
+      var p=function(s){if(!s)return null;var x=s.split(':');return parseInt(x[0])*60+parseInt(x[1]);};
+      var ei=p(prog.horaEncendido), ai=p(prog.horaApagado);
+      if(ei!==null&&ai!==null){
+        var on=(ei<ai)?(hm>=ei&&hm<ai):(hm>=ei||hm<ai);
+        return {est:on?'enc':'apag', manual:true, forzado:'prog'};
+      }
+    }
+    var modo=ac.modoControl||'auto';
+    if(modo==='encendido') return {est:'enc', manual:true, forzado:'btn'};
+    if(modo==='apagado')   return {est:'apag',manual:true, forzado:'btn'};
+    return {est:horarioEstado(ac.turno)==='encendido'?'enc':'apag', manual:false};
+  }
+
+  /* KPIs */
+  function actualizarKPIs(){
+    var enc=0,apag=0,mant=0,manual=0;
+    todosACs.forEach(function(ac){
+      var r=estadoReal(ac);
+      if(r.est==='enc') enc++; else if(r.est==='apag') apag++; else if(r.est==='mant') mant++;
+      if(r.manual) manual++;
+    });
+    document.getElementById('kpiEnc').textContent=enc;
+    document.getElementById('kpiApag').textContent=apag;
+    document.getElementById('kpiMant').textContent=mant;
+    document.getElementById('kpiManual').textContent=manual;
+  }
+
+  /* RENDER MAPA */
+  function renderMapa(){
+    actualizarKPIs();
+    var cont=document.getElementById('mapaContainer');
+    if(!todasAulas.length){
+      cont.innerHTML='<div class="empty-state"><i class="fa-solid fa-school"></i><h3>Sin aulas registradas</h3><p>Registra aulas en el módulo Aulas y Turnos.</p></div>';
+      return;
+    }
+    // Agrupar por edificio → piso
+    var edifs={};
+    todasAulas.forEach(function(a){
+      var e=a.edificio||'Sin edificio', p=a.piso||'Planta baja';
+      if(!edifs[e]) edifs[e]={};
+      if(!edifs[e][p]) edifs[e][p]=[];
+      edifs[e][p].push(a);
+    });
+    var html='';
+    var globalIdx=0;
+    Object.keys(edifs).sort().forEach(function(edif,ei){
+      var pisos=edifs[edif];
+      var total=Object.values(pisos).reduce(function(s,a){return s+a.length;},0);
+      html+='<div class="edificio-section">';
+      html+='<div class="edificio-header"><div class="edificio-pill"><i class="fa-solid fa-building"></i>'+edif+'<span class="edificio-count">· '+total+' aula(s)</span></div><div class="edificio-line"></div></div>';
+      var multiPiso=Object.keys(pisos).length>1;
+      Object.keys(pisos).sort().forEach(function(piso){
+        if(multiPiso) html+='<div class="piso-label"><i class="fa-solid fa-layer-group" style="margin-right:.35rem"></i>'+piso+'</div>';
+        html+='<div class="mapa-grid">';
+        pisos[piso].forEach(function(aula){
+          var ac=todosACs.find(function(a){return a.aula===aula.nombre||a.aula_id===aula.id;});
+          var r=estadoReal(ac);
+          var stMap={
+            enc:  {blk:'st-enc',  bar:'rb-enc',  lbl:'Encendido',           lcls:'lbl-enc'},
+            apag: {blk:'st-apag', bar:'rb-apag', lbl:'Apagado',             lcls:'lbl-apag'},
+            mant: {blk:'st-mant', bar:'rb-mant', lbl:'Mantenimiento',       lcls:'lbl-mant'},
+            sin:  {blk:'st-sin',  bar:'rb-sin',  lbl:'Sin AC',              lcls:'lbl-sin'}
+          };
+          var st=stMap[r.est]||stMap.apag;
+          // Sobreescribir si es manual
+          if(r.manual&&r.forzado==='btn'){
+            if(r.est==='enc')  st={blk:'st-fenc',  bar:'rb-fenc',  lbl:'Encendido · Manual', lcls:'lbl-fenc'};
+            if(r.est==='apag') st={blk:'st-fapag', bar:'rb-fapag', lbl:'Apagado · Manual',   lcls:'lbl-fapag'};
+          }
+          var temp=ac&&ac.temperatura?ac.temperatura+'°C':'';
+          var delay=(globalIdx*0.04)+'s'; globalIdx++;
+          html+=[
+            '<div class="room-block '+st.blk+'" onclick="abrirPanel(\''+aula.id+'\')" style="animation-delay:'+delay+'">',
+              '<div class="room-bar '+st.bar+'"></div>',
+              '<div class="room-dot"></div>',
+              '<div class="room-inner">',
+                '<div class="room-nombre">'+(aula.nombre||'—')+'</div>',
+                '<div class="room-tipo">'+(aula.tipo||'')+'</div>',
+                temp?'<div class="room-temp"><i class="fa-solid fa-temperature-half"></i>'+temp+'</div>':'',
+                ac?'<div class="room-ac-chip"><i class="fa-solid fa-snowflake" style="font-size:.58rem;color:var(--azul-light)"></i><span>'+ac.nombre+'</span></div>'
+                  :'<div class="room-ac-chip sin"><i class="fa-solid fa-circle-xmark" style="font-size:.58rem"></i><span>Sin AC</span></div>',
+                '<div class="room-est-lbl '+st.lcls+'">'+st.lbl+'</div>',
+              '</div>',
+            '</div>'
+          ].join('');
+        });
+        html+='</div>';
+      });
+      html+='</div>';
+    });
+    cont.innerHTML=html;
+  }
+
+  /* PANEL ABRIR */
+  function abrirPanel(aulaId){
+    var aula=todasAulas.find(function(a){return a.id===aulaId;});
+    if(!aula) return;
+    var ac=todosACs.find(function(a){return a.aula===aula.nombre||a.aula_id===aula.id;});
+    panelAula=aula; panelAC=ac||null;
+
+    document.getElementById('panelNombre').textContent=aula.nombre||'—';
+    document.getElementById('panelSub').textContent=[aula.tipo,aula.edificio,aula.piso].filter(Boolean).join(' · ')||'—';
+
+    panelModo=(ac&&ac.modoControl)?ac.modoControl:'auto';
+    panelTemp=(ac&&ac.temperatura)?parseInt(ac.temperatura):24;
+    document.getElementById('tempNum').textContent=panelTemp;
+    document.getElementById('tempSlider').value=panelTemp;
+    sliderFill();
+
+    var prog=(ac&&ac.programacion)?ac.programacion:{};
+    document.getElementById('progActivo').checked=!!prog.activado;
+    document.getElementById('horaEnc').value=prog.horaEncendido||'';
+    document.getElementById('horaApag').value=prog.horaApagado||'';
+    toggleTime(!!prog.activado);
+
+    var pills=[];
+    if(aula.turno)          pills.push('<div class="info-pill"><i class="fa-solid fa-clock"></i>'+aula.turno+'</div>');
+    if(aula.capacidad)      pills.push('<div class="info-pill"><i class="fa-solid fa-users"></i>'+aula.capacidad+' alumnos</div>');
+    if(aula.docente_nombre) pills.push('<div class="info-pill"><i class="fa-solid fa-chalkboard-user"></i>'+aula.docente_nombre+'</div>');
+    if(ac&&ac.btu)          pills.push('<div class="info-pill"><i class="fa-solid fa-temperature-half"></i>'+ac.btu+' BTU</div>');
+    if(ac&&ac.marca)        pills.push('<div class="info-pill"><i class="fa-solid fa-tag"></i>'+ac.marca+(ac.modelo?' '+ac.modelo:'')+'</div>');
+    if(!ac)                 pills.push('<div class="info-pill" style="color:var(--danger);border-color:#FECACA"><i class="fa-solid fa-circle-xmark"></i>Sin AC asignado</div>');
+    document.getElementById('infoPills').innerHTML=pills.join('');
+
+    var sinCtrl=!ac||ac.estado==='mantenimiento';
+    ['btnEnc','btnApag','btnAuto','btnTMenos','btnTMas'].forEach(function(id){ document.getElementById(id).disabled=sinCtrl; });
+    document.getElementById('tempSlider').disabled=sinCtrl;
+    document.getElementById('progActivo').disabled=sinCtrl;
+
+    actualizarCtrlBtns();
+    actualizarPanelStatus(aula);
+
+    document.getElementById('panelOverlay').classList.add('open');
+    document.getElementById('panel').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+
+  function actualizarPanelStatus(aula){
+    var ac=todosACs.find(function(a){return a.aula===aula.nombre||a.aula_id===aula.id;});
+    var r=estadoReal(ac);
+    var map={
+      enc: {st:'pst-enc', ic:'psi-enc', dt:'pdb-enc', lb:'Encendido', sb:'Según horario institucional'},
+      apag:{st:'pst-apag',ic:'psi-apag',dt:'pdb-apag',lb:'Apagado',  sb:'Según horario institucional'},
+      mant:{st:'pst-mant',ic:'psi-mant',dt:'pdb-mant',lb:'Mantenimiento',sb:'No disponible para control'},
+      sin: {st:'pst-apag',ic:'psi-apag',dt:'pdb-apag',lb:'Sin AC asignado',sb:'Asigna un AC desde Aulas y Turnos'}
+    };
+    var m=map[r.est]||map.apag;
+    if(r.manual&&r.forzado==='btn'){
+      if(r.est==='enc')  m={st:'pst-fenc', ic:'psi-fenc', dt:'pdb-fenc', lb:'Encendido',sb:'Forzado manualmente'};
+      if(r.est==='apag') m={st:'pst-fapag',ic:'psi-fapag',dt:'pdb-fapag',lb:'Apagado',  sb:'Forzado manualmente'};
+    }
+    if(r.manual&&r.forzado==='prog') m.sb='Según programación manual';
+    document.getElementById('panelStatus').className='panel-status '+m.st;
+    document.getElementById('psIco').className='ps-ico '+m.ic;
+    document.getElementById('psDot').className='ps-dot-b '+m.dt;
+    document.getElementById('psLbl').textContent=m.lb;
+    document.getElementById('psSub').textContent=m.sb;
+    document.getElementById('psAcn').textContent=ac?(ac.nombre+(ac.marca?' · '+ac.marca:'')):'';
+  }
+
+  function cerrarPanel(){
+    document.getElementById('panelOverlay').classList.remove('open');
+    document.getElementById('panel').classList.remove('open');
+    document.body.style.overflow='';
+    panelAula=null; panelAC=null;
+  }
+
+  /* CONTROL BTNS */
+  function setPanelModo(modo){ panelModo=modo; actualizarCtrlBtns(); }
+  function actualizarCtrlBtns(){
+    document.getElementById('btnEnc').className ='ctrl-btn'+(panelModo==='encendido'?' sel-enc':'');
+    document.getElementById('btnApag').className='ctrl-btn'+(panelModo==='apagado'  ?' sel-apag':'');
+    document.getElementById('btnAuto').className='ctrl-btn'+(panelModo==='auto'     ?' sel-auto':'');
+  }
+
+  /* TEMPERATURA */
+  function cambiarTemp(d){ panelTemp=Math.max(16,Math.min(30,panelTemp+d)); document.getElementById('tempNum').textContent=panelTemp; document.getElementById('tempSlider').value=panelTemp; sliderFill(); }
+  function onSlider(v){ panelTemp=parseInt(v); document.getElementById('tempNum').textContent=panelTemp; sliderFill(); }
+  function sliderFill(){ var p=((panelTemp-16)/(30-16))*100; document.getElementById('tempSlider').style.setProperty('--pct',p+'%'); }
+
+  /* PROGRAMACIÓN */
+  function onProgToggle(){ toggleTime(document.getElementById('progActivo').checked); }
+  function toggleTime(e){ document.getElementById('horaEnc').disabled=!e; document.getElementById('horaApag').disabled=!e; }
+
+  /* GUARDAR */
+  function guardarCambios(){
+    if(!panelAC){ showToast('Este aula no tiene AC asignado','error'); return; }
+    var btn=document.getElementById('btnGuardar');
+    btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
+    db.collection('aires_acondicionados').doc(panelAC.id).update({
+      modoControl: panelModo,
+      temperatura: panelTemp,
+      programacion:{
+        activado:      document.getElementById('progActivo').checked,
+        horaEncendido: document.getElementById('horaEnc').value,
+        horaApagado:   document.getElementById('horaApag').value
+      },
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      showToast('Cambios guardados en '+(panelAula.nombre||'el aula'),'success');
+      cerrarPanel();
+    }).catch(function(err){ showToast('Error: '+err.message,'error'); })
+    .finally(function(){ btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-floppy-disk"></i> Guardar cambios'; });
+  }
+
+  /* ACCIÓN GLOBAL */
+  function accionGlobal(modo){
+    if(!confirm(modo==='encendido'?'¿Encender TODOS los ACs disponibles?':'¿Apagar TODOS los ACs disponibles?')) return;
+    var batch=db.batch(), n=0;
+    todosACs.forEach(function(ac){
+      if(ac.estado!=='mantenimiento'){ batch.update(db.collection('aires_acondicionados').doc(ac.id),{modoControl:modo}); n++; }
+    });
+    if(!n){ showToast('No hay equipos disponibles','info'); return; }
+    batch.commit()
+      .then(function(){ showToast(n+' equipo(s) '+(modo==='encendido'?'encendidos':'apagados'),modo==='encendido'?'success':'info'); })
+      .catch(function(err){ showToast('Error: '+err.message,'error'); });
+  }
+
+  /* TOAST */
+  function showToast(msg,type){
+    var w=document.getElementById('toastWrap'),icons={success:'fa-circle-check',error:'fa-circle-xmark',info:'fa-circle-info'};
+    var t=document.createElement('div'); t.className='toast '+(type||'info');
+    t.innerHTML='<i class="fa-solid '+(icons[type]||'fa-circle-info')+'"></i> '+msg;
+    w.appendChild(t); setTimeout(function(){t.remove();},3500);
+  }
+
+  /* PRELOADER */
+  (function(){
+    var el=document.getElementById('simgeca-preloader');
+    if(!el) return;
+    function d(){ el.classList.add('fade-out'); setTimeout(function(){el.remove();},550); }
+    if(document.readyState==='complete') setTimeout(d,400);
+    else window.addEventListener('load',function(){ setTimeout(d,400); });
+  })();
+</script>
+</body>
+</html>
