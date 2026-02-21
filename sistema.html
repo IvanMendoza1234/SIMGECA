@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SIMGECA — Acerca del sistema</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <style>
+    :root {
+      --azul:       #003B8E;
+      --azul-mid:   #0057CC;
+      --azul-light: #1A75FF;
+      --azul-pale:  #E8F0FE;
+      --accent:     #00C2A8;
+      --accent-pale:#E6FAF8;
+      --danger:     #EF4444;
+      --success:    #10B981;
+      --warning:    #F59E0B;
+      --bg:         #F0F4FA;
+      --surface:    #FFFFFF;
+      --surface2:   #F8FAFF;
+      --text:       #0D1B3E;
+      --text-mid:   #3D5280;
+      --text-light: #7A90B8;
+      --border:     #DDE5F4;
+      --sidebar-w:  265px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; }
+
+    /* ══ SIDEBAR ══ */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--azul);
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      position: fixed; top: 0; left: 0; z-index: 100;
+    }
+    .sidebar-logo { padding: 1.5rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
+    .logo-row { display: flex; align-items: center; gap: .7rem; }
+    .logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .logo-sub  { font-size: .62rem; color: rgba(255,255,255,.35); margin-top: .1rem; line-height: 1.3; }
+    .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
+    .nav-section { font-size: .6rem; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: .85rem 1.25rem .3rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: .7rem;
+      padding: .65rem 1.25rem;
+      color: rgba(255,255,255,.55); font-size: .85rem; font-weight: 500;
+      cursor: pointer; transition: all .2s;
+      border-left: 3px solid transparent; text-decoration: none;
+    }
+    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
+    .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--accent); }
+    .nav-item i { width: 17px; text-align: center; font-size: .9rem; }
+    .sidebar-footer { padding: .9rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
+    .user-card { display: flex; align-items: center; gap: .65rem; }
+    .user-avatar { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0; }
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-size: .82rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .user-role { font-size: .68rem; color: rgba(255,255,255,.35); }
+    .btn-logout { background: none; border: none; color: rgba(255,255,255,.4); cursor: pointer; font-size: .85rem; padding: .3rem; transition: color .2s; }
+    .btn-logout:hover { color: var(--danger); }
+
+    /* ══ MAIN ══ */
+    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
+    .topbar { padding: 1.25rem 2rem; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
+    .topbar-left p  { font-size: .8rem; color: var(--text-light); margin-top: .1rem; }
+    .content { padding: 2rem; flex: 1; }
+
+    /* ══ HERO BANNER ══ */
+    .hero-banner {
+      background: linear-gradient(135deg, var(--azul) 0%, var(--azul-mid) 60%, #005BB5 100%);
+      border-radius: 18px;
+      padding: 2.5rem 2.5rem;
+      display: flex; align-items: center; gap: 2rem;
+      margin-bottom: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-banner::before {
+      content: '';
+      position: absolute; top: -40px; right: -40px;
+      width: 220px; height: 220px;
+      background: rgba(0,194,168,.12);
+      border-radius: 50%;
+    }
+    .hero-banner::after {
+      content: '';
+      position: absolute; bottom: -60px; right: 100px;
+      width: 160px; height: 160px;
+      background: rgba(255,255,255,.04);
+      border-radius: 50%;
+    }
+    .hero-logo-big {
+      width: 72px; height: 72px; flex-shrink: 0;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 18px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; color: var(--accent);
+    }
+    .hero-text { position: relative; z-index: 1; }
+    .hero-text h2 { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .hero-text p { color: rgba(255,255,255,.6); font-size: .9rem; margin-top: .35rem; max-width: 500px; line-height: 1.5; }
+    .hero-badge {
+      margin-top: .8rem;
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: rgba(0,194,168,.2); border: 1px solid rgba(0,194,168,.35);
+      color: var(--accent); font-size: .75rem; font-weight: 600;
+      padding: .3rem .75rem; border-radius: 20px;
+    }
+
+    /* ══ GRID ══ */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    /* ══ CARDS ══ */
+    .card { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: 1.5rem; }
+    .card-header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.25rem; }
+    .card-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+    .card-icon.blue  { background: var(--azul-pale); color: var(--azul-mid); }
+    .card-icon.teal  { background: var(--accent-pale); color: var(--accent); }
+    .card-icon.warn  { background: #FEF3C7; color: var(--warning); }
+    .card-title { font-family: 'Syne', sans-serif; font-size: .95rem; font-weight: 700; color: var(--text); }
+    .card-sub   { font-size: .75rem; color: var(--text-light); margin-top: .1rem; }
+
+    /* Info list */
+    .info-list { display: flex; flex-direction: column; gap: .75rem; }
+    .info-row { display: flex; align-items: flex-start; gap: .75rem; padding-bottom: .75rem; border-bottom: 1px solid var(--border); }
+    .info-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .info-label { font-size: .76rem; font-weight: 600; color: var(--text-light); text-transform: uppercase; letter-spacing: .05em; width: 120px; flex-shrink: 0; padding-top: .1rem; }
+    .info-value { font-size: .87rem; color: var(--text); line-height: 1.4; }
+
+    /* Version badge */
+    .version-chip { display: inline-flex; align-items: center; gap: .35rem; background: var(--azul-pale); color: var(--azul-mid); font-size: .78rem; font-weight: 700; padding: .25rem .6rem; border-radius: 6px; }
+
+    /* Module list */
+    .module-list { display: flex; flex-direction: column; gap: .6rem; }
+    .module-item { display: flex; align-items: center; gap: .75rem; padding: .65rem .85rem; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
+    .module-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .module-dot.on  { background: var(--success); box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+    .module-dot.off { background: var(--text-light); }
+    .module-name { font-size: .84rem; font-weight: 500; color: var(--text); flex: 1; }
+    .module-badge { font-size: .7rem; font-weight: 600; padding: .2rem .5rem; border-radius: 5px; }
+    .module-badge.active   { background: #D1FAE5; color: #059669; }
+    .module-badge.inactive { background: var(--border); color: var(--text-light); }
+
+    /* Tech stack */
+    .tech-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: .75rem; }
+    .tech-item { display: flex; align-items: center; gap: .6rem; padding: .65rem .85rem; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
+    .tech-icon { font-size: 1rem; width: 20px; text-align: center; color: var(--azul-mid); }
+    .tech-name { font-size: .82rem; font-weight: 600; color: var(--text); }
+    .tech-desc { font-size: .72rem; color: var(--text-light); }
+
+    /* Team */
+    .team-list { display: flex; flex-direction: column; gap: .6rem; }
+    .team-item { display: flex; align-items: center; gap: .85rem; padding: .75rem .85rem; background: var(--surface2); border-radius: 10px; border: 1px solid var(--border); }
+    .team-avatar { width: 36px; height: 36px; border-radius: 10px; background: var(--azul); display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: .85rem; font-weight: 800; color: #fff; flex-shrink: 0; }
+    .team-avatar.accent { background: var(--accent); }
+    .team-name { font-size: .85rem; font-weight: 600; color: var(--text); }
+    .team-role { font-size: .72rem; color: var(--text-light); }
+
+    /* Changelog */
+    .changelog { display: flex; flex-direction: column; gap: 0; }
+    .changelog-item { display: flex; gap: 1rem; position: relative; padding-bottom: 1.25rem; }
+    .changelog-item:last-child { padding-bottom: 0; }
+    .changelog-line { display: flex; flex-direction: column; align-items: center; flex-shrink: 0; width: 16px; }
+    .changelog-dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--border); background: var(--surface); flex-shrink: 0; }
+    .changelog-dot.current { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,194,168,.2); }
+    .changelog-connector { width: 2px; background: var(--border); flex: 1; margin-top: 2px; }
+    .changelog-item:last-child .changelog-connector { display: none; }
+    .changelog-body { padding-top: 0; }
+    .changelog-ver { font-size: .78rem; font-weight: 700; color: var(--text-light); margin-bottom: .15rem; }
+    .changelog-desc { font-size: .84rem; color: var(--text); line-height: 1.4; }
+    .changelog-date { font-size: .72rem; color: var(--text-light); margin-top: .2rem; }
+
+    /* Stats row */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: var(--surface); border-radius: 14px; border: 1px solid var(--border); padding: 1.25rem; text-align: center; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--azul); line-height: 1; }
+    .stat-label { font-size: .75rem; color: var(--text-light); margin-top: .3rem; font-weight: 500; }
+    @media (max-width: 700px) { .stats-row { grid-template-columns: repeat(2,1fr); } }
+
+    /* Preloader */
+    #simgeca-preloader {
+      position: fixed; inset: 0; z-index: 9999;
+      background: var(--azul);
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem;
+    }
+    .pre-icon { font-size: 2.5rem; color: var(--accent); animation: prePulse 1s ease-in-out infinite; }
+    @keyframes prePulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.85)} }
+    .pre-bar-wrap { width: 180px; height: 3px; background: rgba(255,255,255,.15); border-radius: 99px; overflow: hidden; }
+    .pre-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--azul-light)); border-radius: 99px; animation: preLoad 1.6s ease forwards; }
+    @keyframes preLoad { to { width: 100%; } }
+    #simgeca-preloader.fade { animation: preFade .5s ease forwards; }
+    @keyframes preFade { to { opacity: 0; pointer-events: none; } }
+  </style>
+</head>
+<body>
+
+<!-- Preloader -->
+<div id="simgeca-preloader">
+  <div class="pre-icon"><i class="fa-solid fa-wind"></i></div>
+  <div class="pre-bar-wrap"><div class="pre-bar"></div></div>
+</div>
+
+<!-- ══ SIDEBAR ══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-row">
+      <div class="logo-icon"><i class="fa-solid fa-wind"></i></div>
+      <div>
+        <div class="logo-text">SIMGECA</div>
+        <div class="logo-sub">TecNM — Lázaro Cárdenas</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item" href="dashboard.html"><i class="fa-solid fa-house"></i> Inicio</a>
+
+    <div class="nav-section">Gestión</div>
+    <a class="nav-item" href="acs.html"><i class="fa-solid fa-snowflake"></i> Aires Acondicionados</a>
+    <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
+    <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
+    <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes</a>
+
+    <div class="nav-section">Análisis</div>
+    <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
+    <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
+
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item" href="control.html"><i class="fa-solid fa-sliders"></i> Control AC</a>
+    <a class="nav-item" href="programacion.html"><i class="fa-solid fa-calendar-check"></i> Programación AC</a>
+    <a class="nav-item active" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar" id="userAvatar">A</div>
+      <div class="user-info">
+        <div class="user-name" id="userName">Administrador</div>
+        <div class="user-role">Admin del sistema</div>
+      </div>
+      <button class="btn-logout" onclick="doLogout()" title="Cerrar sesión">
+        <i class="fa-solid fa-right-from-bracket"></i>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- ══ MAIN ══ -->
+<main class="main">
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Acerca del sistema</h1>
+      <p>Información general, versión y tecnologías de SIMGECA</p>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="hero-banner">
+      <div class="hero-logo-big"><i class="fa-solid fa-wind"></i></div>
+      <div class="hero-text">
+        <h2>SIMGECA</h2>
+        <p>Sistema de Monitoreo y Gestión de Climatización Automatizada para el TecNM campus Lázaro Cárdenas. Administración centralizada de equipos de aire acondicionado en tiempo real.</p>
+        <div class="hero-badge"><i class="fa-solid fa-circle-check"></i> Sistema activo y operando</div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-val" id="statACs">—</div>
+        <div class="stat-label">Aires registrados</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statAulas">—</div>
+        <div class="stat-label">Aulas monitoreadas</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statUsuarios">—</div>
+        <div class="stat-label">Usuarios en sistema</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="statReportes">—</div>
+        <div class="stat-label">Reportes totales</div>
+      </div>
+    </div>
+
+    <!-- Row 1 -->
+    <div class="grid-2">
+
+      <!-- Información general -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon blue"><i class="fa-solid fa-circle-info"></i></div>
+          <div>
+            <div class="card-title">Información general</div>
+            <div class="card-sub">Datos del proyecto</div>
+          </div>
+        </div>
+        <div class="info-list">
+          <div class="info-row">
+            <div class="info-label">Sistema</div>
+            <div class="info-value">SIMGECA — Sistema de Monitoreo y Gestión de Climatización Automatizada</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Institución</div>
+            <div class="info-value">TecNM campus Lázaro Cárdenas</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Versión</div>
+            <div class="info-value"><span class="version-chip"><i class="fa-solid fa-tag"></i> v1.0.0</span></div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Plataforma</div>
+            <div class="info-value">Aplicación web + App móvil (Android)</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Licencia</div>
+            <div class="info-value">Uso interno institucional</div>
+          </div>
+          <div class="info-row">
+            <div class="info-label">Soporte</div>
+            <div class="info-value">Departamento de Sistemas — TecNM LC</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Módulos del sistema -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon teal"><i class="fa-solid fa-cubes"></i></div>
+          <div>
+            <div class="card-title">Módulos del sistema</div>
+            <div class="card-sub">Estado de cada módulo</div>
+          </div>
+        </div>
+        <div class="module-list">
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div>
+              <div class="module-name">Dashboard principal</div>
+            </div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div><div class="module-name">Gestión de ACs</div></div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div><div class="module-name">Aulas y turnos</div></div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div><div class="module-name">Usuarios y solicitudes</div></div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div><div class="module-name">Monitoreo energético</div></div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div><div class="module-name">Reportes de mantenimiento</div></div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot on"></div>
+            <div><div class="module-name">Control AC en tiempo real</div></div>
+            <span class="module-badge active">Activo</span>
+          </div>
+          <div class="module-item">
+            <div class="module-dot off"></div>
+            <div><div class="module-name">App móvil (Android)</div></div>
+            <span class="module-badge inactive">En desarrollo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2 -->
+    <div class="grid-2">
+
+      <!-- Tecnologías -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon blue"><i class="fa-solid fa-microchip"></i></div>
+          <div>
+            <div class="card-title">Stack tecnológico</div>
+            <div class="card-sub">Herramientas y plataformas utilizadas</div>
+          </div>
+        </div>
+        <div class="tech-grid">
+          <div class="tech-item">
+            <div class="tech-icon"><i class="fa-brands fa-google"></i></div>
+            <div>
+              <div class="tech-name">Firebase</div>
+              <div class="tech-desc">Auth + Firestore</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon"><i class="fa-solid fa-fire"></i></div>
+            <div>
+              <div class="tech-name">Firestore</div>
+              <div class="tech-desc">Base de datos NoSQL</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon"><i class="fa-brands fa-html5"></i></div>
+            <div>
+              <div class="tech-name">HTML / CSS / JS</div>
+              <div class="tech-desc">Interfaz web</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon"><i class="fa-solid fa-chart-bar"></i></div>
+            <div>
+              <div class="tech-name">Chart.js</div>
+              <div class="tech-desc">Gráficas y estadísticas</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon"><i class="fa-brands fa-android"></i></div>
+            <div>
+              <div class="tech-name">Android (Kotlin)</div>
+              <div class="tech-desc">App móvil</div>
+            </div>
+          </div>
+          <div class="tech-item">
+            <div class="tech-icon"><i class="fa-solid fa-file-pdf"></i></div>
+            <div>
+              <div class="tech-name">jsPDF</div>
+              <div class="tech-desc">Exportación PDF</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historial de versiones -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon teal"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <div>
+            <div class="card-title">Historial de versiones</div>
+            <div class="card-sub">Registro de cambios</div>
+          </div>
+        </div>
+        <div class="changelog">
+          <div class="changelog-item">
+            <div class="changelog-line">
+              <div class="changelog-dot current"></div>
+              <div class="changelog-connector"></div>
+            </div>
+            <div class="changelog-body">
+              <div class="changelog-ver">v1.0.0 — Versión actual</div>
+              <div class="changelog-desc">Lanzamiento inicial del sistema. Dashboard, gestión de ACs, aulas, usuarios, solicitudes, monitoreo energético, reportes de mantenimiento y control en tiempo real.</div>
+              <div class="changelog-date">2025</div>
+            </div>
+          </div>
+          <div class="changelog-item">
+            <div class="changelog-line">
+              <div class="changelog-dot"></div>
+              <div class="changelog-connector"></div>
+            </div>
+            <div class="changelog-body">
+              <div class="changelog-ver">v0.9.0 — Beta</div>
+              <div class="changelog-desc">Integración de Firestore en tiempo real, preloader de marca, módulo de monitoreo energético y exportación a PDF.</div>
+              <div class="changelog-date">2025</div>
+            </div>
+          </div>
+          <div class="changelog-item">
+            <div class="changelog-line">
+              <div class="changelog-dot"></div>
+              <div class="changelog-connector"></div>
+            </div>
+            <div class="changelog-body">
+              <div class="changelog-ver">v0.5.0 — Prototipo</div>
+              <div class="changelog-desc">Prototipo funcional con autenticación Firebase, CRUD de ACs y aulas, y diseño base del sistema.</div>
+              <div class="changelog-date">2025</div>
+            </div>
+          </div>
+          <div class="changelog-item">
+            <div class="changelog-line">
+              <div class="changelog-dot"></div>
+            </div>
+            <div class="changelog-body">
+              <div class="changelog-ver">v0.1.0 — Inicio del proyecto</div>
+              <div class="changelog-desc">Definición de requerimientos, diseño del sistema de diseño y estructura de colecciones en Firestore.</div>
+              <div class="changelog-date">2024</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Equipo de desarrollo -->
+    <div class="card" style="margin-bottom: 1.5rem;">
+      <div class="card-header">
+        <div class="card-icon warn"><i class="fa-solid fa-users-gear"></i></div>
+        <div>
+          <div class="card-title">Equipo de desarrollo</div>
+          <div class="card-sub">Responsables del proyecto</div>
+        </div>
+      </div>
+      <div class="team-list" id="teamList">
+        <div class="team-item">
+          <div class="team-avatar">D</div>
+          <div>
+            <div class="team-name">Desarrollador principal</div>
+            <div class="team-role">Diseño, frontend y backend — TecNM campus Lázaro Cárdenas</div>
+          </div>
+        </div>
+        <div class="team-item">
+          <div class="team-avatar accent">A</div>
+          <div>
+            <div class="team-name">Asesor del proyecto</div>
+            <div class="team-role">Docente responsable — Departamento de Sistemas</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</main>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
+    authDomain: "simgeca-26297.firebaseapp.com",
+    projectId: "simgeca-26297",
+    storageBucket: "simgeca-26297.firebasestorage.app",
+    messagingSenderId: "28195458236",
+    appId: "1:28195458236:web:9250f82b845665d82cd4b9"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+
+  // Protección de ruta
+  auth.onAuthStateChanged(user => {
+    if (!user) { window.location.href = 'login.html'; return; }
+    const email = user.email || '';
+    document.getElementById('userName').textContent   = email.split('@')[0];
+    document.getElementById('userAvatar').textContent = email.charAt(0).toUpperCase();
+    cargarEstadisticas();
+  });
+
+  function doLogout() {
+    auth.signOut().then(() => window.location.href = 'login.html');
+  }
+
+  async function cargarEstadisticas() {
+    try {
+      const [acsSnap, aulasSnap, usersSnap, repSnap] = await Promise.all([
+        db.collection('aires_acondicionados').get(),
+        db.collection('aulas').get(),
+        db.collection('usuarios').get(),
+        db.collection('reportes_mantenimiento').get(),
+      ]);
+      document.getElementById('statACs').textContent      = acsSnap.size;
+      document.getElementById('statAulas').textContent    = aulasSnap.size;
+      document.getElementById('statUsuarios').textContent = usersSnap.size;
+      document.getElementById('statReportes').textContent = repSnap.size;
+    } catch(e) {
+      // Si alguna colección no existe simplemente deja el "—"
+    }
+  }
+
+  // Preloader dismiss
+  window.addEventListener('load', () => {
+    const el = document.getElementById('simgeca-preloader');
+    if (!el) return;
+    setTimeout(() => {
+      el.classList.add('fade');
+      setTimeout(() => el.remove(), 500);
+    }, 800);
+  });
+</script>
+</body>
+</html>
