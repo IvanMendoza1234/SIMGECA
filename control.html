@@ -347,7 +347,7 @@
       <div class="kpi-card"><div class="kpi-icon ki-enc"><i class="fa-solid fa-power-off"></i></div><div><div class="kpi-val" id="kpiEnc">—</div><div class="kpi-lbl">Encendidos</div></div></div>
       <div class="kpi-card"><div class="kpi-icon ki-apag"><i class="fa-solid fa-circle"></i></div><div><div class="kpi-val" id="kpiApag">—</div><div class="kpi-lbl">Apagados</div></div></div>
       <div class="kpi-card"><div class="kpi-icon ki-mant"><i class="fa-solid fa-wrench"></i></div><div><div class="kpi-val" id="kpiMant">—</div><div class="kpi-lbl">Mantenimiento</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon ki-man"><i class="fa-solid fa-hand"></i></div><div><div class="kpi-val" id="kpiManual">—</div><div class="kpi-lbl">Modo manual</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-sonoff" style="background:#FFF3E0;color:#E65100"><i class="fa-brands fa-bluetooth"></i></div><div><div class="kpi-val">Sonoff</div><div class="kpi-lbl">Dispositivo IoT</div></div></div>
     </div>
 
     <div class="leyenda">
@@ -355,7 +355,7 @@
       <div class="leyenda-item"><div class="ley-dot ld-apag"></div> Apagado (auto)</div>
       <div class="leyenda-item"><div class="ley-dot ld-mant"></div> Mantenimiento</div>
       <div class="ley-sep"></div>
-      <div class="leyenda-item"><div class="ley-dot ld-forz"></div> Forzado manual</div>
+      <div class="leyenda-item"><div class="ley-dot ld-enc"></div> Encendido por horario</div>
       <div class="leyenda-item"><div class="ley-dot ld-sin"></div> Sin AC asignado</div>
     </div>
 
@@ -401,42 +401,10 @@
       </div>
     </div>
 
-    <!-- Temperatura -->
-    <div>
-      <div class="sec-tit">Temperatura objetivo</div>
-      <div class="temp-ctrl">
-        <button class="temp-btn" id="btnTMenos" onclick="cambiarTemp(-1)"><i class="fa-solid fa-minus"></i></button>
-        <div class="temp-disp">
-          <div class="temp-num" id="tempNum">24</div>
-          <div class="temp-unit">°C</div>
-        </div>
-        <button class="temp-btn" id="btnTMas" onclick="cambiarTemp(+1)"><i class="fa-solid fa-plus"></i></button>
-      </div>
-      <input type="range" class="temp-slider" id="tempSlider" min="16" max="30" value="24" oninput="onSlider(this.value)"/>
-      <div class="temp-range-row"><span>16 °C (mín)</span><span>30 °C (máx)</span></div>
-    </div>
-
-    <!-- Programación -->
-    <div>
-      <div class="sec-tit">Programación de encendido</div>
-      <div class="prog-toggle-row">
-        <label class="ios-toggle">
-          <input type="checkbox" id="progActivo" onchange="onProgToggle()"/>
-          <span class="ios-sl"></span>
-        </label>
-        Activar programación manual
-      </div>
-      <div class="time-grid">
-        <div class="form-group">
-          <label class="form-label">Hora de encendido</label>
-          <input type="time" class="form-input" id="horaEnc" disabled/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Hora de apagado</label>
-          <input type="time" class="form-input" id="horaApag" disabled/>
-        </div>
-        <span class="form-hint"><i class="fa-solid fa-circle-info" style="color:var(--azul-light)"></i> La programación sobrescribe el horario institucional solo para este equipo.</span>
-      </div>
+    <!-- Nota Sonoff -->
+    <div style="background:var(--azul-pale);border:1.5px solid #C5D8FF;border-radius:10px;padding:.75rem 1rem;font-size:.78rem;color:var(--azul);display:flex;gap:.55rem;align-items:flex-start">
+      <i class="fa-solid fa-circle-info" style="margin-top:.1rem;flex-shrink:0"></i>
+      <span>El dispositivo <strong>Sonoff</strong> solo permite encender y apagar el equipo. El horario de encendido automático se rige por el calendario institucional registrado en el sistema.</span>
     </div>
 
     <!-- Info aula -->
@@ -642,30 +610,20 @@
     document.getElementById('panelSub').textContent=[aula.tipo,aula.edificio,aula.piso].filter(Boolean).join(' · ')||'—';
 
     panelModo=(ac&&ac.modoControl)?ac.modoControl:'auto';
-    panelTemp=(ac&&ac.temperatura)?parseInt(ac.temperatura):24;
-    document.getElementById('tempNum').textContent=panelTemp;
-    document.getElementById('tempSlider').value=panelTemp;
-    sliderFill();
-
-    var prog=(ac&&ac.programacion)?ac.programacion:{};
-    document.getElementById('progActivo').checked=!!prog.activado;
-    document.getElementById('horaEnc').value=prog.horaEncendido||'';
-    document.getElementById('horaApag').value=prog.horaApagado||'';
-    toggleTime(!!prog.activado);
 
     var pills=[];
     if(aula.turno)          pills.push('<div class="info-pill"><i class="fa-solid fa-clock"></i>'+aula.turno+'</div>');
     if(aula.capacidad)      pills.push('<div class="info-pill"><i class="fa-solid fa-users"></i>'+aula.capacidad+' alumnos</div>');
     if(aula.docente_nombre) pills.push('<div class="info-pill"><i class="fa-solid fa-chalkboard-user"></i>'+aula.docente_nombre+'</div>');
     if(ac&&ac.btu)          pills.push('<div class="info-pill"><i class="fa-solid fa-temperature-half"></i>'+ac.btu+' BTU</div>');
+    if(ac&&ac.potencia_w)   pills.push('<div class="info-pill"><i class="fa-solid fa-bolt"></i>'+ac.potencia_w+' W</div>');
     if(ac&&ac.marca)        pills.push('<div class="info-pill"><i class="fa-solid fa-tag"></i>'+ac.marca+(ac.modelo?' '+ac.modelo:'')+'</div>');
+    if(ac&&ac.hw_id)        pills.push('<div class="info-pill"><i class="fa-solid fa-microchip"></i>Sonoff: '+ac.hw_id+'</div>');
     if(!ac)                 pills.push('<div class="info-pill" style="color:var(--danger);border-color:#FECACA"><i class="fa-solid fa-circle-xmark"></i>Sin AC asignado</div>');
     document.getElementById('infoPills').innerHTML=pills.join('');
 
     var sinCtrl=!ac||ac.estado==='mantenimiento';
-    ['btnEnc','btnApag','btnAuto','btnTMenos','btnTMas'].forEach(function(id){ document.getElementById(id).disabled=sinCtrl; });
-    document.getElementById('tempSlider').disabled=sinCtrl;
-    document.getElementById('progActivo').disabled=sinCtrl;
+    ['btnEnc','btnApag','btnAuto'].forEach(function(id){ document.getElementById(id).disabled=sinCtrl; });
 
     actualizarCtrlBtns();
     actualizarPanelStatus(aula);
@@ -685,11 +643,11 @@
       sin: {st:'pst-apag',ic:'psi-apag',dt:'pdb-apag',lb:'Sin AC asignado',sb:'Asigna un AC desde Aulas y Turnos'}
     };
     var m=map[r.est]||map.apag;
+    // Con Sonoff solo hay forzado por botón, no por programación
     if(r.manual&&r.forzado==='btn'){
-      if(r.est==='enc')  m={st:'pst-fenc', ic:'psi-fenc', dt:'pdb-fenc', lb:'Encendido',sb:'Forzado manualmente'};
-      if(r.est==='apag') m={st:'pst-fapag',ic:'psi-fapag',dt:'pdb-fapag',lb:'Apagado',  sb:'Forzado manualmente'};
+      if(r.est==='enc')  m={st:'pst-enc', ic:'psi-enc', dt:'pdb-enc', lb:'Encendido', sb:'Encendido vía Sonoff'};
+      if(r.est==='apag') m={st:'pst-apag',ic:'psi-apag',dt:'pdb-apag',lb:'Apagado',   sb:'Apagado vía Sonoff'};
     }
-    if(r.manual&&r.forzado==='prog') m.sb='Según programación manual';
     document.getElementById('panelStatus').className='panel-status '+m.st;
     document.getElementById('psIco').className='ps-ico '+m.ic;
     document.getElementById('psDot').className='ps-dot-b '+m.dt;
@@ -713,29 +671,22 @@
     document.getElementById('btnAuto').className='ctrl-btn'+(panelModo==='auto'     ?' sel-auto':'');
   }
 
-  /* TEMPERATURA */
-  function cambiarTemp(d){ panelTemp=Math.max(16,Math.min(30,panelTemp+d)); document.getElementById('tempNum').textContent=panelTemp; document.getElementById('tempSlider').value=panelTemp; sliderFill(); }
-  function onSlider(v){ panelTemp=parseInt(v); document.getElementById('tempNum').textContent=panelTemp; sliderFill(); }
-  function sliderFill(){ var p=((panelTemp-16)/(30-16))*100; document.getElementById('tempSlider').style.setProperty('--pct',p+'%'); }
-
-  /* PROGRAMACIÓN */
-  function onProgToggle(){ toggleTime(document.getElementById('progActivo').checked); }
-  function toggleTime(e){ document.getElementById('horaEnc').disabled=!e; document.getElementById('horaApag').disabled=!e; }
-
-  /* GUARDAR */
+  /* ACCIÓN GLOBAL */
   function guardarCambios(){
     if(!panelAC){ showToast('Este aula no tiene AC asignado','error'); return; }
     var btn=document.getElementById('btnGuardar');
     btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
     db.collection('aires_acondicionados').doc(panelAC.id).update({
       modoControl: panelModo,
-      temperatura: panelTemp,
-      programacion:{
-        activado:      document.getElementById('progActivo').checked,
-        horaEncendido: document.getElementById('horaEnc').value,
-        horaApagado:   document.getElementById('horaApag').value
-      },
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(function(){
+      // Registrar en historial
+      return db.collection('historial_eventos').add({
+        tipo: panelModo === 'encendido' ? 'encendido' : 'apagado',
+        titulo: panelModo === 'auto' ? 'Modo automático activado' : (panelModo === 'encendido' ? 'AC encendido manualmente' : 'AC apagado manualmente'),
+        descripcion: (panelAula.nombre||'Aula') + ' — ' + (panelAC.nombre||'AC'),
+        fecha: firebase.firestore.FieldValue.serverTimestamp()
+      });
     }).then(function(){
       showToast('Cambios guardados en '+(panelAula.nombre||'el aula'),'success');
       cerrarPanel();
