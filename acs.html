@@ -287,13 +287,12 @@
     <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
     <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
     <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
-      <span class="nav-badge" id="navBadgeSol">0</span></a>
+      <span class="nav-badge" id="navBadgeSol" style="display:none">0</span></a>
     <div class="nav-section">Análisis</div>
     <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
     <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
-    <a class="nav-item" href="control.html"><i class="fa-solid fa-sliders"></i> Control AC</a>
     <div class="nav-section">Sistema</div>
-    <a class="nav-item" href="programacion.html"><i class="fa-solid fa-calendar-check"></i> Programación AC</a>
+    <a class="nav-item" href="control.html"><i class="fa-solid fa-sliders"></i> Control AC</a>
     <a class="nav-item" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
   </nav>
   <div class="sidebar-footer">
@@ -413,9 +412,15 @@
         <div class="section-label">Ubicación y turno</div>
 
         <div class="form-group">
+          <label class="form-label">Edificio *</label>
+          <select class="form-select" id="fEdificio" onchange="cargarAulasPorEdificio()">
+            <option value="">Selecciona edificio...</option>
+          </select>
+        </div>
+        <div class="form-group">
           <label class="form-label">Aula asignada *</label>
-          <select class="form-select" id="fAula">
-            <option value="">Selecciona un aula...</option>
+          <select class="form-select" id="fAula" disabled>
+            <option value="">Primero selecciona un edificio</option>
           </select>
         </div>
         <div class="form-group">
@@ -550,26 +555,60 @@
     } catch(e) {}
   }
 
-  // ── Cargar aulas para el select del modal ──
+  // ── Datos de aulas agrupadas por edificio (carga desde Firestore) ──
+  let aulasPorEdificio = {}; // { 'Edificio A': [{nombre, tipo}, ...], ... }
+
   async function cargarAulas() {
     try {
       const snap = await db.collection('aulas').orderBy('nombre').get();
-      const sel = document.getElementById('fAula');
-      sel.innerHTML = '<option value="">Selecciona un aula...</option>';
+      aulasPorEdificio = {};
+
       snap.forEach(doc => {
-        const op = document.createElement('option');
-        op.value       = doc.data().nombre;
-        op.textContent = doc.data().nombre;
-        sel.appendChild(op);
+        const d       = doc.data();
+        const edif    = d.edificio || 'Sin edificio';
+        if (!aulasPorEdificio[edif]) aulasPorEdificio[edif] = [];
+        aulasPorEdificio[edif].push({ nombre: d.nombre, tipo: d.tipo || 'Aula' });
       });
-      // Si no hay aulas aún, dejamos el select con opción manual
+
+      const selEdif = document.getElementById('fEdificio');
+      selEdif.innerHTML = '<option value="">Selecciona edificio...</option>';
+
       if (snap.empty) {
-        sel.innerHTML = '<option value="">Sin aulas registradas aún</option>';
-        const op = document.createElement('option');
-        op.value = 'manual'; op.textContent = 'Ingresar manualmente';
-        sel.appendChild(op);
+        selEdif.innerHTML = '<option value="">Sin aulas registradas aún</option>';
+        return;
       }
-    } catch(e) {}
+
+      Object.keys(aulasPorEdificio).sort().forEach(edif => {
+        const op = document.createElement('option');
+        op.value       = edif;
+        op.textContent = edif;
+        selEdif.appendChild(op);
+      });
+    } catch(e) { console.error('cargarAulas:', e); }
+  }
+
+  function cargarAulasPorEdificio() {
+    const edif    = document.getElementById('fEdificio').value;
+    const selAula = document.getElementById('fAula');
+
+    if (!edif) {
+      selAula.innerHTML = '<option value="">Primero selecciona un edificio</option>';
+      selAula.disabled  = true;
+      return;
+    }
+
+    const lista = aulasPorEdificio[edif] || [];
+    selAula.innerHTML = '<option value="">Selecciona un espacio...</option>';
+    lista.forEach(a => {
+      const op = document.createElement('option');
+      op.value       = a.nombre;
+      op.textContent = `${a.nombre} — ${a.tipo}`;
+      selAula.appendChild(op);
+    });
+    selAula.disabled = lista.length === 0;
+    if (lista.length === 0) {
+      selAula.innerHTML = '<option value="">Sin espacios en este edificio</option>';
+    }
   }
 
   // ── Cargar todos los ACs de Firestore ──
@@ -773,6 +812,12 @@
     document.getElementById('fHwId').value         = ac.hw_id        || '';
     document.getElementById('fMantenimiento').checked = ac.estado === 'mantenimiento';
     document.getElementById('fObservaciones').value= ac.observaciones|| '';
+    // Cargar edificio y luego seleccionar aula
+    const edif = ac.edificio || '';
+    const aulaNombre = ac.aula || '';
+    document.getElementById('fEdificio').value = edif;
+    cargarAulasPorEdificio();
+    if (aulaNombre) document.getElementById('fAula').value = aulaNombre;
     toggleHwId();
     document.getElementById('modalRegistro').classList.add('open');
   }
@@ -781,9 +826,11 @@
     ['fNombre','fMarca','fModelo','fPotencia','fBtu','fSerie','fAnio','fHwId','fObservaciones'].forEach(id => {
       document.getElementById(id).value = '';
     });
-    document.getElementById('fAula').value     = '';
-    document.getElementById('fTurno').value    = '';
-    document.getElementById('fHardware').value = '';
+    document.getElementById('fEdificio').value  = '';
+    document.getElementById('fAula').innerHTML  = '<option value="">Primero selecciona un edificio</option>';
+    document.getElementById('fAula').disabled   = true;
+    document.getElementById('fTurno').value     = '';
+    document.getElementById('fHardware').value  = '';
     document.getElementById('fMantenimiento').checked = false;
     toggleHwId();
   }
@@ -798,6 +845,7 @@
     const marca  = document.getElementById('fMarca').value.trim();
     const modelo = document.getElementById('fModelo').value.trim();
     const aula   = document.getElementById('fAula').value;
+    const edif   = document.getElementById('fEdificio').value;
 
     // Validación básica
     document.getElementById('fNombre').classList.toggle('error', !nombre);
@@ -814,6 +862,7 @@
       num_serie:     document.getElementById('fSerie').value.trim(),
       anio:          Number(document.getElementById('fAnio').value)      || null,
       aula:          aula,
+      edificio:      edif,
       turno:         document.getElementById('fTurno').value,
       hardware:      document.getElementById('fHardware').value,
       hw_id:         document.getElementById('fHwId').value.trim(),
