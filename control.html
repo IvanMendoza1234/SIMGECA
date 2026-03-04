@@ -466,6 +466,15 @@
   }
   setInterval(tick,1000); tick();
 
+  // Al cargar la página, si ya son horas fuera de horario y hay manuales encendidos → apagar
+  setTimeout(function(){
+    var n = new Date(), hm = n.getHours()*60+n.getMinutes();
+    if(hm >= 22*60 || hm < 6*60+45){
+      var manuales = todosACs.filter(function(ac){ return ac.modoControl==='encendido' && ac.estado!=='mantenimiento'; });
+      if(manuales.length) apagadoAutomatico22();
+    }
+  }, 3000); // esperar 3s a que Firestore cargue
+
   /* Apagar todos los manuales a las 22:00 y registrar en historial */
   function apagadoAutomatico22(){
     var manuales = todosACs.filter(function(ac){
@@ -556,10 +565,10 @@
     if(!ac) return {est:'sin', manual:false};
     if(ac.estado==='mantenimiento') return {est:'mant', manual:false};
 
-    // Regla absoluta: después de las 22:00 todo apagado
+    // Regla absoluta: fuera de horario institucional (22:00–06:44) todo apagado
     var n  = new Date();
     var hm = n.getHours()*60 + n.getMinutes();
-    if(hm >= 22*60) return {est:'apag', manual:false};
+    if(hm >= 22*60 || hm < 6*60+45) return {est:'apag', manual:false};
 
     var modo=ac.modoControl||'auto';
     if(modo==='encendido') return {est:'enc', manual:true,  forzado:'btn'};
