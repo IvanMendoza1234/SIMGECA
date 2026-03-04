@@ -255,20 +255,44 @@
   </div>
 
   <nav class="sidebar-nav">
+
     <div class="nav-section">Principal</div>
-    <a class="nav-item active" href="dashboard.html"><i class="fa-solid fa-house"></i> Inicio</a>
+    <a class="nav-item active" href="dashboard.html">
+      <i class="fa-solid fa-house"></i> Inicio
+    </a>
+
     <div class="nav-section">Gestión</div>
-    <a class="nav-item" href="acs.html"><i class="fa-solid fa-snowflake"></i> Aires Acondicionados</a>
-    <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
-    <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
-    <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
-      <span class="nav-badge" id="navBadgeSol" style="display:none">0</span></a>
+    <a class="nav-item" href="acs.html">
+      <i class="fa-solid fa-snowflake"></i> Aires Acondicionados
+    </a>
+    <a class="nav-item" href="aulas.html">
+      <i class="fa-solid fa-school"></i> Aulas y Turnos
+    </a>
+    <a class="nav-item" href="usuarios.html">
+      <i class="fa-solid fa-users"></i> Usuarios
+    </a>
+    <a class="nav-item" href="solicitudes.html">
+      <i class="fa-solid fa-clipboard-list"></i> Solicitudes
+      <span class="nav-badge" id="navBadgeSol" style="display:none">0</span>
+    </a>
+
     <div class="nav-section">Análisis</div>
-    <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
-    <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
-    <div class="nav-section">Sistema</div>
+    <a class="nav-item" href="monitoreo.html">
+      <i class="fa-solid fa-chart-line"></i> Monitoreo
+    </a>
+    <a class="nav-item" href="reportes.html">
+      <i class="fa-solid fa-triangle-exclamation"></i> Reportes
+    </a>
     <a class="nav-item" href="control.html"><i class="fa-solid fa-sliders"></i> Control AC</a>
-    <a class="nav-item" href="sistema.html"><i class="fa-solid fa-circle-info"></i> Acerca del sistema</a>
+
+    <div class="nav-section">Sistema</div>
+    <a class="nav-item" href="programacion.html">
+      <i class="fa-solid fa-calendar-check"></i> Programación AC
+    </a>
+    <a class="nav-item" href="sistema.html">
+      <i class="fa-solid fa-circle-info"></i> Acerca del sistema
+    </a>
+
   </nav>
 
   <div class="sidebar-footer">
@@ -488,6 +512,78 @@
     }
   });
 
+  // ══ FUNCIONES DE CÁLCULO REAL DE kWh ══════════════════════════════
+
+  // Minutos de operación para un día de la semana (0=Dom...6=Sáb) según turno
+  function minutosDia(diaSemana, turno) {
+    const t = turno || 'ambos';
+    let min = 0;
+    if ([1,2,4,5].includes(diaSemana) && (t==='matutino'||t==='ambos'))   min += 13*60-(6*60+45);   // 375
+    if (diaSemana===3              && (t==='matutino'||t==='ambos'))   min += 13*60-(8*60+45);   // 255
+    if ([1,2,3,4].includes(diaSemana) && (t==='vespertino'||t==='ambos')) min += 20*60-(13*60+45);  // 375
+    if (diaSemana===5              && (t==='vespertino'||t==='ambos')) min += 20*60-(15*60+45);  // 255
+    if (diaSemana===6              && (t==='matutino'||t==='ambos'))   min += 13*60-(7*60+45);   // 315
+    return min;
+  }
+
+  // Horas reales acumuladas desde fecha de registro hasta hoy
+  function horasDesde(turno, fechaInicio) {
+    const hoy    = new Date(); hoy.setHours(23,59,0,0);
+    const inicio = (fechaInicio instanceof Date && !isNaN(fechaInicio)) ? fechaInicio : new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    let totalMin = 0;
+    const cur = new Date(inicio); cur.setHours(0,0,0,0);
+    while (cur <= hoy) {
+      // Regla: no contar después de las 22:00 (el sistema apaga a las 22h)
+      // Para días completos, el tope de 22h ya está implícito en los horarios (fin max 20h)
+      totalMin += minutosDia(cur.getDay(), turno);
+      cur.setDate(cur.getDate() + 1);
+    }
+    return +(totalMin/60).toFixed(1);
+  }
+
+  // kWh de un AC dado su potencia, turno y fecha de registro
+  function kwhAC(potencia_w, turno, fechaRegistro) {
+    return +((potencia_w||0)/1000 * horasDesde(turno, fechaRegistro)).toFixed(1);
+  }
+
+  // Estado según horario institucional (con límite 22h)
+  function estadoHorario(ac) {
+    if (ac.estado === 'mantenimiento') return 'mantenimiento';
+    if (ac.dado_de_baja) return 'apagado';
+    const n = new Date(), dia = n.getDay(), hm = n.getHours()*60+n.getMinutes();
+    if (hm >= 22*60) return 'apagado';
+    const modo = ac.modoControl || 'auto';
+    if (modo === 'encendido') return 'encendido';
+    if (modo === 'apagado')   return 'apagado';
+    return minutosDia(dia, ac.turno||'ambos') > 0 && hm >= (()=>{
+      // Verificar si estamos dentro de un bloque activo
+      const t = ac.turno||'ambos', H=[];
+      if([1,2,4,5].includes(dia)) H.push({t:'mat',i:6*60+45,f:13*60});
+      if(dia===3)                  H.push({t:'mat',i:8*60+45,f:13*60});
+      if([1,2,3,4].includes(dia)) H.push({t:'ves',i:13*60+45,f:20*60});
+      if(dia===5)                  H.push({t:'ves',i:15*60+45,f:20*60});
+      if(dia===6)                  H.push({t:'mat',i:7*60+45,f:13*60});
+      return H.some(h=>(t==='ambos'||t===h.t||t==='')&&hm>=h.i&&hm<h.f);
+    })() ? 'encendido' : 'apagado';
+  }
+
+  // kWh de un día específico para todos los ACs combinados
+  function kwhDia(fecha, acs) {
+    const dia = fecha.getDay();
+    // No contar domingos (sin clases) — ya están cubiertos porque minutosDia=0
+    return acs.reduce((s, ac) => {
+      // Solo sumar si el AC estaba activo ese día (fue registrado antes o ese día)
+      const reg = ac._fechaReg;
+      if (reg) {
+        const regD = new Date(reg); regD.setHours(0,0,0,0);
+        const fechaD = new Date(fecha); fechaD.setHours(0,0,0,0);
+        if (regD > fechaD) return s; // no existía ese día
+      }
+      const min = minutosDia(dia, ac.turno||'ambos');
+      return s + +((ac.potencia_w||0)/1000 * min/60).toFixed(2);
+    }, 0);
+  }
+
   // ── Cargar dashboard ──
   async function cargarDashboard() {
     await Promise.all([
@@ -502,15 +598,23 @@
   async function cargarACs() {
     try {
       const snap = await db.collection('aires_acondicionados').get();
-      let total = snap.size, encendidos = 0, apagados = 0, mantenimiento = 0, kwh = 0;
+      let total = 0, encendidos = 0, apagados = 0, mantenimiento = 0, kwh = 0;
+      const listaACs = [];
       snap.forEach(doc => {
         const d = doc.data();
-        const estado = d.estado || 'apagado';
-        if (estado === 'encendido')       encendidos++;
-        else if (estado === 'mantenimiento') mantenimiento++;
-        else                               apagados++;
-        kwh += d.consumo_mes || 0;
+        if (d.dado_de_baja) return;
+        total++;
+        const fechaReg  = d.fecha_registro?.toDate ? d.fecha_registro.toDate() : null;
+        const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0,0,0,0);
+        const desde     = (fechaReg && fechaReg > inicioMes) ? fechaReg : inicioMes;
+        const est = estadoHorario(d);
+        if (est === 'encendido')          encendidos++;
+        else if (est === 'mantenimiento') mantenimiento++;
+        else                              apagados++;
+        kwh += kwhAC(d.potencia_w||0, d.turno||'ambos', desde);
+        listaACs.push({ ...d, id: doc.id, _fechaReg: desde, potencia_w: d.potencia_w||0, turno: d.turno||'ambos' });
       });
+      window._dashACs = listaACs;
       document.getElementById('kpiTotalACs').textContent      = total;
       document.getElementById('kpiActivosACs').textContent    = `${encendidos} activos ahora mismo`;
       document.getElementById('kpiKwh').textContent           = kwh.toFixed(1);
@@ -521,7 +625,6 @@
       donutChart.update();
     } catch(e) { console.error('ACs:', e); }
   }
-
   async function cargarUsuarios() {
     try {
       const snap = await db.collection('usuarios').get();
@@ -648,28 +751,31 @@
   }
 
   async function cargarConsumoSemanal() {
+    // Últimos 7 días con cálculo real kW × horas según horario
     const dias = [];
     for (let i = 6; i >= 0; i--) {
-      const d = new Date(); d.setDate(d.getDate() - i); dias.push(d);
+      const d = new Date(); d.setDate(d.getDate() - i);
+      dias.push(d);
     }
-    let datos = new Array(7).fill(0);
-    try {
-      const inicio = new Date(); inicio.setDate(inicio.getDate() - 6); inicio.setHours(0,0,0,0);
-      const snap = await db.collection('historial_consumo').where('fecha', '>=', inicio).get();
-      snap.forEach(doc => {
-        const d = doc.data();
-        const f = d.fecha?.toDate ? d.fecha.toDate() : new Date(d.fecha);
-        for (let i = 0; i < 7; i++) {
-          if (f.toDateString() === dias[i].toDateString()) datos[i] += d.kwh || 0;
-        }
-      });
-    } catch(e) { /* sin datos aún */ }
+    const acs = window._dashACs || [];
+    const datos = dias.map(dia => {
+      const kwhDiaVal = acs.reduce((s, ac) => {
+        // Solo contar si el AC ya estaba registrado ese día
+        const regD = new Date(ac._fechaReg); regD.setHours(0,0,0,0);
+        const diaD = new Date(dia); diaD.setHours(0,0,0,0);
+        if (regD > diaD) return s;
+        const min = minutosDia(dia.getDay(), ac.turno||'ambos');
+        return s + +((ac.potencia_w||0)/1000 * min/60).toFixed(2);
+      }, 0);
+      return +kwhDiaVal.toFixed(1);
+    });
+    const labels = dias.map(d => d.toLocaleDateString('es-MX',{weekday:'short',day:'numeric'}).replace('.','')); 
     const max = Math.max(...datos);
+    barChart.data.labels   = labels;
     barChart.data.datasets[0].data = datos;
     barChart.data.datasets[0].backgroundColor = datos.map(v => v === max && max > 0 ? '#1A75FF' : '#C5D8FF');
     barChart.update();
   }
-
   function showToast(msg, type = 'info') {
     const icons = { success:'circle-check', error:'circle-xmark', info:'circle-info' };
     const wrap = document.getElementById('toastWrap');
