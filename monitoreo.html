@@ -492,8 +492,8 @@
     const dia   = ahora.getDay();
     const hhmm  = ahora.getHours() * 60 + ahora.getMinutes();
 
-    // Regla absoluta: a las 22:00 todo se apaga
-    if (hhmm >= 22 * 60) return 'apagado';
+    // Regla absoluta: fuera de horario institucional (22:00–06:44) todo apagado
+    if (hhmm >= 22 * 60 || hhmm < 6 * 60 + 45) return 'apagado';
 
     // modoControl manual (Sonoff)
     const modo = ac.modoControl || 'auto';
