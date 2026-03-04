@@ -365,7 +365,7 @@
       <div class="two-col">
         <div class="chart-card">
           <div class="chart-header">
-            <div><div class="chart-title">Consumo kWh por equipo</div><div class="chart-sub">Mes actual — datos simulados</div></div>
+            <div><div class="chart-title">Consumo kWh por equipo</div><div class="chart-sub">Mes actual — cálculo por horario institucional</div></div>
             <select class="chart-select" id="selectAulaKwh" onchange="actualizarGraficaKwh()">
               <option value="todos">Todas las aulas</option>
             </select>
@@ -475,7 +475,18 @@
   }
 
   // Misma lógica de horarios que acs.html
-  function calcularEstadoPorHorario(ac) {
+  // Helper: minutos de operación de un día de semana según turno
+  function _minDia(dia, turno) {
+    const t = turno||'ambos'; let m=0;
+    if([1,2,4,5].includes(dia)&&(t==='matutino'||t==='ambos'))   m+=13*60-(6*60+45);
+    if(dia===3&&(t==='matutino'||t==='ambos'))                     m+=13*60-(8*60+45);
+    if([1,2,3,4].includes(dia)&&(t==='vespertino'||t==='ambos'))  m+=20*60-(13*60+45);
+    if(dia===5&&(t==='vespertino'||t==='ambos'))                   m+=20*60-(15*60+45);
+    if(dia===6&&(t==='matutino'||t==='ambos'))                     m+=13*60-(7*60+45);
+    return m;
+  }
+
+    function calcularEstadoPorHorario(ac) {
     if (ac.estado === 'mantenimiento') return 'mantenimiento';
     if (ac.dado_de_baja === true)      return 'apagado';
     const ahora = new Date();
@@ -821,17 +832,71 @@
     document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
     if (el) el.classList.add('active');
 
-    const labels = periodo === 'semana'
-      ? ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom']
-      : periodo === 'mes'
-      ? Array.from({length:30},(_,i)=>`${i+1}`)
-      : ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const hoy = new Date();
 
-    const base = todosACs.length * 3.2;
-    const data  = labels.map(() => +(base*(0.55+Math.random()*.9)).toFixed(1));
-    const total = data.reduce((s,v)=>s+v,0);
-    const prom  = (total/data.length).toFixed(1);
-    const costo = (total*2.5).toFixed(0);
+    // ── Generar etiquetas y calcular kWh real por período ──
+    let labels = [], datos = [];
+
+    if (periodo === 'semana') {
+      // Últimos 7 días
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(hoy); d.setDate(hoy.getDate() - i);
+        labels.push(d.toLocaleDateString('es-MX',{weekday:'short'}));
+        const kwh = todosACs.reduce((s, ac) => {
+          // Solo si el AC existía ese día
+          const reg = ac.fecha_registro ? new Date(ac.fecha_registro) : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+          const regD = new Date(reg); regD.setHours(0,0,0,0);
+          const dD   = new Date(d);   dD.setHours(0,0,0,0);
+          if (regD > dD) return s;
+          const min = _minDia(d.getDay(), ac.turno||'ambos');
+          return s + +((ac.potencia_w||0)/1000 * min/60).toFixed(2);
+        }, 0);
+        datos.push(+kwh.toFixed(1));
+      }
+    } else if (periodo === 'mes') {
+      const diasMes = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).getDate();
+      for (let d = 1; d <= diasMes; d++) {
+        const fecha = new Date(hoy.getFullYear(), hoy.getMonth(), d);
+        labels.push(String(d));
+        // No mostrar días futuros con valor — dejar 0
+        if (fecha > hoy) { datos.push(0); continue; }
+        const kwh = todosACs.reduce((s, ac) => {
+          const reg = ac.fecha_registro ? new Date(ac.fecha_registro) : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+          const regD = new Date(reg); regD.setHours(0,0,0,0);
+          const fD   = new Date(fecha); fD.setHours(0,0,0,0);
+          if (regD > fD) return s;
+          const min = _minDia(fecha.getDay(), ac.turno||'ambos');
+          return s + +((ac.potencia_w||0)/1000 * min/60).toFixed(2);
+        }, 0);
+        datos.push(+kwh.toFixed(1));
+      }
+    } else { // año
+      const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+      labels = meses;
+      for (let m = 0; m < 12; m++) {
+        if (m > hoy.getMonth()) { datos.push(0); continue; }
+        // Sumar todos los días del mes
+        const diasM = new Date(hoy.getFullYear(), m+1, 0).getDate();
+        let kwhMes = 0;
+        for (let d = 1; d <= diasM; d++) {
+          const fecha = new Date(hoy.getFullYear(), m, d);
+          if (fecha > hoy) break;
+          kwhMes += todosACs.reduce((s, ac) => {
+            const reg = ac.fecha_registro ? new Date(ac.fecha_registro) : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            const regD = new Date(reg); regD.setHours(0,0,0,0);
+            const fD   = new Date(fecha); fD.setHours(0,0,0,0);
+            if (regD > fD) return s;
+            return s + +((ac.potencia_w||0)/1000 * _minDia(fecha.getDay(), ac.turno||'ambos')/60).toFixed(2);
+          }, 0);
+        }
+        datos.push(+kwhMes.toFixed(1));
+      }
+    }
+
+    const total = datos.reduce((s,v)=>s+v, 0);
+    const dias  = datos.filter(v=>v>0).length || 1;
+    const prom  = (total/dias).toFixed(1);
+    const costo = (total*2.5).toFixed(0); // ~$2.5 MXN por kWh CFE
 
     document.getElementById('kpiPTotal').textContent  = total.toFixed(1);
     document.getElementById('kpiPProm').textContent   = prom;
@@ -841,7 +906,7 @@
     chGeneral = new Chart(document.getElementById('chartGeneral'), {
       type: 'line',
       data: { labels, datasets: [{
-        label: 'kWh', data,
+        label: 'kWh', data: datos,
         borderColor:'#1A75FF', backgroundColor:'rgba(26,117,255,.07)',
         borderWidth:2.5, pointRadius: periodo==='mes'?2:4,
         pointBackgroundColor:'#1A75FF', fill:true, tension:.4
@@ -851,23 +916,23 @@
         plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},
         scales:{
           y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},
-          x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}}
+          x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8',maxTicksLimit:periodo==='mes'?10:12}}
         }
       }
     });
 
-    // Donut
-    const enc  = todosACs.filter(a=>a.estado==='encendido').length   || 1;
-    const apag = todosACs.filter(a=>a.estado==='apagado').length     || 1;
+    // Donut estado actual
+    const enc  = todosACs.filter(a=>a.estado==='encendido').length   || 0;
+    const apag = todosACs.filter(a=>a.estado==='apagado').length     || 0;
     const mant = todosACs.filter(a=>a.estado==='mantenimiento').length;
     if (chDonut) chDonut.destroy();
     chDonut = new Chart(document.getElementById('chartDonut'), {
       type:'doughnut',
-      data:{labels:['Encendidos','Apagados','Mantenimiento'],datasets:[{data:[enc,apag,mant],backgroundColor:['#1A75FF','#DDE5F4','#F59E0B'],borderWidth:0,hoverOffset:6}]},
+      data:{labels:['Encendidos','Apagados','Mantenimiento'],datasets:[{data:[enc||0,apag||todosACs.length,mant],backgroundColor:['#1A75FF','#DDE5F4','#F59E0B'],borderWidth:0,hoverOffset:6}]},
       options:{cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11},color:'#3D5280',boxWidth:12,padding:14}}}}
     });
 
-    // Barras horizontales por aula
+    // Barras por aula (consumo real mes actual)
     const aulasMap = {};
     todosACs.forEach(a => { aulasMap[a.aula] = (aulasMap[a.aula]||0) + a.consumo_mes; });
     const aulasArr = Object.entries(aulasMap).sort((a,b)=>b[1]-a[1]);
@@ -885,7 +950,6 @@
       }
     });
   }
-
   // ════ TAB: UPTIME ════
   function renderUptime() {
     const sorted = [...todosACs].sort((a,b)=>b.horas_mes-a.horas_mes);
@@ -893,8 +957,10 @@
     const colMap = { encendido:'#1A75FF', mantenimiento:'#F59E0B', apagado:'#DDE5F4' };
 
     document.getElementById('uptimeList').innerHTML = sorted.map((ac,i) => {
-      const pct   = Math.min((ac.horas_mes/(30*8)*100),100).toFixed(0);
-      const rCls  = i===0?'r1':i===1?'r2':i===2?'r3':'';
+      // Porcentaje sobre horas proyectadas del mes completo
+      const proy = ac.horas_proyect || maxH;
+      const pct  = proy > 0 ? Math.min((ac.horas_mes/proy*100),100).toFixed(0) : 0;
+      const rCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
       return `<div class="uptime-item">
         <span class="uptime-rank ${rCls}">${i+1}</span>
         <div class="uptime-info"><div class="uptime-name">${ac.nombre}</div><div class="uptime-aula">${ac.aula}</div></div>
@@ -903,8 +969,15 @@
       </div>`;
     }).join('');
 
+    // Horas por día de la semana actual — cálculo real
+    const hoy  = new Date();
     const dias  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-    const hDia  = dias.map(() => +(todosACs.length*(2+Math.random()*4)).toFixed(0));
+    const diaSem= [1,2,3,4,5,6,0]; // índices getDay()
+    const hDia  = diaSem.map(diaIdx => {
+      const totalMin = todosACs.reduce((s, ac) => s + _minDia(diaIdx, ac.turno||'ambos'), 0);
+      return +(totalMin/60).toFixed(1);
+    });
+
     if (chUptime) chUptime.destroy();
     chUptime = new Chart(document.getElementById('chartUptime'), {
       type:'bar',
@@ -918,7 +991,6 @@
         }
       }
     });
-  }
 
   function showToast(msg, type='info') {
     const icons = {success:'circle-check',info:'circle-info'};
