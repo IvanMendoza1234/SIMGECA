@@ -473,16 +473,32 @@
     });
   }
 
-  /* CARGAR DATOS */
+  /* CARGAR DATOS — listeners paralelos, no anidados */
   function cargarDatos(){
+    // Listener ACs
     db.collection('aires_acondicionados').onSnapshot(function(snapAC){
-      todosACs=[];
-      snapAC.forEach(function(d){ var x=Object.assign({id:d.id},d.data()); if(!x.dado_de_baja) todosACs.push(x); });
-      db.collection('aulas').orderBy('nombre').onSnapshot(function(snapA){
-        todasAulas=[];
-        snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id},d.data())); });
+      todosACs = [];
+      snapAC.forEach(function(d){
+        var x = Object.assign({id:d.id}, d.data());
+        if(!x.dado_de_baja) todosACs.push(x);
+      });
+      renderMapa();
+      if(panelAula){ var a=todasAulas.find(function(x){return x.id===panelAula.id;}); if(a) actualizarPanelStatus(a); }
+    }, function(err){ console.error('AC listener:', err); });
+
+    // Listener aulas — independiente
+    db.collection('aulas').orderBy('nombre').onSnapshot(function(snapA){
+      todasAulas = [];
+      snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id}, d.data())); });
+      renderMapa();
+    }, function(err){
+      // Si falla orderBy por índice, intentar sin ordenar
+      console.warn('orderBy falló, cargando sin orden:', err);
+      db.collection('aulas').get().then(function(snapA){
+        todasAulas = [];
+        snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id}, d.data())); });
+        todasAulas.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
         renderMapa();
-        if(panelAula){ var a=todasAulas.find(function(x){return x.id===panelAula.id;}); if(a) actualizarPanelStatus(a); }
       });
     });
   }
@@ -499,38 +515,26 @@
     return 'apagado';
   }
 
-  /* ESTADO REAL */
+  /* ESTADO REAL — Sonoff: solo encendido/apagado/auto */
   function estadoReal(ac){
     if(!ac) return {est:'sin', manual:false};
     if(ac.estado==='mantenimiento') return {est:'mant', manual:false};
-    var prog=ac.programacion||{};
-    if(prog.activado){
-      var hm=new Date().getHours()*60+new Date().getMinutes();
-      var p=function(s){if(!s)return null;var x=s.split(':');return parseInt(x[0])*60+parseInt(x[1]);};
-      var ei=p(prog.horaEncendido), ai=p(prog.horaApagado);
-      if(ei!==null&&ai!==null){
-        var on=(ei<ai)?(hm>=ei&&hm<ai):(hm>=ei||hm<ai);
-        return {est:on?'enc':'apag', manual:true, forzado:'prog'};
-      }
-    }
     var modo=ac.modoControl||'auto';
-    if(modo==='encendido') return {est:'enc', manual:true, forzado:'btn'};
-    if(modo==='apagado')   return {est:'apag',manual:true, forzado:'btn'};
+    if(modo==='encendido') return {est:'enc', manual:true,  forzado:'btn'};
+    if(modo==='apagado')   return {est:'apag',manual:true,  forzado:'btn'};
     return {est:horarioEstado(ac.turno)==='encendido'?'enc':'apag', manual:false};
   }
 
   /* KPIs */
   function actualizarKPIs(){
-    var enc=0,apag=0,mant=0,manual=0;
+    var enc=0,apag=0,mant=0;
     todosACs.forEach(function(ac){
       var r=estadoReal(ac);
       if(r.est==='enc') enc++; else if(r.est==='apag') apag++; else if(r.est==='mant') mant++;
-      if(r.manual) manual++;
     });
     document.getElementById('kpiEnc').textContent=enc;
     document.getElementById('kpiApag').textContent=apag;
     document.getElementById('kpiMant').textContent=mant;
-    document.getElementById('kpiManual').textContent=manual;
   }
 
   /* RENDER MAPA */
