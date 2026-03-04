@@ -456,14 +456,66 @@
   });
   function doLogout(){ auth.signOut().then(function(){ window.location.replace('login.html'); }); }
 
-  /* RELOJ */
+  /* RELOJ + APAGADO AUTOMÁTICO 22:00 */
+  var apagadoAutoEjecutado = false; // evitar ejecutar múltiples veces en el mismo minuto
+
   function tick(){
     var n = new Date();
+    var hh = n.getHours(), mm = n.getMinutes(), ss = n.getSeconds();
     document.getElementById('reloj').textContent =
-      String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
-    if(n.getSeconds()===0) renderMapa();
+      String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
+
+    // Actualizar mapa cada minuto
+    if(ss===0) renderMapa();
+
+    // ── Apagado automático a las 22:00 ──
+    // Afecta solo a los que tengan modoControl = 'encendido' (manual)
+    // Los que están en 'auto' ya los apaga el horario institucional
+    if(hh===22 && mm===0 && ss===0 && !apagadoAutoEjecutado){
+      apagadoAutoEjecutado = true;
+      apagadoAutomatico22();
+    }
+    // Resetear el flag cuando ya no son las 22:00
+    if(!(hh===22 && mm===0)){
+      apagadoAutoEjecutado = false;
+    }
   }
   setInterval(tick,1000); tick();
+
+  /* Apagar todos los manuales a las 22:00 y registrar en historial */
+  function apagadoAutomatico22(){
+    var manuales = todosACs.filter(function(ac){
+      return ac.modoControl === 'encendido' && ac.estado !== 'mantenimiento';
+    });
+    if(!manuales.length) return;
+
+    var batch = db.batch();
+    var ts    = firebase.firestore.FieldValue.serverTimestamp();
+
+    manuales.forEach(function(ac){
+      batch.update(
+        db.collection('aires_acondicionados').doc(ac.id),
+        { modoControl: 'auto', updatedAt: ts }
+      );
+    });
+
+    batch.commit().then(function(){
+      // Registrar un evento por cada AC apagado
+      var promesas = manuales.map(function(ac){
+        return db.collection('historial_eventos').add({
+          tipo:        'apagado',
+          titulo:      'Apagado automático 22:00',
+          descripcion: (ac.nombre||'AC') + ' — ' + (ac.aula||'sin aula') + ' · Apagado por límite horario del sistema',
+          fecha:       ts
+        });
+      });
+      return Promise.all(promesas);
+    }).then(function(){
+      showToast('Apagado automático ejecutado (22:00) — ' + manuales.length + ' equipo(s)', 'info');
+    }).catch(function(err){
+      console.error('Error en apagado automático:', err);
+    });
+  }
 
   /* BADGE */
   function badgeSolicitudes(){
@@ -515,10 +567,16 @@
     return 'apagado';
   }
 
-  /* ESTADO REAL — Sonoff: solo encendido/apagado/auto */
+  /* ESTADO REAL — Sonoff: encendido/apagado/auto, con límite 22:00 */
   function estadoReal(ac){
     if(!ac) return {est:'sin', manual:false};
     if(ac.estado==='mantenimiento') return {est:'mant', manual:false};
+
+    // Regla absoluta: después de las 22:00 todo apagado
+    var n  = new Date();
+    var hm = n.getHours()*60 + n.getMinutes();
+    if(hm >= 22*60) return {est:'apag', manual:false};
+
     var modo=ac.modoControl||'auto';
     if(modo==='encendido') return {est:'enc', manual:true,  forzado:'btn'};
     if(modo==='apagado')   return {est:'apag',manual:true,  forzado:'btn'};
