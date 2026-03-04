@@ -481,6 +481,15 @@
     const ahora = new Date();
     const dia   = ahora.getDay();
     const hhmm  = ahora.getHours() * 60 + ahora.getMinutes();
+
+    // Regla absoluta: a las 22:00 todo se apaga
+    if (hhmm >= 22 * 60) return 'apagado';
+
+    // modoControl manual (Sonoff)
+    const modo = ac.modoControl || 'auto';
+    if (modo === 'encendido') return 'encendido';
+    if (modo === 'apagado')   return 'apagado';
+
     const turno = ac.turno || 'ambos';
     const horarios = [];
     if ([1,2,4,5].includes(dia)) horarios.push({ turno:'matutino',  inicio:6*60+45,  fin:13*60 });
