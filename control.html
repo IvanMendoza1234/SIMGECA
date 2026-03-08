@@ -474,12 +474,17 @@
   var auth         = firebase.auth();
   var db           = firebase.firestore();
   
- function fnControlarAC(data){
-  return fetch('https://us-central1-simgeca-26297.cloudfunctions.net/controlarAC',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body: JSON.stringify({data: data})
-  }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+function fnControlarAC(data){
+  return auth.currentUser.getIdToken().then(function(token){
+    return fetch('https://us-central1-simgeca-26297.cloudfunctions.net/controlarAC',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':'Bearer '+token
+      },
+      body: JSON.stringify({data: data})
+    }).then(function(r){ if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+  });
 }
 
   var todasAulas = [], todosACs = [];
