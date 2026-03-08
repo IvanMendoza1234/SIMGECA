@@ -740,11 +740,14 @@
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     }).then(function(){
       showToast('Cambios guardados en '+(panelAula.nombre||'el aula'),'success');
+      // ── Guardar hw_id y modo ANTES de cerrar el panel ──
+      var hwId  = panelAC ? panelAC.hw_id : null;
+      var modo  = panelModo;
       cerrarPanel();
       // ── Enviar comando al dispositivo físico si tiene hw_id ──
-      if(panelAC.hw_id){
-        var accion = (panelModo==='encendido') ? 'on' : 'off';
-        fnControlarAC({ deviceId: panelAC.hw_id, accion: accion })
+      if(hwId){
+        var accion = (modo==='encendido') ? 'on' : 'off';
+        fnControlarAC({ deviceId: hwId, accion: accion })
           .then(function(){ console.log('Dispositivo físico actualizado'); })
           .catch(function(err){ showToast('Firestore OK, pero error en dispositivo físico: '+err.message,'error'); });
       }
