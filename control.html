@@ -225,11 +225,27 @@
 
     /* Temperatura */
     .temp-ctrl { display: flex; align-items: center; gap: .85rem; }
-/* Programación */
-.ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
-.ios-sl::before { content:''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
-.ios-toggle input:checked + .ios-sl::before { transform: translateX(20px); }
-.form-group { display: flex; flex-direction: column; gap: .28rem; }
+    .temp-btn  { width: 40px; height: 40px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--surface2); cursor: pointer; font-size: 1.05rem; display: flex; align-items: center; justify-content: center; color: var(--text-mid); transition: all .15s; flex-shrink: 0; }
+    .temp-btn:hover:not(:disabled) { border-color: var(--azul-light); color: var(--azul); background: var(--azul-pale); }
+    .temp-btn:disabled { opacity: .38; cursor: not-allowed; }
+    .temp-disp { flex: 1; text-align: center; }
+    .temp-num  { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; color: var(--text); line-height: 1; }
+    .temp-unit { font-size: .78rem; color: var(--text-light); margin-top: .12rem; }
+    .temp-slider { width: 100%; margin-top: .55rem; -webkit-appearance: none; height: 5px; border-radius: 3px; background: linear-gradient(90deg, var(--azul-light) var(--pct,50%), var(--border) var(--pct,50%)); outline: none; cursor: pointer; }
+    .temp-slider:disabled { cursor: not-allowed; opacity: .4; }
+    .temp-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%; background: var(--azul); border: 2px solid #fff; box-shadow: 0 2px 6px rgba(0,59,142,.3); cursor: pointer; }
+    .temp-range-row { display: flex; justify-content: space-between; font-size: .66rem; color: var(--text-light); margin-top: .3rem; }
+
+    /* Programación */
+    .prog-toggle-row { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 600; color: var(--text); margin-bottom: .75rem; }
+    .ios-toggle { position: relative; width: 44px; height: 24px; cursor: pointer; flex-shrink: 0; }
+    .ios-toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+    .ios-sl { position: absolute; inset: 0; background: #CBD5E1; border-radius: 24px; transition: background .2s; }
+    .ios-sl::before { content:''; position: absolute; width: 18px; height: 18px; left: 3px; top: 3px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.2); transition: transform .2s; }
+    .ios-toggle input:checked + .ios-sl { background: var(--success); }
+    .ios-toggle input:checked + .ios-sl::before { transform: translateX(20px); }
+    .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+    .form-group { display: flex; flex-direction: column; gap: .28rem; }
     .form-label { font-size: .72rem; font-weight: 700; color: var(--text-mid); }
     .form-input { padding: .58rem .85rem; border: 1.5px solid var(--border); border-radius: 9px; background: var(--surface2); font-family: 'DM Sans', sans-serif; font-size: .88rem; color: var(--text); outline: none; transition: border-color .2s; }
     .form-input:focus { border-color: var(--azul-light); box-shadow: 0 0 0 3px rgba(26,117,255,.1); background: #fff; }
@@ -292,7 +308,7 @@
     <a class="nav-item" href="aulas.html"><i class="fa-solid fa-school"></i> Aulas y Turnos</a>
     <a class="nav-item" href="usuarios.html"><i class="fa-solid fa-users"></i> Usuarios</a>
     <a class="nav-item" href="solicitudes.html"><i class="fa-solid fa-clipboard-list"></i> Solicitudes
-      <span class="nav-badge" id="navBadgeSol" style="display:none">0</span></a>
+      <span class="nav-badge" id="navBadgeSol">0</span></a>
     <div class="nav-section">Análisis</div>
     <a class="nav-item" href="monitoreo.html"><i class="fa-solid fa-chart-line"></i> Monitoreo</a>
     <a class="nav-item" href="reportes.html"><i class="fa-solid fa-triangle-exclamation"></i> Reportes</a>
@@ -331,7 +347,7 @@
       <div class="kpi-card"><div class="kpi-icon ki-enc"><i class="fa-solid fa-power-off"></i></div><div><div class="kpi-val" id="kpiEnc">—</div><div class="kpi-lbl">Encendidos</div></div></div>
       <div class="kpi-card"><div class="kpi-icon ki-apag"><i class="fa-solid fa-circle"></i></div><div><div class="kpi-val" id="kpiApag">—</div><div class="kpi-lbl">Apagados</div></div></div>
       <div class="kpi-card"><div class="kpi-icon ki-mant"><i class="fa-solid fa-wrench"></i></div><div><div class="kpi-val" id="kpiMant">—</div><div class="kpi-lbl">Mantenimiento</div></div></div>
-      <div class="kpi-card"><div class="kpi-icon ki-sonoff" style="background:#FFF3E0;color:#E65100"><i class="fa-brands fa-bluetooth"></i></div><div><div class="kpi-val">Sonoff</div><div class="kpi-lbl">Dispositivo IoT</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-man"><i class="fa-solid fa-hand"></i></div><div><div class="kpi-val" id="kpiManual">—</div><div class="kpi-lbl">Modo manual</div></div></div>
     </div>
 
     <div class="leyenda">
@@ -339,7 +355,7 @@
       <div class="leyenda-item"><div class="ley-dot ld-apag"></div> Apagado (auto)</div>
       <div class="leyenda-item"><div class="ley-dot ld-mant"></div> Mantenimiento</div>
       <div class="ley-sep"></div>
-      <div class="leyenda-item"><div class="ley-dot ld-enc"></div> Encendido por horario</div>
+      <div class="leyenda-item"><div class="ley-dot ld-forz"></div> Forzado manual</div>
       <div class="leyenda-item"><div class="ley-dot ld-sin"></div> Sin AC asignado</div>
     </div>
 
@@ -385,10 +401,42 @@
       </div>
     </div>
 
-    <!-- Nota Sonoff -->
-    <div style="background:var(--azul-pale);border:1.5px solid #C5D8FF;border-radius:10px;padding:.75rem 1rem;font-size:.78rem;color:var(--azul);display:flex;gap:.55rem;align-items:flex-start">
-      <i class="fa-solid fa-circle-info" style="margin-top:.1rem;flex-shrink:0"></i>
-      <span>El dispositivo <strong>Sonoff</strong> solo permite encender y apagar el equipo. El horario de encendido automático se rige por el calendario institucional registrado en el sistema.</span>
+    <!-- Temperatura -->
+    <div>
+      <div class="sec-tit">Temperatura objetivo</div>
+      <div class="temp-ctrl">
+        <button class="temp-btn" id="btnTMenos" onclick="cambiarTemp(-1)"><i class="fa-solid fa-minus"></i></button>
+        <div class="temp-disp">
+          <div class="temp-num" id="tempNum">24</div>
+          <div class="temp-unit">°C</div>
+        </div>
+        <button class="temp-btn" id="btnTMas" onclick="cambiarTemp(+1)"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <input type="range" class="temp-slider" id="tempSlider" min="16" max="30" value="24" oninput="onSlider(this.value)"/>
+      <div class="temp-range-row"><span>16 °C (mín)</span><span>30 °C (máx)</span></div>
+    </div>
+
+    <!-- Programación -->
+    <div>
+      <div class="sec-tit">Programación de encendido</div>
+      <div class="prog-toggle-row">
+        <label class="ios-toggle">
+          <input type="checkbox" id="progActivo" onchange="onProgToggle()"/>
+          <span class="ios-sl"></span>
+        </label>
+        Activar programación manual
+      </div>
+      <div class="time-grid">
+        <div class="form-group">
+          <label class="form-label">Hora de encendido</label>
+          <input type="time" class="form-input" id="horaEnc" disabled/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hora de apagado</label>
+          <input type="time" class="form-input" id="horaApag" disabled/>
+        </div>
+        <span class="form-hint"><i class="fa-solid fa-circle-info" style="color:var(--azul-light)"></i> La programación sobrescribe el horario institucional solo para este equipo.</span>
+      </div>
     </div>
 
     <!-- Info aula -->
@@ -412,6 +460,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-functions-compat.js"></script>
 <script>
   var firebaseConfig = {
     apiKey: "AIzaSyCdbaYB4Ke0buAMFhlr4YzsJUo_uYgj3Hg",
@@ -422,8 +471,9 @@
     appId: "1:28195458236:web:9250f82b845665d82cd4b9"
   };
   firebase.initializeApp(firebaseConfig);
-  var auth = firebase.auth();
-  var db   = firebase.firestore();
+  var auth         = firebase.auth();
+  var db           = firebase.firestore();
+  var fnControlarAC = firebase.functions().httpsCallable('controlarAC');
 
   var todasAulas = [], todosACs = [];
   var panelAula  = null, panelAC = null;
@@ -440,75 +490,14 @@
   });
   function doLogout(){ auth.signOut().then(function(){ window.location.replace('login.html'); }); }
 
-  /* RELOJ + APAGADO AUTOMÁTICO 22:00 */
-  var apagadoAutoEjecutado = false; // evitar ejecutar múltiples veces en el mismo minuto
-
+  /* RELOJ */
   function tick(){
     var n = new Date();
-    var hh = n.getHours(), mm = n.getMinutes(), ss = n.getSeconds();
     document.getElementById('reloj').textContent =
-      String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0')+':'+String(ss).padStart(2,'0');
-
-    // Actualizar mapa cada minuto
-    if(ss===0) renderMapa();
-
-    // ── Apagado automático a las 22:00 ──
-    // Afecta solo a los que tengan modoControl = 'encendido' (manual)
-    // Los que están en 'auto' ya los apaga el horario institucional
-    if(hh===22 && mm===0 && ss===0 && !apagadoAutoEjecutado){
-      apagadoAutoEjecutado = true;
-      apagadoAutomatico22();
-    }
-    // Resetear el flag cuando ya no son las 22:00
-    if(!(hh===22 && mm===0)){
-      apagadoAutoEjecutado = false;
-    }
+      String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0')+':'+String(n.getSeconds()).padStart(2,'0');
+    if(n.getSeconds()===0) renderMapa();
   }
   setInterval(tick,1000); tick();
-
-  // Al cargar la página, si ya son horas fuera de horario y hay manuales encendidos → apagar
-  setTimeout(function(){
-    var n = new Date(), hm = n.getHours()*60+n.getMinutes();
-    if(hm >= 22*60 || hm < 6*60+45){
-      var manuales = todosACs.filter(function(ac){ return ac.modoControl==='encendido' && ac.estado!=='mantenimiento'; });
-      if(manuales.length) apagadoAutomatico22();
-    }
-  }, 3000); // esperar 3s a que Firestore cargue
-
-  /* Apagar todos los manuales a las 22:00 y registrar en historial */
-  function apagadoAutomatico22(){
-    var manuales = todosACs.filter(function(ac){
-      return ac.modoControl === 'encendido' && ac.estado !== 'mantenimiento';
-    });
-    if(!manuales.length) return;
-
-    var batch = db.batch();
-    var ts    = firebase.firestore.FieldValue.serverTimestamp();
-
-    manuales.forEach(function(ac){
-      batch.update(
-        db.collection('aires_acondicionados').doc(ac.id),
-        { modoControl: 'auto', updatedAt: ts }
-      );
-    });
-
-    batch.commit().then(function(){
-      // Registrar un evento por cada AC apagado
-      var promesas = manuales.map(function(ac){
-        return db.collection('historial_eventos').add({
-          tipo:        'apagado',
-          titulo:      'Apagado automático 22:00',
-          descripcion: (ac.nombre||'AC') + ' — ' + (ac.aula||'sin aula') + ' · Apagado por límite horario del sistema',
-          fecha:       ts
-        });
-      });
-      return Promise.all(promesas);
-    }).then(function(){
-      showToast('Apagado automático ejecutado (22:00) — ' + manuales.length + ' equipo(s)', 'info');
-    }).catch(function(err){
-      console.error('Error en apagado automático:', err);
-    });
-  }
 
   /* BADGE */
   function badgeSolicitudes(){
@@ -518,32 +507,16 @@
     });
   }
 
-  /* CARGAR DATOS — listeners paralelos, no anidados */
+  /* CARGAR DATOS */
   function cargarDatos(){
-    // Listener ACs
     db.collection('aires_acondicionados').onSnapshot(function(snapAC){
-      todosACs = [];
-      snapAC.forEach(function(d){
-        var x = Object.assign({id:d.id}, d.data());
-        if(!x.dado_de_baja) todosACs.push(x);
-      });
-      renderMapa();
-      if(panelAula){ var a=todasAulas.find(function(x){return x.id===panelAula.id;}); if(a) actualizarPanelStatus(a); }
-    }, function(err){ console.error('AC listener:', err); });
-
-    // Listener aulas — independiente
-    db.collection('aulas').orderBy('nombre').onSnapshot(function(snapA){
-      todasAulas = [];
-      snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id}, d.data())); });
-      renderMapa();
-    }, function(err){
-      // Si falla orderBy por índice, intentar sin ordenar
-      console.warn('orderBy falló, cargando sin orden:', err);
-      db.collection('aulas').get().then(function(snapA){
-        todasAulas = [];
-        snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id}, d.data())); });
-        todasAulas.sort(function(a,b){ return (a.nombre||'').localeCompare(b.nombre||''); });
+      todosACs=[];
+      snapAC.forEach(function(d){ var x=Object.assign({id:d.id},d.data()); if(!x.dado_de_baja) todosACs.push(x); });
+      db.collection('aulas').orderBy('nombre').onSnapshot(function(snapA){
+        todasAulas=[];
+        snapA.forEach(function(d){ todasAulas.push(Object.assign({id:d.id},d.data())); });
         renderMapa();
+        if(panelAula){ var a=todasAulas.find(function(x){return x.id===panelAula.id;}); if(a) actualizarPanelStatus(a); }
       });
     });
   }
@@ -560,32 +533,38 @@
     return 'apagado';
   }
 
-  /* ESTADO REAL — Sonoff: encendido/apagado/auto, con límite 22:00 */
+  /* ESTADO REAL */
   function estadoReal(ac){
     if(!ac) return {est:'sin', manual:false};
     if(ac.estado==='mantenimiento') return {est:'mant', manual:false};
-
-    // Regla absoluta: fuera de horario institucional (22:00–06:44) todo apagado
-    var n  = new Date();
-    var hm = n.getHours()*60 + n.getMinutes();
-    if(hm >= 22*60 || hm < 6*60+45) return {est:'apag', manual:false};
-
+    var prog=ac.programacion||{};
+    if(prog.activado){
+      var hm=new Date().getHours()*60+new Date().getMinutes();
+      var p=function(s){if(!s)return null;var x=s.split(':');return parseInt(x[0])*60+parseInt(x[1]);};
+      var ei=p(prog.horaEncendido), ai=p(prog.horaApagado);
+      if(ei!==null&&ai!==null){
+        var on=(ei<ai)?(hm>=ei&&hm<ai):(hm>=ei||hm<ai);
+        return {est:on?'enc':'apag', manual:true, forzado:'prog'};
+      }
+    }
     var modo=ac.modoControl||'auto';
-    if(modo==='encendido') return {est:'enc', manual:true,  forzado:'btn'};
-    if(modo==='apagado')   return {est:'apag',manual:true,  forzado:'btn'};
+    if(modo==='encendido') return {est:'enc', manual:true, forzado:'btn'};
+    if(modo==='apagado')   return {est:'apag',manual:true, forzado:'btn'};
     return {est:horarioEstado(ac.turno)==='encendido'?'enc':'apag', manual:false};
   }
 
   /* KPIs */
   function actualizarKPIs(){
-    var enc=0,apag=0,mant=0;
+    var enc=0,apag=0,mant=0,manual=0;
     todosACs.forEach(function(ac){
       var r=estadoReal(ac);
       if(r.est==='enc') enc++; else if(r.est==='apag') apag++; else if(r.est==='mant') mant++;
+      if(r.manual) manual++;
     });
     document.getElementById('kpiEnc').textContent=enc;
     document.getElementById('kpiApag').textContent=apag;
     document.getElementById('kpiMant').textContent=mant;
+    document.getElementById('kpiManual').textContent=manual;
   }
 
   /* RENDER MAPA */
@@ -665,20 +644,30 @@
     document.getElementById('panelSub').textContent=[aula.tipo,aula.edificio,aula.piso].filter(Boolean).join(' · ')||'—';
 
     panelModo=(ac&&ac.modoControl)?ac.modoControl:'auto';
+    panelTemp=(ac&&ac.temperatura)?parseInt(ac.temperatura):24;
+    document.getElementById('tempNum').textContent=panelTemp;
+    document.getElementById('tempSlider').value=panelTemp;
+    sliderFill();
+
+    var prog=(ac&&ac.programacion)?ac.programacion:{};
+    document.getElementById('progActivo').checked=!!prog.activado;
+    document.getElementById('horaEnc').value=prog.horaEncendido||'';
+    document.getElementById('horaApag').value=prog.horaApagado||'';
+    toggleTime(!!prog.activado);
 
     var pills=[];
     if(aula.turno)          pills.push('<div class="info-pill"><i class="fa-solid fa-clock"></i>'+aula.turno+'</div>');
     if(aula.capacidad)      pills.push('<div class="info-pill"><i class="fa-solid fa-users"></i>'+aula.capacidad+' alumnos</div>');
     if(aula.docente_nombre) pills.push('<div class="info-pill"><i class="fa-solid fa-chalkboard-user"></i>'+aula.docente_nombre+'</div>');
     if(ac&&ac.btu)          pills.push('<div class="info-pill"><i class="fa-solid fa-temperature-half"></i>'+ac.btu+' BTU</div>');
-    if(ac&&ac.potencia_w)   pills.push('<div class="info-pill"><i class="fa-solid fa-bolt"></i>'+ac.potencia_w+' W</div>');
     if(ac&&ac.marca)        pills.push('<div class="info-pill"><i class="fa-solid fa-tag"></i>'+ac.marca+(ac.modelo?' '+ac.modelo:'')+'</div>');
-    if(ac&&ac.hw_id)        pills.push('<div class="info-pill"><i class="fa-solid fa-microchip"></i>Sonoff: '+ac.hw_id+'</div>');
     if(!ac)                 pills.push('<div class="info-pill" style="color:var(--danger);border-color:#FECACA"><i class="fa-solid fa-circle-xmark"></i>Sin AC asignado</div>');
     document.getElementById('infoPills').innerHTML=pills.join('');
 
     var sinCtrl=!ac||ac.estado==='mantenimiento';
-    ['btnEnc','btnApag','btnAuto'].forEach(function(id){ document.getElementById(id).disabled=sinCtrl; });
+    ['btnEnc','btnApag','btnAuto','btnTMenos','btnTMas'].forEach(function(id){ document.getElementById(id).disabled=sinCtrl; });
+    document.getElementById('tempSlider').disabled=sinCtrl;
+    document.getElementById('progActivo').disabled=sinCtrl;
 
     actualizarCtrlBtns();
     actualizarPanelStatus(aula);
@@ -698,11 +687,11 @@
       sin: {st:'pst-apag',ic:'psi-apag',dt:'pdb-apag',lb:'Sin AC asignado',sb:'Asigna un AC desde Aulas y Turnos'}
     };
     var m=map[r.est]||map.apag;
-    // Con Sonoff solo hay forzado por botón, no por programación
     if(r.manual&&r.forzado==='btn'){
-      if(r.est==='enc')  m={st:'pst-enc', ic:'psi-enc', dt:'pdb-enc', lb:'Encendido', sb:'Encendido vía Sonoff'};
-      if(r.est==='apag') m={st:'pst-apag',ic:'psi-apag',dt:'pdb-apag',lb:'Apagado',   sb:'Apagado vía Sonoff'};
+      if(r.est==='enc')  m={st:'pst-fenc', ic:'psi-fenc', dt:'pdb-fenc', lb:'Encendido',sb:'Forzado manualmente'};
+      if(r.est==='apag') m={st:'pst-fapag',ic:'psi-fapag',dt:'pdb-fapag',lb:'Apagado',  sb:'Forzado manualmente'};
     }
+    if(r.manual&&r.forzado==='prog') m.sb='Según programación manual';
     document.getElementById('panelStatus').className='panel-status '+m.st;
     document.getElementById('psIco').className='ps-ico '+m.ic;
     document.getElementById('psDot').className='ps-dot-b '+m.dt;
@@ -726,25 +715,39 @@
     document.getElementById('btnAuto').className='ctrl-btn'+(panelModo==='auto'     ?' sel-auto':'');
   }
 
-  /* ACCIÓN GLOBAL */
+  /* TEMPERATURA */
+  function cambiarTemp(d){ panelTemp=Math.max(16,Math.min(30,panelTemp+d)); document.getElementById('tempNum').textContent=panelTemp; document.getElementById('tempSlider').value=panelTemp; sliderFill(); }
+  function onSlider(v){ panelTemp=parseInt(v); document.getElementById('tempNum').textContent=panelTemp; sliderFill(); }
+  function sliderFill(){ var p=((panelTemp-16)/(30-16))*100; document.getElementById('tempSlider').style.setProperty('--pct',p+'%'); }
+
+  /* PROGRAMACIÓN */
+  function onProgToggle(){ toggleTime(document.getElementById('progActivo').checked); }
+  function toggleTime(e){ document.getElementById('horaEnc').disabled=!e; document.getElementById('horaApag').disabled=!e; }
+
+  /* GUARDAR */
   function guardarCambios(){
     if(!panelAC){ showToast('Este aula no tiene AC asignado','error'); return; }
     var btn=document.getElementById('btnGuardar');
     btn.disabled=true; btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
     db.collection('aires_acondicionados').doc(panelAC.id).update({
       modoControl: panelModo,
+      temperatura: panelTemp,
+      programacion:{
+        activado:      document.getElementById('progActivo').checked,
+        horaEncendido: document.getElementById('horaEnc').value,
+        horaApagado:   document.getElementById('horaApag').value
+      },
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(function(){
-      // Registrar en historial
-      return db.collection('historial_eventos').add({
-        tipo: panelModo === 'encendido' ? 'encendido' : 'apagado',
-        titulo: panelModo === 'auto' ? 'Modo automático activado' : (panelModo === 'encendido' ? 'AC encendido manualmente' : 'AC apagado manualmente'),
-        descripcion: (panelAula.nombre||'Aula') + ' — ' + (panelAC.nombre||'AC'),
-        fecha: firebase.firestore.FieldValue.serverTimestamp()
-      });
     }).then(function(){
       showToast('Cambios guardados en '+(panelAula.nombre||'el aula'),'success');
       cerrarPanel();
+      // ── Enviar comando al dispositivo físico si tiene hw_id ──
+      if(panelAC.hw_id){
+        var accion = (panelModo==='encendido') ? 'on' : 'off';
+        fnControlarAC({ deviceId: panelAC.hw_id, accion: accion })
+          .then(function(){ console.log('Dispositivo físico actualizado'); })
+          .catch(function(err){ showToast('Firestore OK, pero error en dispositivo físico: '+err.message,'error'); });
+      }
     }).catch(function(err){ showToast('Error: '+err.message,'error'); })
     .finally(function(){ btn.disabled=false; btn.innerHTML='<i class="fa-solid fa-floppy-disk"></i> Guardar cambios'; });
   }
@@ -758,7 +761,17 @@
     });
     if(!n){ showToast('No hay equipos disponibles','info'); return; }
     batch.commit()
-      .then(function(){ showToast(n+' equipo(s) '+(modo==='encendido'?'encendidos':'apagados'),modo==='encendido'?'success':'info'); })
+      .then(function(){
+        showToast(n+' equipo(s) '+(modo==='encendido'?'encendidos':'apagados'),modo==='encendido'?'success':'info');
+        // ── Enviar comando físico a cada dispositivo con hw_id ──
+        var accion = (modo==='encendido') ? 'on' : 'off';
+        todosACs.forEach(function(ac){
+          if(ac.hw_id && ac.estado!=='mantenimiento'){
+            fnControlarAC({ deviceId: ac.hw_id, accion: accion })
+              .catch(function(e){ console.error('Error físico '+ac.nombre+': '+e.message); });
+          }
+        });
+      })
       .catch(function(err){ showToast('Error: '+err.message,'error'); });
   }
 
