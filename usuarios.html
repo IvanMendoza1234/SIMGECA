@@ -57,8 +57,6 @@
     .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
     .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
     .topbar-right   { display: flex; align-items: center; gap: .6rem; }
-
-    /* info chip en topbar */
     .info-chip { display: flex; align-items: center; gap: .4rem; background: var(--azul-pale); color: var(--azul); border: 1px solid #C5D8FF; border-radius: 8px; padding: .4rem .8rem; font-size: .75rem; font-weight: 600; }
 
     .page-content { padding: 1.5rem 1.75rem; flex: 1; }
@@ -155,16 +153,12 @@
     .btn-danger-full { padding: .55rem 1.1rem; background: #FEE2E2; border: 1.5px solid #FECACA; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .85rem; font-weight: 600; color: #991B1B; cursor: pointer; }
     .btn-danger-full:hover { background: #FECACA; }
 
-    /* modal confirm */
     .confirm-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin: 0 auto 1rem; }
-    .confirm-icon.warn    { background: #FEF3C7; color: var(--warning); }
     .confirm-icon.danger  { background: #FEE2E2; color: var(--danger); }
-    .confirm-icon.success { background: #D1FAE5; color: var(--success); }
     .modal-body.center { text-align: center; }
     .confirm-title { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; color: var(--text); margin-bottom: .5rem; }
     .confirm-desc  { font-size: .84rem; color: var(--text-light); line-height: 1.5; }
 
-    /* historial panel */
     .historial-list { display: flex; flex-direction: column; gap: .6rem; max-height: 380px; overflow-y: auto; }
     .historial-item { display: flex; align-items: flex-start; gap: .75rem; padding: .7rem .9rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; }
     .h-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: .8rem; flex-shrink: 0; }
@@ -175,7 +169,6 @@
     .h-desc { font-size: .82rem; color: var(--text-mid); flex: 1; line-height: 1.4; }
     .h-fecha { font-size: .72rem; color: var(--text-light); margin-top: .2rem; }
 
-    /* toast */
     .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
     .toast { padding: .7rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: .55rem; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: fadeIn .3s ease; max-width: 300px; }
     .toast.success { background: var(--success); }
@@ -188,89 +181,34 @@
       .form-grid { grid-template-columns: 1fr; }
       .form-grid .full { grid-column: 1; }
     }
-  
-    /* ══ PRELOADER ══ */
-    #simgeca-preloader {
-      position: fixed; inset: 0; z-index: 9999;
-      background: #003B8E;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      gap: 1.5rem;
-      transition: opacity .5s ease, visibility .5s ease;
-    }
-    #simgeca-preloader.fade-out {
-      opacity: 0; visibility: hidden;
-    }
-    .pre-logo {
-      display: flex; flex-direction: column; align-items: center; gap: .6rem;
-    }
-    .pre-icon {
-      width: 64px; height: 64px;
-      background: rgba(255,255,255,.1);
-      border: 1.5px solid rgba(255,255,255,.2);
-      border-radius: 18px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.75rem; color: #00C2A8;
-      animation: pre-pulse 1.8s ease-in-out infinite;
-    }
-    .pre-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 1.5rem; font-weight: 800;
-      color: #fff; letter-spacing: -.5px;
-    }
-    .pre-sub {
-      font-size: .68rem; color: rgba(255,255,255,.35);
-      text-transform: uppercase; letter-spacing: .1em;
-    }
-    .pre-bar-wrap {
-      width: 180px; height: 3px;
-      background: rgba(255,255,255,.12);
-      border-radius: 99px; overflow: hidden;
-    }
-    .pre-bar {
-      height: 100%; width: 0%;
-      background: linear-gradient(90deg, #00C2A8, #1A75FF);
-      border-radius: 99px;
-      animation: pre-load 1.6s cubic-bezier(.4,0,.2,1) forwards;
-    }
-    @keyframes pre-load {
-      0%   { width: 0%; }
-      60%  { width: 75%; }
-      100% { width: 100%; }
-    }
-    @keyframes pre-pulse {
-      0%, 100% { transform: scale(1);   box-shadow: 0 0 0 0 rgba(0,194,168,.3); }
-      50%       { transform: scale(1.06); box-shadow: 0 0 0 12px rgba(0,194,168,0); }
-    }
 
+    #simgeca-preloader { position: fixed; inset: 0; z-index: 9999; background: #003B8E; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; transition: opacity .5s ease, visibility .5s ease; }
+    #simgeca-preloader.fade-out { opacity: 0; visibility: hidden; }
+    .pre-logo { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
+    .pre-icon { width: 64px; height: 64px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: #00C2A8; animation: pre-pulse 1.8s ease-in-out infinite; }
+    .pre-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
+    .pre-sub { font-size: .68rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .1em; }
+    .pre-bar-wrap { width: 180px; height: 3px; background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden; }
+    .pre-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00C2A8, #1A75FF); border-radius: 99px; animation: pre-load 1.6s cubic-bezier(.4,0,.2,1) forwards; }
+    @keyframes pre-load { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
+    @keyframes pre-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,194,168,.3)} 50%{transform:scale(1.06);box-shadow:0 0 0 12px rgba(0,194,168,0)} }
   </style>
 </head>
 <body>
 
-  <!-- PRELOADER -->
   <div id="simgeca-preloader">
     <div class="pre-logo">
       <div class="pre-icon"><i class="fa-solid fa-wind"></i></div>
-      <div>
-        <div class="pre-title">SIMGECA</div>
-        <div class="pre-sub">Sistema de Gestión de Clima</div>
-      </div>
+      <div><div class="pre-title">SIMGECA</div><div class="pre-sub">Sistema de Gestión de Clima</div></div>
     </div>
-    <div class="pre-bar-wrap">
-      <div class="pre-bar"></div>
-    </div>
+    <div class="pre-bar-wrap"><div class="pre-bar"></div></div>
   </div>
 
-
-<!-- ══ SIDEBAR ══ -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-row">
       <div class="logo-icon"><i class="fa-solid fa-wind"></i></div>
-      <div>
-        <div class="logo-text">SIMGECA</div>
-        <div class="logo-sub">TecNM — Lázaro Cárdenas</div>
-      </div>
+      <div><div class="logo-text">SIMGECA</div><div class="logo-sub">TecNM — Lázaro Cárdenas</div></div>
     </div>
   </div>
   <nav class="sidebar-nav">
@@ -303,7 +241,6 @@
   </div>
 </aside>
 
-<!-- ══ MAIN ══ -->
 <div class="main">
   <header class="topbar">
     <div class="topbar-left">
@@ -319,8 +256,6 @@
   </header>
 
   <div class="page-content">
-
-    <!-- Tabs -->
     <div class="tabs">
       <button class="tab active" onclick="cambiarTab('activos', this)">
         <i class="fa-solid fa-circle-check"></i> Activos <span id="countActivos" style="opacity:.6"></span>
@@ -333,7 +268,6 @@
       </button>
     </div>
 
-    <!-- Toolbar -->
     <div class="toolbar">
       <div class="search-wrap">
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -355,19 +289,13 @@
       <span class="count-badge" id="countLabel">Cargando...</span>
     </div>
 
-    <!-- Tabla -->
     <div class="table-wrap">
       <table>
         <thead>
           <tr>
-            <th>Usuario</th>
-            <th>Rol</th>
-            <th>Turno</th>
-            <th>No. Control / ID</th>
-            <th>Departamento</th>
-            <th>Estado</th>
-            <th>Alta</th>
-            <th>Acciones</th>
+            <th>Usuario</th><th>Rol</th><th>Turno</th>
+            <th>No. Control / ID</th><th>Departamento</th>
+            <th>Estado</th><th>Alta</th><th>Acciones</th>
           </tr>
         </thead>
         <tbody id="tablaBody">
@@ -380,11 +308,10 @@
         </tbody>
       </table>
     </div>
-
   </div>
 </div>
 
-<!-- ══ MODAL EDITAR USUARIO ══ -->
+<!-- MODAL EDITAR -->
 <div class="modal-overlay" id="modalEditar">
   <div class="modal">
     <div class="modal-header">
@@ -396,7 +323,6 @@
     </div>
     <div class="modal-body">
       <div class="form-grid">
-
         <div class="section-label">Información personal</div>
         <div class="form-group">
           <label class="form-label">Nombre(s)</label>
@@ -415,7 +341,6 @@
           <label class="form-label">Teléfono</label>
           <input type="tel" class="form-input" id="fTelefono" placeholder="Ej. 7531234567"/>
         </div>
-
         <div class="section-label">Rol y turno</div>
         <div class="form-group">
           <label class="form-label">Rol *</label>
@@ -436,7 +361,6 @@
             <option value="ambos">Ambos</option>
           </select>
         </div>
-
         <div class="section-label">Datos institucionales</div>
         <div class="form-group">
           <label class="form-label" id="labelControl">No. de Control</label>
@@ -446,12 +370,10 @@
           <label class="form-label">Departamento / Carrera</label>
           <input type="text" class="form-input" id="fDepartamento" placeholder="Ej. Sistemas Computacionales"/>
         </div>
-
         <div class="section-label">Observaciones</div>
         <div class="form-group full">
-          <textarea class="form-input form-textarea" id="fObs" placeholder="Notas adicionales sobre el usuario..." style="resize:vertical;min-height:65px"></textarea>
+          <textarea class="form-input form-textarea" id="fObs" placeholder="Notas adicionales..." style="resize:vertical;min-height:65px"></textarea>
         </div>
-
       </div>
     </div>
     <div class="modal-footer">
@@ -463,7 +385,7 @@
   </div>
 </div>
 
-<!-- ══ MODAL CAMBIAR CONTRASEÑA ══ -->
+<!-- MODAL CONTRASEÑA -->
 <div class="modal-overlay" id="modalPassword">
   <div class="modal modal-sm">
     <div class="modal-header">
@@ -495,7 +417,7 @@
   </div>
 </div>
 
-<!-- ══ MODAL HISTORIAL ══ -->
+<!-- MODAL HISTORIAL -->
 <div class="modal-overlay" id="modalHistorial">
   <div class="modal modal-lg">
     <div class="modal-header">
@@ -520,13 +442,13 @@
   </div>
 </div>
 
-<!-- ══ MODAL CONFIRMAR BAJA ══ -->
+<!-- MODAL BAJA -->
 <div class="modal-overlay" id="modalBaja">
   <div class="modal modal-sm">
     <div class="modal-body center" style="padding:2rem 1.5rem">
       <div class="confirm-icon danger"><i class="fa-solid fa-user-slash"></i></div>
       <div class="confirm-title">¿Dar de baja al usuario?</div>
-      <p class="confirm-desc">El usuario <strong id="bajaNombre"></strong> perderá acceso al sistema. Podrás reactivarlo en cualquier momento desde la pestaña "Dados de baja".</p>
+      <p class="confirm-desc">El usuario <strong id="bajaNombre"></strong> perderá acceso al sistema.</p>
     </div>
     <div class="modal-footer">
       <button class="btn-cancel" onclick="cerrarModal('modalBaja')">Cancelar</button>
@@ -539,7 +461,6 @@
 
 <div class="toast-wrap" id="toastWrap"></div>
 
-<!-- ══ FIREBASE ══ -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -556,14 +477,38 @@
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
-  // ── Estado — declarado al tope para que los onclick del HTML lo encuentren ──
   var todosUsuarios = [];
   var tabActual     = 'activos';
   var docIdEditar   = null;
   var docIdAccion   = null;
   var docIdPassword = null;
 
-  // ── Protección de ruta ──
+  // ══════════════════════════════════════════════════════════════
+  // PARADIGMA 4 — FUNCIONES DE PRIMERA CLASE
+  // Una función guardada en una variable, igual que un número o texto.
+  // rolConfig es una variable que contiene una función (formatearRol).
+  // La usamos más adelante en renderTabla() como cualquier otro valor.
+  // ══════════════════════════════════════════════════════════════
+  const formatearRol = function(rol) {
+    const config = {
+      admin:   { lbl: 'Admin',   cls: 'rol-admin'   },
+      docente: { lbl: 'Docente', cls: 'rol-docente' },
+      alumno:  { lbl: 'Alumno',  cls: 'rol-alumno'  },
+      tecnico: { lbl: 'Técnico', cls: 'rol-tecnico' },
+    };
+    return config[rol] || { lbl: rol || '—', cls: '' };
+  };
+
+  const formatearTurno = function(turno) {
+    const config = {
+      matutino:   { lbl: 'Matutino',   cls: 'turno-matutino'   },
+      vespertino: { lbl: 'Vespertino', cls: 'turno-vespertino' },
+      ambos:      { lbl: 'Ambos',      cls: 'turno-ambos'      },
+    };
+    return config[turno] || null;
+  };
+  // ══════════════════════════════════════════════════════════════
+
   auth.onAuthStateChanged(user => {
     if (!user) { window.location.href = 'login.html'; return; }
     document.getElementById('userName').textContent   = user.email.split('@')[0];
@@ -574,7 +519,6 @@
 
   function doLogout() { auth.signOut().then(() => window.location.href = 'login.html'); }
 
-  // ── Badge ──
   async function cargarBadgeSolicitudes() {
     try {
       const snap = await db.collection('solicitudes').where('estado','==','pendiente').get();
@@ -584,35 +528,64 @@
     } catch(e) {}
   }
 
-  // ── Cargar en tiempo real ──
   function cargarUsuarios() {
     db.collection('usuarios').orderBy('nombre').onSnapshot(snap => {
+      // ══════════════════════════════════════════════════════════
+      // PARADIGMA 1 — MAP
+      // Convierte cada documento de Firestore en un objeto JS usable.
+      // snap.docs es la lista cruda de Firestore.
+      // map la transforma en objetos con id + todos sus campos.
+      // Se refleja en: la tabla se llena con los datos de cada usuario.
+      // ══════════════════════════════════════════════════════════
       todosUsuarios = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
       actualizarContadores();
       filtrar();
     }, e => { console.error(e); renderTabla([]); });
   }
 
   function actualizarContadores() {
-    document.getElementById('countActivos').textContent   = `(${todosUsuarios.filter(u => u.activo !== false).length})`;
-    document.getElementById('countInactivos').textContent = `(${todosUsuarios.filter(u => u.activo === false).length})`;
+    // ══════════════════════════════════════════════════════════
+    // PARADIGMA 2 — FILTER (contadores de tabs)
+    // filter recorre la lista y se queda solo con los que cumplen
+    // la condición. Aquí cuenta activos e inactivos para los tabs.
+    // Se refleja en: los números entre paréntesis en cada tab.
+    // ══════════════════════════════════════════════════════════
+    const activos   = todosUsuarios.filter(u => u.activo !== false);
+    const inactivos = todosUsuarios.filter(u => u.activo === false);
+
+    document.getElementById('countActivos').textContent   = `(${activos.length})`;
+    document.getElementById('countInactivos').textContent = `(${inactivos.length})`;
     document.getElementById('countTodos').textContent     = `(${todosUsuarios.length})`;
   }
 
-  // ── Filtrar ──
   function filtrar() {
     const q     = document.getElementById('searchInput').value.toLowerCase();
     const rol   = document.getElementById('filtroRol').value;
     const turno = document.getElementById('filtroTurno').value;
 
-    let lista = todosUsuarios.filter(u => {
+    // ══════════════════════════════════════════════════════════
+    // PARADIGMA 2 — FILTER (filtrado principal)
+    // Aquí usamos arrow functions (=>) dentro de filter.
+    // filter evalúa cada usuario y lo incluye solo si pasa
+    // todas las condiciones: tab activo, rol, turno y búsqueda.
+    // Se refleja en: la tabla y el contador "X usuarios" cambian
+    // al escribir en el buscador o cambiar los filtros.
+    // ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
+    // PARADIGMA 3 — ARROW FUNCTIONS
+    // u => { ... } es la forma corta de escribir function(u) { ... }
+    // Cada u representa un usuario de la lista.
+    // Se usa dentro de filter para evaluar cada usuario.
+    // ══════════════════════════════════════════════════════════
+    const lista = todosUsuarios.filter(u => {
       if (tabActual === 'activos'   && u.activo === false) return false;
       if (tabActual === 'inactivos' && u.activo !== false) return false;
       if (rol   && u.rol   !== rol)   return false;
       if (turno && u.turno !== turno) return false;
       if (q) {
-        const h = `${u.nombre||''} ${u.apellidos||''} ${u.correo||''} ${u.noControl||''}`.toLowerCase();
-        if (!h.includes(q)) return false;
+        const haystack = `${u.nombre||''} ${u.apellidos||''} ${u.correo||''} ${u.noControl||''}`.toLowerCase();
+        if (!haystack.includes(q)) return false;
       }
       return true;
     });
@@ -621,7 +594,6 @@
     renderTabla(lista);
   }
 
-  // ── Render ──
   function renderTabla(lista) {
     const tbody = document.getElementById('tablaBody');
     if (!lista || lista.length === 0) {
@@ -633,24 +605,25 @@
       return;
     }
 
-    const rolMap = {
-      admin:   { lbl:'Admin',   cls:'rol-admin'   },
-      docente: { lbl:'Docente', cls:'rol-docente' },
-      alumno:  { lbl:'Alumno',  cls:'rol-alumno'  },
-      tecnico: { lbl:'Técnico', cls:'rol-tecnico' },
-    };
-    const turnoMap = {
-      matutino:   { lbl:'Matutino',   cls:'turno-matutino'   },
-      vespertino: { lbl:'Vespertino', cls:'turno-vespertino' },
-      ambos:      { lbl:'Ambos',      cls:'turno-ambos'      },
-    };
     const colores = { admin:'#5B21B6', docente:'#1D4ED8', alumno:'#15803D', tecnico:'#C2410C' };
 
+    // ══════════════════════════════════════════════════════════
+    // PARADIGMA 1 — MAP (render de filas)
+    // Aquí map convierte cada objeto usuario en una fila HTML.
+    // Cada u entra como objeto JS y sale como string de HTML.
+    // Se refleja en: cada fila visible en la tabla de usuarios.
+    //
+    // PARADIGMA 4 — FUNCIONES DE PRIMERA CLASE (uso de formatearRol)
+    // formatearRol es una función guardada en variable (definida arriba).
+    // Aquí la usamos igual que usaríamos cualquier otro valor.
+    // Pasamos u.rol como argumento y nos devuelve { lbl, cls }.
+    // Se refleja en: los badges de color de rol en cada fila.
+    // ══════════════════════════════════════════════════════════
     tbody.innerHTML = lista.map(u => {
       const ini   = ((u.nombre||'')[0] || (u.correo||'U')[0]).toUpperCase();
       const color = colores[u.rol] || '#7A90B8';
-      const rm    = rolMap[u.rol]   || { lbl: u.rol||'—', cls:'' };
-      const tm    = turnoMap[u.turno] || null;
+      const rm    = formatearRol(u.rol);    // PARADIGMA 4: función de primera clase
+      const tm    = formatearTurno(u.turno); // PARADIGMA 4: función de primera clase
       const fecha = u.fecha_registro ? fmtDate(u.fecha_registro) : '—';
       const activo = u.activo !== false;
 
@@ -680,20 +653,20 @@
         <td style="color:var(--text-light);font-size:.8rem;">${fecha}</td>
         <td>
           <div class="actions">
-            <button class="btn-icon" onclick="abrirEditar('${u.id}')" title="Editar información">
+            <button class="btn-icon" onclick="abrirEditar('${u.id}')">
               <i class="fa-solid fa-pen"></i>
             </button>
-            <button class="btn-icon" onclick="abrirPassword('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')".trim() title="Cambiar contraseña">
+            <button class="btn-icon" onclick="abrirPassword('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')">
               <i class="fa-solid fa-key"></i>
             </button>
-            <button class="btn-icon" onclick="abrirHistorial('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')".trim() title="Historial">
+            <button class="btn-icon" onclick="abrirHistorial('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')">
               <i class="fa-solid fa-clock-rotate-left"></i>
             </button>
             ${activo
-              ? `<button class="btn-icon danger" onclick="pedirBaja('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')".trim() title="Dar de baja">
+              ? `<button class="btn-icon danger" onclick="pedirBaja('${u.id}','${(u.nombre||'')} ${(u.apellidos||'')}')">
                   <i class="fa-solid fa-user-slash"></i>
                 </button>`
-              : `<button class="btn-icon success-btn" onclick="reactivarUsuario('${u.id}')" title="Reactivar">
+              : `<button class="btn-icon success-btn" onclick="reactivarUsuario('${u.id}')">
                   <i class="fa-solid fa-user-check"></i>
                 </button>`
             }
@@ -708,7 +681,6 @@
     catch { return '—'; }
   }
 
-  // ── Tabs ──
   function cambiarTab(tab, el) {
     tabActual = tab;
     document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -716,7 +688,6 @@
     filtrar();
   }
 
-  // ── Modal Editar ──
   function abrirEditar(id) {
     const u = todosUsuarios.find(x => x.id === id);
     if (!u) return;
@@ -746,8 +717,6 @@
     const correo = document.getElementById('fCorreo').value.trim();
     const rol    = document.getElementById('fRol').value;
     const nombre = document.getElementById('fNombre').value.trim();
-
-    // Validar correo institucional
     if (!correo.endsWith('@lcardenas.tecnm.mx')) {
       document.getElementById('fCorreo').classList.add('error');
       showToast('Solo se aceptan correos @lcardenas.tecnm.mx', 'error'); return;
@@ -757,61 +726,41 @@
       if (!rol)    document.getElementById('fRol').classList.add('error');
       showToast('Completa los campos obligatorios', 'error'); return;
     }
-
-    // Verificar duplicado de correo (excluyendo el mismo usuario)
     const duplicado = todosUsuarios.find(u => u.correo === correo && u.id !== docIdEditar);
     if (duplicado) {
       document.getElementById('fCorreo').classList.add('error');
       showToast('Este correo ya está registrado en otro usuario', 'error'); return;
     }
-
-    // Verificar duplicado de no. control (si aplica)
     const noControl = document.getElementById('fControl').value.trim();
     if (noControl) {
       const dupControl = todosUsuarios.find(u => u.noControl === noControl && u.id !== docIdEditar && u.noControl);
       if (dupControl) {
         document.getElementById('fControl').classList.add('error');
-        showToast('Este número de control ya está registrado en otro usuario', 'error'); return;
+        showToast('Este número de control ya está registrado', 'error'); return;
       }
     }
-
     const datos = {
-      nombre,
-      apellidos:     document.getElementById('fApellidos').value.trim(),
-      correo,
-      rol,
-      turno:         document.getElementById('fTurno').value,
-      noControl,
-      departamento:  document.getElementById('fDepartamento').value.trim(),
-      telefono:      document.getElementById('fTelefono').value.trim(),
+      nombre, apellidos: document.getElementById('fApellidos').value.trim(),
+      correo, rol, turno: document.getElementById('fTurno').value, noControl,
+      departamento: document.getElementById('fDepartamento').value.trim(),
+      telefono: document.getElementById('fTelefono').value.trim(),
       observaciones: document.getElementById('fObs').value.trim(),
     };
-
     const btn = document.getElementById('btnGuardar');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
-
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Guardando...';
     try {
       await db.collection('usuarios').doc(docIdEditar).update(datos);
-      // Registrar en historial
       await db.collection('historial_eventos').add({
-        tipo: 'usuario_editado',
-        usuario_id: docIdEditar,
+        tipo: 'usuario_editado', usuario_id: docIdEditar,
         descripcion: `Información editada: ${nombre} (${rol})`,
         fecha: firebase.firestore.FieldValue.serverTimestamp()
       });
       showToast('Información actualizada correctamente', 'success');
       cerrarModal('modalEditar');
-    } catch(e) {
-      console.error(e);
-      showToast('Error al guardar los cambios', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar cambios';
-    }
+    } catch(e) { showToast('Error al guardar los cambios', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Guardar cambios'; }
   }
 
-  // ── Modal Contraseña ──
   function abrirPassword(id, nombre) {
     docIdPassword = id;
     document.getElementById('pwSubtitle').textContent = nombre.trim();
@@ -825,95 +774,55 @@
   async function cambiarPassword() {
     const pw1 = document.getElementById('fNewPw').value;
     const pw2 = document.getElementById('fConfirmPw').value;
-
-    if (!pw1 || pw1.length < 6) {
-      document.getElementById('fNewPw').classList.add('error');
-      showToast('La contraseña debe tener al menos 6 caracteres', 'error'); return;
-    }
-    if (pw1 !== pw2) {
-      document.getElementById('fConfirmPw').classList.add('error');
-      showToast('Las contraseñas no coinciden', 'error'); return;
-    }
-
-    // Buscamos el correo del usuario para enviar reset
+    if (!pw1 || pw1.length < 6) { document.getElementById('fNewPw').classList.add('error'); showToast('La contraseña debe tener al menos 6 caracteres', 'error'); return; }
+    if (pw1 !== pw2) { document.getElementById('fConfirmPw').classList.add('error'); showToast('Las contraseñas no coinciden', 'error'); return; }
     const u = todosUsuarios.find(x => x.id === docIdPassword);
     if (!u?.correo) { showToast('No se encontró el correo del usuario', 'error'); return; }
-
     const btn = document.getElementById('btnPw');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
-
+    btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Enviando...';
     try {
-      // Enviar correo de restablecimiento
       await auth.sendPasswordResetEmail(u.correo);
       await db.collection('historial_eventos').add({
-        tipo: 'password_reset',
-        usuario_id: docIdPassword,
-        descripcion: `Restablecimiento de contraseña enviado a ${u.correo}`,
+        tipo: 'password_reset', usuario_id: docIdPassword,
+        descripcion: `Restablecimiento enviado a ${u.correo}`,
         fecha: firebase.firestore.FieldValue.serverTimestamp()
       });
-      showToast('Correo de restablecimiento enviado al usuario', 'success');
+      showToast('Correo de restablecimiento enviado', 'success');
       cerrarModal('modalPassword');
-    } catch(e) {
-      console.error(e);
-      showToast('Error al enviar el correo de restablecimiento', 'error');
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fa-solid fa-key"></i> Actualizar';
-    }
+    } catch(e) { showToast('Error al enviar el correo', 'error'); }
+    finally { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-key"></i> Actualizar'; }
   }
 
-  // ── Modal Historial ──
   async function abrirHistorial(id, nombre) {
     document.getElementById('histSubtitle').textContent = nombre.trim();
     document.getElementById('historialList').innerHTML  = `<div style="text-align:center;padding:1.5rem;color:var(--text-light)"><i class="fa-solid fa-spinner fa-spin"></i> Cargando...</div>`;
     document.getElementById('modalHistorial').classList.add('open');
-
     try {
-      const snap = await db.collection('historial_eventos')
-        .where('usuario_id','==',id)
-        .orderBy('fecha','desc')
-        .limit(30)
-        .get();
-
+      const snap = await db.collection('historial_eventos').where('usuario_id','==',id).orderBy('fecha','desc').limit(30).get();
       if (snap.empty) {
-        document.getElementById('historialList').innerHTML = `<div class="empty-state" style="padding:2rem">
-          <i class="fa-solid fa-clock-rotate-left"></i>
-          <h3>Sin historial</h3>
-          <p>No hay actividad registrada para este usuario.</p>
-        </div>`;
+        document.getElementById('historialList').innerHTML = `<div class="empty-state" style="padding:2rem"><i class="fa-solid fa-clock-rotate-left"></i><h3>Sin historial</h3><p>No hay actividad registrada.</p></div>`;
         return;
       }
-
       const iconMap = {
-        solicitud_ac:      { cls:'sol',  ico:'snowflake' },
-        solicitud_aprobada:{ cls:'apro', ico:'circle-check' },
-        solicitud_rechazada:{ cls:'rech',ico:'circle-xmark' },
-        usuario_editado:   { cls:'edit', ico:'pen' },
-        password_reset:    { cls:'edit', ico:'key' },
+        solicitud_ac:       { cls:'sol',  ico:'snowflake' },
+        solicitud_aprobada: { cls:'apro', ico:'circle-check' },
+        solicitud_rechazada:{ cls:'rech', ico:'circle-xmark' },
+        usuario_editado:    { cls:'edit', ico:'pen' },
+        password_reset:     { cls:'edit', ico:'key' },
       };
-
       document.getElementById('historialList').innerHTML = snap.docs.map(d => {
         const ev = d.data();
         const m  = iconMap[ev.tipo] || { cls:'sol', ico:'circle-info' };
         return `<div class="historial-item">
           <div class="h-icon ${m.cls}"><i class="fa-solid fa-${m.ico}"></i></div>
-          <div>
-            <div class="h-desc">${ev.descripcion || ev.tipo}</div>
-            <div class="h-fecha">${ev.fecha ? fmtDate(ev.fecha) : '—'}</div>
-          </div>
+          <div><div class="h-desc">${ev.descripcion || ev.tipo}</div><div class="h-fecha">${ev.fecha ? fmtDate(ev.fecha) : '—'}</div></div>
         </div>`;
       }).join('');
     } catch(e) {
-      document.getElementById('historialList').innerHTML = `<div class="empty-state" style="padding:2rem">
-        <i class="fa-solid fa-triangle-exclamation"></i>
-        <h3>Error al cargar historial</h3>
-        <p>Puede que necesites crear un índice en Firestore.</p>
-      </div>`;
+      document.getElementById('historialList').innerHTML = `<div class="empty-state" style="padding:2rem"><i class="fa-solid fa-triangle-exclamation"></i><h3>Error al cargar historial</h3></div>`;
     }
   }
 
-  // ── Baja / Reactivar ──
   function pedirBaja(id, nombre) {
     docIdAccion = id;
     document.getElementById('bajaNombre').textContent = nombre.trim();
@@ -925,8 +834,7 @@
     const u = todosUsuarios.find(x => x.id === docIdAccion);
     await db.collection('usuarios').doc(docIdAccion).update({ activo: false });
     await db.collection('historial_eventos').add({
-      tipo: 'usuario_baja',
-      usuario_id: docIdAccion,
+      tipo: 'usuario_baja', usuario_id: docIdAccion,
       descripcion: `Usuario dado de baja: ${u?.nombre || ''} ${u?.apellidos || ''}`,
       fecha: firebase.firestore.FieldValue.serverTimestamp()
     });
@@ -938,15 +846,13 @@
     const u = todosUsuarios.find(x => x.id === id);
     await db.collection('usuarios').doc(id).update({ activo: true });
     await db.collection('historial_eventos').add({
-      tipo: 'usuario_reactivado',
-      usuario_id: id,
+      tipo: 'usuario_reactivado', usuario_id: id,
       descripcion: `Usuario reactivado: ${u?.nombre||''} ${u?.apellidos||''}`,
       fecha: firebase.firestore.FieldValue.serverTimestamp()
     });
     showToast('Usuario reactivado correctamente', 'success');
   }
 
-  // ── Helpers ──
   function cerrarModal(id) {
     document.getElementById(id).classList.remove('open');
     docIdAccion = null;
@@ -966,16 +872,15 @@
   }
 </script>
 
-  <!-- Preloader dismiss -->
-  <script>
-    (function(){
-      var el = document.getElementById('simgeca-preloader');
-      if(!el) return;
-      function dismiss(){ el.classList.add('fade-out'); setTimeout(function(){ el.remove(); }, 550); }
-      if(document.readyState === 'complete'){ setTimeout(dismiss, 400); }
-      else { window.addEventListener('load', function(){ setTimeout(dismiss, 400); }); }
-    })();
-  </script>
+<script>
+  (function(){
+    var el = document.getElementById('simgeca-preloader');
+    if(!el) return;
+    function dismiss(){ el.classList.add('fade-out'); setTimeout(function(){ el.remove(); }, 550); }
+    if(document.readyState === 'complete'){ setTimeout(dismiss, 400); }
+    else { window.addEventListener('load', function(){ setTimeout(dismiss, 400); }); }
+  })();
+</script>
 
 </body>
 </html>
