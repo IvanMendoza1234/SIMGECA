@@ -231,9 +231,7 @@
         <div class="live-dot"></div>
         Actualizado: <span id="horaUpdate">—</span>
       </div>
-      <button class="btn-reload" onclick="recargarDatos()">
-        <i class="fa-solid fa-rotate-right" id="iconRecargar"></i> Recargar
-      </button>
+
     </div>
   </header>
 
@@ -394,10 +392,9 @@
 
   function iniciarListener() {
     db.collection('aires_acondicionados').onSnapshot(snap => {
-      if (snap.empty) { generarSimulados(); return; }
       todosACs = snap.docs.map(enriquecerAC);
       refrescar();
-    }, () => generarSimulados());
+    }, e => { console.error(e); });
   }
 
   function _minDia(dia, turno) {
