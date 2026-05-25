@@ -8,171 +8,133 @@
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
-    :root {
-      --azul:       #003B8E;
-      --azul-mid:   #0057CC;
-      --azul-light: #1A75FF;
-      --azul-pale:  #E8F0FE;
-      --accent:     #00C2A8;
-      --danger:     #EF4444;
-      --success:    #10B981;
-      --warning:    #F59E0B;
-      --bg:         #F0F4FA;
-      --surface:    #FFFFFF;
-      --surface2:   #F8FAFF;
-      --text:       #0D1B3E;
-      --text-mid:   #3D5280;
-      --text-light: #7A90B8;
-      --border:     #DDE5F4;
-      --sidebar-w:  265px;
-    }
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; }
-
-    .sidebar { width: var(--sidebar-w); background: var(--azul); min-height: 100vh; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; z-index: 100; }
-    .sidebar-logo { padding: 1.5rem 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,.08); }
-    .logo-row { display: flex; align-items: center; gap: .7rem; }
-    .logo-icon { width: 38px; height: 38px; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.18); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1rem; color: var(--accent); }
-    .logo-text { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
-    .logo-sub  { font-size: .62rem; color: rgba(255,255,255,.35); margin-top: .1rem; }
-    .sidebar-nav { flex: 1; padding: .75rem 0; overflow-y: auto; }
-    .nav-section { font-size: .6rem; font-weight: 700; color: rgba(255,255,255,.28); text-transform: uppercase; letter-spacing: .1em; padding: .85rem 1.25rem .3rem; }
-    .nav-item { display: flex; align-items: center; gap: .7rem; padding: .65rem 1.25rem; color: rgba(255,255,255,.55); font-size: .85rem; font-weight: 500; cursor: pointer; transition: all .2s; border-left: 3px solid transparent; text-decoration: none; }
-    .nav-item:hover { background: rgba(255,255,255,.06); color: rgba(255,255,255,.9); }
-    .nav-item.active { background: rgba(255,255,255,.1); color: #fff; border-left-color: var(--accent); }
-    .nav-item i { width: 17px; text-align: center; font-size: .9rem; }
-    .nav-badge { margin-left: auto; background: var(--danger); color: #fff; font-size: .62rem; font-weight: 700; padding: .12rem .42rem; border-radius: 20px; display: none; }
-    .sidebar-footer { padding: .9rem 1.25rem; border-top: 1px solid rgba(255,255,255,.08); }
-    .user-card { display: flex; align-items: center; gap: .65rem; }
-    .user-avatar { width: 34px; height: 34px; background: var(--accent); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: .85rem; color: #fff; font-weight: 700; flex-shrink: 0; }
-    .user-info { flex: 1; min-width: 0; }
-    .user-name  { font-size: .8rem; font-weight: 600; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .user-role  { font-size: .68rem; color: rgba(255,255,255,.38); }
-    .btn-logout { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35); font-size: .88rem; padding: .25rem; border-radius: 6px; transition: color .2s; }
-    .btn-logout:hover { color: var(--danger); }
-
-    .main { margin-left: var(--sidebar-w); flex: 1; min-height: 100vh; display: flex; flex-direction: column; }
-    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: .9rem 1.75rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 50; }
-    .topbar-left h1 { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text); }
-    .topbar-left p  { font-size: .75rem; color: var(--text-light); margin-top: .05rem; }
-    .topbar-right   { display: flex; align-items: center; gap: .6rem; }
-    .last-update { font-size: .75rem; color: var(--text-light); display: flex; align-items: center; gap: .4rem; }
-    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--success); animation: livepulse 2s infinite; }
-    @keyframes livepulse { 0%,100%{opacity:1} 50%{opacity:.3} }
-    .btn-reload { display:flex; align-items:center; gap:.4rem; padding:.5rem .9rem; border:1.5px solid var(--border); border-radius:9px; background:var(--surface); font-family:'DM Sans',sans-serif; font-size:.82rem; font-weight:600; color:var(--text-mid); cursor:pointer; transition:all .15s; }
-    .btn-reload:hover { border-color:var(--azul-light); color:var(--azul); }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .page-content { padding: 1.5rem 1.75rem; flex: 1; }
-
-    .kpi-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
-    .kpi-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.1rem 1.25rem; display: flex; align-items: center; gap: 1rem; }
-    .kpi-icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
-    .ki-blue   { background: var(--azul-pale); color: var(--azul); }
-    .ki-green  { background: #D1FAE5; color: var(--success); }
-    .ki-yellow { background: #FEF3C7; color: var(--warning); }
-    .ki-cyan   { background: #CCFBF1; color: #0D9488; }
-    .kpi-val  { font-family: 'Syne', sans-serif; font-size: 1.55rem; font-weight: 700; color: var(--text); line-height: 1; }
-    .kpi-lbl  { font-size: .72rem; color: var(--text-light); margin-top: .2rem; }
-    .kpi-sub  { font-size: .7rem; color: var(--text-light); margin-top: .15rem; }
-
-    .main-tabs { display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
-    .main-tab { padding: .65rem 1.3rem; font-size: .875rem; font-weight: 600; cursor: pointer; color: var(--text-light); border: none; background: none; font-family: 'DM Sans', sans-serif; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all .2s; display: flex; align-items: center; gap: .45rem; }
-    .main-tab:hover { color: var(--text-mid); }
-    .main-tab.active { color: var(--azul); border-bottom-color: var(--azul); }
-
-    .filter-row { display: flex; align-items: center; gap: .6rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
-    .filter-btn { padding: .38rem .85rem; border-radius: 20px; border: 1.5px solid var(--border); background: var(--surface); font-family: 'DM Sans', sans-serif; font-size: .78rem; font-weight: 600; color: var(--text-light); cursor: pointer; transition: all .15s; }
-    .filter-btn.active { background: var(--azul); border-color: var(--azul); color: #fff; }
-    .filter-btn.fenc.active  { background: var(--success); border-color: var(--success); }
-    .filter-btn.fapag.active { background: var(--text-light); border-color: var(--text-light); }
-    .filter-btn.fmant.active { background: var(--warning); border-color: var(--warning); }
-    .filter-count { margin-left: auto; font-size: .78rem; color: var(--text-light); }
-
-    .ac-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
-    .ac-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.1rem; position: relative; overflow: hidden; transition: box-shadow .2s, transform .15s; animation: fadeIn .3s ease both; }
-    .ac-card:hover { box-shadow: 0 6px 24px rgba(0,59,142,.09); transform: translateY(-2px); }
-    @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-    .ac-top-bar { position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-    .ac-top-bar.encendido    { background: linear-gradient(90deg, var(--success), var(--accent)); }
-    .ac-top-bar.apagado      { background: var(--border); }
-    .ac-top-bar.mantenimiento{ background: linear-gradient(90deg, var(--warning), #FCA5A5); }
-    .ac-header { display: flex; align-items: flex-start; justify-content: space-between; margin: .4rem 0 .75rem; }
-    .ac-nombre { font-weight: 700; font-size: .9rem; }
-    .ac-aula   { font-size: .72rem; color: var(--text-light); margin-top: .1rem; }
-    .estado-badge { padding: .2rem .55rem; border-radius: 20px; font-size: .7rem; font-weight: 700; white-space: nowrap; }
-    .estado-badge.encendido     { background:#D1FAE5; color:#065F46; }
-    .estado-badge.apagado       { background:var(--surface2); color:var(--text-light); }
-    .estado-badge.mantenimiento { background:#FEF3C7; color:#92400E; }
-    .ac-stats { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
-    .ac-stat { background: var(--surface2); border-radius: 8px; padding: .5rem .65rem; }
-    .ac-stat-val { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
-    .ac-stat-lbl { font-size: .63rem; color: var(--text-light); margin-top: .05rem; text-transform: uppercase; letter-spacing: .04em; }
-    .ac-footer { display: flex; align-items: center; gap: .4rem; margin-top: .7rem; padding-top: .65rem; border-top: 1px solid var(--border); font-size: .78rem; color: var(--text-light); }
-
-    .chart-card { background: var(--surface); border: 1.5px solid var(--border); border-radius: 14px; padding: 1.25rem 1.5rem; }
-    .chart-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 1.1rem; }
-    .chart-title { font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700; }
-    .chart-sub   { font-size: .73rem; color: var(--text-light); margin-top: .1rem; }
-    .chart-select { padding: .42rem .8rem; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface2); font-family: 'DM Sans', sans-serif; font-size: .8rem; color: var(--text-mid); outline: none; cursor: pointer; }
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-
-    .ranking-list { display: flex; flex-direction: column; gap: .45rem; }
-    .rank-item { display: flex; align-items: center; gap: .7rem; padding: .55rem .75rem; border-radius: 9px; background: var(--surface2); border: 1px solid var(--border); }
-    .rank-num  { font-family: 'Syne', sans-serif; font-size: .78rem; font-weight: 700; color: var(--text-light); width: 16px; text-align: center; flex-shrink: 0; }
-    .rank-info { flex: 1; min-width: 0; }
-    .rank-name { font-size: .82rem; font-weight: 600; }
-    .rank-aula { font-size: .7rem; color: var(--text-light); }
-    .rank-bar-wrap { width: 80px; height: 5px; background: var(--border); border-radius: 3px; overflow: hidden; flex-shrink: 0; }
-    .rank-bar  { height: 100%; border-radius: 3px; background: linear-gradient(90deg, var(--azul-light), var(--accent)); transition: width .8s ease; }
-    .rank-val  { font-family: 'Syne', sans-serif; font-size: .8rem; font-weight: 700; color: var(--azul); width: 58px; text-align: right; flex-shrink: 0; }
-
-    .period-tabs { display: flex; gap: .3rem; }
-    .period-tab { padding: .35rem .8rem; border-radius: 7px; font-size: .78rem; font-weight: 600; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text-light); cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all .15s; }
-    .period-tab.active { background: var(--azul); border-color: var(--azul); color: #fff; }
-
-    .consumo-kpi-row { display: grid; grid-template-columns: repeat(3,1fr); gap: .75rem; margin-bottom: 1.25rem; }
-    .consumo-kpi { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: .8rem 1rem; text-align: center; }
-    .consumo-kpi-val { font-family: 'Syne', sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--azul); }
-    .consumo-kpi-lbl { font-size: .67rem; color: var(--text-light); margin-top: .15rem; text-transform: uppercase; letter-spacing: .04em; }
-
-    .uptime-list { display: flex; flex-direction: column; gap: .55rem; }
-    .uptime-item { background: var(--surface); border: 1.5px solid var(--border); border-radius: 11px; padding: .8rem 1rem; display: flex; align-items: center; gap: .9rem; }
-    .uptime-rank { font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; color: var(--text-light); width: 20px; text-align: center; flex-shrink: 0; }
-    .uptime-rank.r1 { color: #F59E0B; }
-    .uptime-rank.r2 { color: #9CA3AF; }
-    .uptime-rank.r3 { color: #CD7F32; }
-    .uptime-info { flex: 1; min-width: 0; }
-    .uptime-name { font-weight: 700; font-size: .87rem; }
-    .uptime-aula { font-size: .7rem; color: var(--text-light); margin-top: .05rem; }
-    .uptime-bar-wrap { flex: 2; height: 7px; background: var(--border); border-radius: 4px; overflow: hidden; }
-    .uptime-bar { height: 100%; border-radius: 4px; transition: width 1s ease; }
-    .uptime-right { text-align: right; flex-shrink: 0; width: 68px; }
-    .uptime-hours { font-family: 'Syne', sans-serif; font-size: .88rem; font-weight: 700; }
-    .uptime-pct   { font-size: .68rem; color: var(--text-light); }
-
-    .empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-light); grid-column: 1/-1; }
-    .empty-state i { font-size: 2rem; margin-bottom: .75rem; display: block; opacity: .3; }
-    .empty-state h3 { font-family: 'Syne', sans-serif; font-size: 1rem; color: var(--text-mid); margin-bottom: .3rem; }
-
-    .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .5rem; }
-    .toast { padding: .7rem 1.1rem; border-radius: 10px; font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: .55rem; color: #fff; box-shadow: 0 8px 24px rgba(0,0,0,.18); animation: fadeIn .3s ease; max-width: 280px; }
-    .toast.success { background: var(--success); }
-    .toast.info    { background: var(--azul); }
-
-    @media (max-width: 1000px) { .kpi-row { grid-template-columns: 1fr 1fr; } .two-col { grid-template-columns: 1fr; } }
-    @media (max-width: 600px) { .sidebar { display: none; } .main { margin-left: 0; } }
-
-    #simgeca-preloader { position: fixed; inset: 0; z-index: 9999; background: #003B8E; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; transition: opacity .5s ease, visibility .5s ease; }
-    #simgeca-preloader.fade-out { opacity: 0; visibility: hidden; }
-    .pre-logo { display: flex; flex-direction: column; align-items: center; gap: .6rem; }
-    .pre-icon { width: 64px; height: 64px; background: rgba(255,255,255,.1); border: 1.5px solid rgba(255,255,255,.2); border-radius: 18px; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; color: #00C2A8; animation: pre-pulse 1.8s ease-in-out infinite; }
-    .pre-title { font-family: 'Syne', sans-serif; font-size: 1.5rem; font-weight: 800; color: #fff; letter-spacing: -.5px; }
-    .pre-sub { font-size: .68rem; color: rgba(255,255,255,.35); text-transform: uppercase; letter-spacing: .1em; }
-    .pre-bar-wrap { width: 180px; height: 3px; background: rgba(255,255,255,.12); border-radius: 99px; overflow: hidden; }
-    .pre-bar { height: 100%; width: 0%; background: linear-gradient(90deg, #00C2A8, #1A75FF); border-radius: 99px; animation: pre-load 1.6s cubic-bezier(.4,0,.2,1) forwards; }
-    @keyframes pre-load { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
-    @keyframes pre-pulse { 0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,194,168,.3)} 50%{transform:scale(1.06);box-shadow:0 0 0 12px rgba(0,194,168,0)} }
+    :root{--azul:#003B8E;--azul-mid:#0057CC;--azul-light:#1A75FF;--azul-pale:#E8F0FE;--accent:#00C2A8;--danger:#EF4444;--success:#10B981;--warning:#F59E0B;--bg:#F0F4FA;--surface:#FFFFFF;--surface2:#F8FAFF;--text:#0D1B3E;--text-mid:#3D5280;--text-light:#7A90B8;--border:#DDE5F4;--sidebar-w:265px;}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;}
+    .sidebar{width:var(--sidebar-w);background:var(--azul);min-height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;}
+    .sidebar-logo{padding:1.5rem 1.25rem 1.1rem;border-bottom:1px solid rgba(255,255,255,.08);}
+    .logo-row{display:flex;align-items:center;gap:.7rem;}
+    .logo-icon{width:38px;height:38px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.18);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--accent);}
+    .logo-text{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800;color:#fff;letter-spacing:-.5px;}
+    .logo-sub{font-size:.62rem;color:rgba(255,255,255,.35);margin-top:.1rem;}
+    .sidebar-nav{flex:1;padding:.75rem 0;overflow-y:auto;}
+    .nav-section{font-size:.6rem;font-weight:700;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.1em;padding:.85rem 1.25rem .3rem;}
+    .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem 1.25rem;color:rgba(255,255,255,.55);font-size:.85rem;font-weight:500;cursor:pointer;transition:all .2s;border-left:3px solid transparent;text-decoration:none;}
+    .nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.9);}
+    .nav-item.active{background:rgba(255,255,255,.1);color:#fff;border-left-color:var(--accent);}
+    .nav-item i{width:17px;text-align:center;font-size:.9rem;}
+    .nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:.62rem;font-weight:700;padding:.12rem .42rem;border-radius:20px;display:none;}
+    .sidebar-footer{padding:.9rem 1.25rem;border-top:1px solid rgba(255,255,255,.08);}
+    .user-card{display:flex;align-items:center;gap:.65rem;}
+    .user-avatar{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;font-weight:700;flex-shrink:0;}
+    .user-info{flex:1;min-width:0;}
+    .user-name{font-size:.8rem;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+    .user-role{font-size:.68rem;color:rgba(255,255,255,.38);}
+    .btn-logout{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.35);font-size:.88rem;padding:.25rem;border-radius:6px;transition:color .2s;}
+    .btn-logout:hover{color:var(--danger);}
+    .main{margin-left:var(--sidebar-w);flex:1;min-height:100vh;display:flex;flex-direction:column;}
+    .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:.9rem 1.75rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;}
+    .topbar-left h1{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);}
+    .topbar-left p{font-size:.75rem;color:var(--text-light);margin-top:.05rem;}
+    .topbar-right{display:flex;align-items:center;gap:.6rem;}
+    .last-update{font-size:.75rem;color:var(--text-light);display:flex;align-items:center;gap:.4rem;}
+    .live-dot{width:7px;height:7px;border-radius:50%;background:var(--success);animation:livepulse 2s infinite;}
+    @keyframes livepulse{0%,100%{opacity:1}50%{opacity:.3}}
+    .page-content{padding:1.5rem 1.75rem;flex:1;}
+    .kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
+    .kpi-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.1rem 1.25rem;display:flex;align-items:center;gap:1rem;}
+    .kpi-icon{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+    .ki-blue{background:var(--azul-pale);color:var(--azul);}
+    .ki-green{background:#D1FAE5;color:var(--success);}
+    .ki-yellow{background:#FEF3C7;color:var(--warning);}
+    .ki-cyan{background:#CCFBF1;color:#0D9488;}
+    .kpi-val{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:700;color:var(--text);line-height:1;}
+    .kpi-lbl{font-size:.72rem;color:var(--text-light);margin-top:.2rem;}
+    .kpi-sub{font-size:.7rem;color:var(--text-light);margin-top:.15rem;}
+    .main-tabs{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:2px solid var(--border);}
+    .main-tab{padding:.65rem 1.3rem;font-size:.875rem;font-weight:600;cursor:pointer;color:var(--text-light);border:none;background:none;font-family:'DM Sans',sans-serif;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .2s;display:flex;align-items:center;gap:.45rem;}
+    .main-tab:hover{color:var(--text-mid);}
+    .main-tab.active{color:var(--azul);border-bottom-color:var(--azul);}
+    .filter-row{display:flex;align-items:center;gap:.6rem;margin-bottom:1.25rem;flex-wrap:wrap;}
+    .filter-btn{padding:.38rem .85rem;border-radius:20px;border:1.5px solid var(--border);background:var(--surface);font-family:'DM Sans',sans-serif;font-size:.78rem;font-weight:600;color:var(--text-light);cursor:pointer;transition:all .15s;}
+    .filter-btn.active{background:var(--azul);border-color:var(--azul);color:#fff;}
+    .filter-btn.fenc.active{background:var(--success);border-color:var(--success);}
+    .filter-btn.fapag.active{background:var(--text-light);border-color:var(--text-light);}
+    .filter-btn.fmant.active{background:var(--warning);border-color:var(--warning);}
+    .filter-count{margin-left:auto;font-size:.78rem;color:var(--text-light);}
+    .ac-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem;}
+    .ac-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.1rem;position:relative;overflow:hidden;transition:box-shadow .2s,transform .15s;animation:fadeIn .3s ease both;}
+    .ac-card:hover{box-shadow:0 6px 24px rgba(0,59,142,.09);transform:translateY(-2px);}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    .ac-top-bar{position:absolute;top:0;left:0;right:0;height:3px;}
+    .ac-top-bar.encendido{background:linear-gradient(90deg,var(--success),var(--accent));}
+    .ac-top-bar.apagado{background:var(--border);}
+    .ac-top-bar.mantenimiento{background:linear-gradient(90deg,var(--warning),#FCA5A5);}
+    .ac-header{display:flex;align-items:flex-start;justify-content:space-between;margin:.4rem 0 .75rem;}
+    .ac-nombre{font-weight:700;font-size:.9rem;}
+    .ac-aula{font-size:.72rem;color:var(--text-light);margin-top:.1rem;}
+    .estado-badge{padding:.2rem .55rem;border-radius:20px;font-size:.7rem;font-weight:700;white-space:nowrap;}
+    .estado-badge.encendido{background:#D1FAE5;color:#065F46;}
+    .estado-badge.apagado{background:var(--surface2);color:var(--text-light);}
+    .estado-badge.mantenimiento{background:#FEF3C7;color:#92400E;}
+    .ac-stats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;}
+    .ac-stat{background:var(--surface2);border-radius:8px;padding:.5rem .65rem;}
+    .ac-stat-val{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;}
+    .ac-stat-lbl{font-size:.63rem;color:var(--text-light);margin-top:.05rem;text-transform:uppercase;letter-spacing:.04em;}
+    .ac-footer{display:flex;align-items:center;gap:.4rem;margin-top:.7rem;padding-top:.65rem;border-top:1px solid var(--border);font-size:.78rem;color:var(--text-light);}
+    .chart-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.25rem 1.5rem;}
+    .chart-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.1rem;}
+    .chart-title{font-family:'Syne',sans-serif;font-size:1rem;font-weight:700;}
+    .chart-sub{font-size:.73rem;color:var(--text-light);margin-top:.1rem;}
+    .chart-select{padding:.42rem .8rem;border:1.5px solid var(--border);border-radius:8px;background:var(--surface2);font-family:'DM Sans',sans-serif;font-size:.8rem;color:var(--text-mid);outline:none;cursor:pointer;}
+    .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;}
+    .ranking-list{display:flex;flex-direction:column;gap:.45rem;}
+    .rank-item{display:flex;align-items:center;gap:.7rem;padding:.55rem .75rem;border-radius:9px;background:var(--surface2);border:1px solid var(--border);}
+    .rank-num{font-family:'Syne',sans-serif;font-size:.78rem;font-weight:700;color:var(--text-light);width:16px;text-align:center;flex-shrink:0;}
+    .rank-info{flex:1;min-width:0;}
+    .rank-name{font-size:.82rem;font-weight:600;}
+    .rank-aula{font-size:.7rem;color:var(--text-light);}
+    .rank-bar-wrap{width:80px;height:5px;background:var(--border);border-radius:3px;overflow:hidden;flex-shrink:0;}
+    .rank-bar{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--azul-light),var(--accent));transition:width .8s ease;}
+    .rank-val{font-family:'Syne',sans-serif;font-size:.8rem;font-weight:700;color:var(--azul);width:58px;text-align:right;flex-shrink:0;}
+    .period-tabs{display:flex;gap:.3rem;}
+    .period-tab{padding:.35rem .8rem;border-radius:7px;font-size:.78rem;font-weight:600;border:1.5px solid var(--border);background:var(--surface2);color:var(--text-light);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;}
+    .period-tab.active{background:var(--azul);border-color:var(--azul);color:#fff;}
+    .consumo-kpi-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-bottom:1.25rem;}
+    .consumo-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:.8rem 1rem;text-align:center;}
+    .consumo-kpi-val{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:700;color:var(--azul);}
+    .consumo-kpi-lbl{font-size:.67rem;color:var(--text-light);margin-top:.15rem;text-transform:uppercase;letter-spacing:.04em;}
+    .uptime-list{display:flex;flex-direction:column;gap:.55rem;}
+    .uptime-item{background:var(--surface);border:1.5px solid var(--border);border-radius:11px;padding:.8rem 1rem;display:flex;align-items:center;gap:.9rem;}
+    .uptime-rank{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;color:var(--text-light);width:20px;text-align:center;flex-shrink:0;}
+    .uptime-rank.r1{color:#F59E0B;}.uptime-rank.r2{color:#9CA3AF;}.uptime-rank.r3{color:#CD7F32;}
+    .uptime-info{flex:1;min-width:0;}
+    .uptime-name{font-weight:700;font-size:.87rem;}
+    .uptime-aula{font-size:.7rem;color:var(--text-light);margin-top:.05rem;}
+    .uptime-bar-wrap{flex:2;height:7px;background:var(--border);border-radius:4px;overflow:hidden;}
+    .uptime-bar{height:100%;border-radius:4px;transition:width 1s ease;}
+    .uptime-right{text-align:right;flex-shrink:0;width:68px;}
+    .uptime-hours{font-family:'Syne',sans-serif;font-size:.88rem;font-weight:700;}
+    .uptime-pct{font-size:.68rem;color:var(--text-light);}
+    .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-light);grid-column:1/-1;}
+    .empty-state i{font-size:2rem;margin-bottom:.75rem;display:block;opacity:.3;}
+    .empty-state h3{font-family:'Syne',sans-serif;font-size:1rem;color:var(--text-mid);margin-bottom:.3rem;}
+    .toast-wrap{position:fixed;bottom:1.5rem;right:1.5rem;z-index:999;display:flex;flex-direction:column;gap:.5rem;}
+    .toast{padding:.7rem 1.1rem;border-radius:10px;font-size:.8rem;font-weight:500;display:flex;align-items:center;gap:.55rem;color:#fff;box-shadow:0 8px 24px rgba(0,0,0,.18);animation:fadeIn .3s ease;max-width:280px;}
+    .toast.success{background:var(--success);}
+    .toast.info{background:var(--azul);}
+    @media(max-width:1000px){.kpi-row{grid-template-columns:1fr 1fr;}.two-col{grid-template-columns:1fr;}}
+    @media(max-width:600px){.sidebar{display:none;}.main{margin-left:0;}}
+    #simgeca-preloader{position:fixed;inset:0;z-index:9999;background:#003B8E;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;transition:opacity .5s ease,visibility .5s ease;}
+    #simgeca-preloader.fade-out{opacity:0;visibility:hidden;}
+    .pre-logo{display:flex;flex-direction:column;align-items:center;gap:.6rem;}
+    .pre-icon{width:64px;height:64px;background:rgba(255,255,255,.1);border:1.5px solid rgba(255,255,255,.2);border-radius:18px;display:flex;align-items:center;justify-content:center;font-size:1.75rem;color:#00C2A8;animation:pre-pulse 1.8s ease-in-out infinite;}
+    .pre-title{font-family:'Syne',sans-serif;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-.5px;}
+    .pre-sub{font-size:.68rem;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.1em;}
+    .pre-bar-wrap{width:180px;height:3px;background:rgba(255,255,255,.12);border-radius:99px;overflow:hidden;}
+    .pre-bar{height:100%;width:0%;background:linear-gradient(90deg,#00C2A8,#1A75FF);border-radius:99px;animation:pre-load 1.6s cubic-bezier(.4,0,.2,1) forwards;}
+    @keyframes pre-load{0%{width:0%}60%{width:75%}100%{width:100%}}
+    @keyframes pre-pulse{0%,100%{transform:scale(1);box-shadow:0 0 0 0 rgba(0,194,168,.3)}50%{transform:scale(1.06);box-shadow:0 0 0 12px rgba(0,194,168,0)}}
   </style>
 </head>
 <body>
@@ -227,48 +189,16 @@
       <p>Consumo energético y estado de los equipos AC</p>
     </div>
     <div class="topbar-right">
-      <div class="last-update">
-        <div class="live-dot"></div>
-        Actualizado: <span id="horaUpdate">—</span>
-      </div>
-
+      <div class="last-update"><div class="live-dot"></div>Actualizado: <span id="horaUpdate">—</span></div>
     </div>
   </header>
 
   <div class="page-content">
     <div class="kpi-row">
-      <div class="kpi-card">
-        <div class="kpi-icon ki-blue"><i class="fa-solid fa-snowflake"></i></div>
-        <div>
-          <div class="kpi-val" id="kpiTotal">—</div>
-          <div class="kpi-lbl">Total equipos AC</div>
-          <div class="kpi-sub" id="kpiEncSub">— encendidos ahora</div>
-        </div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon ki-green"><i class="fa-solid fa-bolt"></i></div>
-        <div>
-          <div class="kpi-val" id="kpiKwh">—</div>
-          <div class="kpi-lbl">kWh consumidos (mes)</div>
-          <div class="kpi-sub" id="kpiKwhSub">— kWh estimado hoy</div>
-        </div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon ki-yellow"><i class="fa-solid fa-clock"></i></div>
-        <div>
-          <div class="kpi-val" id="kpiHoras">—</div>
-          <div class="kpi-lbl">Horas acumuladas (mes)</div>
-          <div class="kpi-sub" id="kpiHorasSub">Promedio por equipo</div>
-        </div>
-      </div>
-      <div class="kpi-card">
-        <div class="kpi-icon ki-cyan"><i class="fa-solid fa-temperature-half"></i></div>
-        <div>
-          <div class="kpi-val" id="kpiTemp">—</div>
-          <div class="kpi-lbl">Temperatura promedio</div>
-          <div class="kpi-sub">Equipos encendidos</div>
-        </div>
-      </div>
+      <div class="kpi-card"><div class="kpi-icon ki-blue"><i class="fa-solid fa-snowflake"></i></div><div><div class="kpi-val" id="kpiTotal">—</div><div class="kpi-lbl">Total equipos AC</div><div class="kpi-sub" id="kpiEncSub">— encendidos ahora</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-green"><i class="fa-solid fa-bolt"></i></div><div><div class="kpi-val" id="kpiKwh">—</div><div class="kpi-lbl">kWh consumidos (mes)</div><div class="kpi-sub" id="kpiKwhSub">— kWh estimado hoy</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-yellow"><i class="fa-solid fa-clock"></i></div><div><div class="kpi-val" id="kpiHoras">—</div><div class="kpi-lbl">Horas acumuladas (mes)</div><div class="kpi-sub" id="kpiHorasSub">Promedio por equipo</div></div></div>
+      <div class="kpi-card"><div class="kpi-icon ki-cyan"><i class="fa-solid fa-temperature-half"></i></div><div><div class="kpi-val" id="kpiTemp">—</div><div class="kpi-lbl">Temperatura promedio</div><div class="kpi-sub">Equipos encendidos</div></div></div>
     </div>
 
     <div class="main-tabs">
@@ -281,73 +211,40 @@
     <div id="secEstado">
       <div class="filter-row">
         <button class="filter-btn active" onclick="filtrarEstado('todos',this)"><i class="fa-solid fa-border-all"></i> Todos</button>
-        <button class="filter-btn fenc"  onclick="filtrarEstado('encendido',this)">🟢 Encendidos</button>
-        <button class="filter-btn fapag" onclick="filtrarEstado('apagado',this)">⚫ Apagados</button>
-        <button class="filter-btn fmant" onclick="filtrarEstado('mantenimiento',this)">🟡 Mantenimiento</button>
+        <button class="filter-btn fenc"   onclick="filtrarEstado('encendido',this)">🟢 Encendidos</button>
+        <button class="filter-btn fapag"  onclick="filtrarEstado('apagado',this)">⚫ Apagados</button>
+        <button class="filter-btn fmant"  onclick="filtrarEstado('mantenimiento',this)">🟡 Mantenimiento</button>
         <span class="filter-count" id="countEstado">— equipos</span>
       </div>
-      <div class="ac-grid" id="gridEstado">
-        <div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Cargando...</h3></div>
-      </div>
+      <div class="ac-grid" id="gridEstado"><div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i><h3>Cargando...</h3></div></div>
     </div>
 
     <div id="secKwh" style="display:none">
       <div class="two-col">
         <div class="chart-card">
-          <div class="chart-header">
-            <div><div class="chart-title">Consumo kWh por equipo</div><div class="chart-sub">Mes actual</div></div>
-            <select class="chart-select" id="selectAulaKwh" onchange="actualizarGraficaKwh()">
-              <option value="todos">Todas las aulas</option>
-            </select>
-          </div>
+          <div class="chart-header"><div><div class="chart-title">Consumo kWh por equipo</div><div class="chart-sub">Mes actual</div></div><select class="chart-select" id="selectAulaKwh" onchange="actualizarGraficaKwh()"><option value="todos">Todas las aulas</option></select></div>
           <canvas id="chartKwh" height="270"></canvas>
         </div>
-        <div class="chart-card">
-          <div class="chart-header"><div><div class="chart-title">Ranking de consumo</div><div class="chart-sub">Top equipos con más kWh</div></div></div>
-          <div class="ranking-list" id="rankingKwh"></div>
-        </div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Ranking de consumo</div><div class="chart-sub">Top equipos con más kWh</div></div></div><div class="ranking-list" id="rankingKwh"></div></div>
       </div>
     </div>
 
     <div id="secGeneral" style="display:none">
       <div class="chart-card" style="margin-bottom:1rem">
-        <div class="chart-header">
-          <div><div class="chart-title">Consumo energético total</div><div class="chart-sub">Todos los equipos combinados</div></div>
-          <div class="period-tabs">
-            <button class="period-tab active" id="tabSemana" onclick="cambiarPeriodo('semana',this)">Semana</button>
-            <button class="period-tab" id="tabMes" onclick="cambiarPeriodo('mes',this)">Mes</button>
-            <button class="period-tab" id="tabAnio" onclick="cambiarPeriodo('anio',this)">Año</button>
-          </div>
-        </div>
-        <div class="consumo-kpi-row">
-          <div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPTotal">—</div><div class="consumo-kpi-lbl">kWh totales</div></div>
-          <div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPProm">—</div><div class="consumo-kpi-lbl">kWh promedio/día</div></div>
-          <div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPCosto">—</div><div class="consumo-kpi-lbl">Costo est. MXN</div></div>
-        </div>
+        <div class="chart-header"><div><div class="chart-title">Consumo energético total</div><div class="chart-sub">Todos los equipos combinados</div></div><div class="period-tabs"><button class="period-tab active" id="tabSemana" onclick="cambiarPeriodo('semana',this)">Semana</button><button class="period-tab" id="tabMes" onclick="cambiarPeriodo('mes',this)">Mes</button><button class="period-tab" id="tabAnio" onclick="cambiarPeriodo('anio',this)">Año</button></div></div>
+        <div class="consumo-kpi-row"><div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPTotal">—</div><div class="consumo-kpi-lbl">kWh totales</div></div><div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPProm">—</div><div class="consumo-kpi-lbl">kWh promedio/día</div></div><div class="consumo-kpi"><div class="consumo-kpi-val" id="kpiPCosto">—</div><div class="consumo-kpi-lbl">Costo est. MXN</div></div></div>
         <canvas id="chartGeneral" height="200"></canvas>
       </div>
       <div class="two-col">
-        <div class="chart-card">
-          <div class="chart-header"><div><div class="chart-title">Distribución por estado</div><div class="chart-sub">Cantidad actual de equipos</div></div></div>
-          <canvas id="chartDonut" height="230"></canvas>
-        </div>
-        <div class="chart-card">
-          <div class="chart-header"><div><div class="chart-title">Consumo por aula</div><div class="chart-sub">kWh acumulados este mes</div></div></div>
-          <canvas id="chartAulas" height="230"></canvas>
-        </div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Distribución por estado</div><div class="chart-sub">Cantidad actual</div></div></div><canvas id="chartDonut" height="230"></canvas></div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Consumo por aula</div><div class="chart-sub">kWh acumulados este mes</div></div></div><canvas id="chartAulas" height="230"></canvas></div>
       </div>
     </div>
 
     <div id="secUptime" style="display:none">
       <div class="two-col">
-        <div class="chart-card">
-          <div class="chart-header"><div><div class="chart-title">Horas encendido por equipo</div><div class="chart-sub">Este mes — mayor a menor</div></div></div>
-          <div class="uptime-list" id="uptimeList"></div>
-        </div>
-        <div class="chart-card">
-          <div class="chart-header"><div><div class="chart-title">Horas totales por día</div><div class="chart-sub">Semana actual</div></div></div>
-          <canvas id="chartUptime" height="270"></canvas>
-        </div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Horas encendido por equipo</div><div class="chart-sub">Este mes</div></div></div><div class="uptime-list" id="uptimeList"></div></div>
+        <div class="chart-card"><div class="chart-header"><div><div class="chart-title">Horas totales por día</div><div class="chart-sub">Semana actual</div></div></div><canvas id="chartUptime" height="270"></canvas></div>
       </div>
     </div>
   </div>
@@ -394,162 +291,104 @@
     db.collection('aires_acondicionados').onSnapshot(snap => {
       todosACs = snap.docs.map(enriquecerAC);
       refrescar();
-    }, e => { console.error(e); });
+    }, e => console.error(e));
   }
 
   function _minDia(dia, turno) {
     const t = turno||'ambos'; let m=0;
-    if([1,2,4,5].includes(dia)&&(t==='matutino'||t==='ambos'))   m+=13*60-(6*60+45);
-    if(dia===3&&(t==='matutino'||t==='ambos'))                     m+=13*60-(8*60+45);
-    if([1,2,3,4].includes(dia)&&(t==='vespertino'||t==='ambos'))  m+=20*60-(13*60+45);
-    if(dia===5&&(t==='vespertino'||t==='ambos'))                   m+=20*60-(15*60+45);
-    if(dia===6&&(t==='matutino'||t==='ambos'))                     m+=13*60-(7*60+45);
+    if([1,2,4,5].includes(dia)&&(t==='matutino'||t==='ambos'))  m+=13*60-(6*60+45);
+    if(dia===3&&(t==='matutino'||t==='ambos'))                    m+=13*60-(8*60+45);
+    if([1,2,3,4].includes(dia)&&(t==='vespertino'||t==='ambos')) m+=20*60-(13*60+45);
+    if(dia===5&&(t==='vespertino'||t==='ambos'))                  m+=20*60-(15*60+45);
+    if(dia===6&&(t==='matutino'||t==='ambos'))                    m+=13*60-(7*60+45);
     return m;
   }
 
   function calcularEstadoPorHorario(ac) {
     if (ac.estado === 'mantenimiento') return 'mantenimiento';
     if (ac.dado_de_baja === true)      return 'apagado';
-    const ahora = new Date();
-    const dia   = ahora.getDay();
-    const hhmm  = ahora.getHours() * 60 + ahora.getMinutes();
-    if (hhmm >= 22 * 60 || hhmm < 6 * 60 + 45) return 'apagado';
-    const modo = ac.modoControl || 'auto';
+    const ahora = new Date(), dia = ahora.getDay(), hhmm = ahora.getHours()*60+ahora.getMinutes();
+    if (hhmm >= 22*60 || hhmm < 6*60+45) return 'apagado';
+    const modo = ac.modoControl||'auto';
     if (modo === 'encendido') return 'encendido';
     if (modo === 'apagado')   return 'apagado';
-    const turno = ac.turno || 'ambos';
-    const horarios = [];
-    if ([1,2,4,5].includes(dia)) horarios.push({ turno:'matutino',  inicio:6*60+45,  fin:13*60 });
-    if (dia === 3)                horarios.push({ turno:'matutino',  inicio:8*60+45,  fin:13*60 });
-    if ([1,2,3,4].includes(dia)) horarios.push({ turno:'vespertino', inicio:13*60+45, fin:20*60 });
-    if (dia === 5)                horarios.push({ turno:'vespertino', inicio:15*60+45, fin:20*60 });
-    if (dia === 6)                horarios.push({ turno:'matutino',  inicio:7*60+45,  fin:13*60 });
-    for (const h of horarios) {
-      const turnoMatch = turno === 'ambos' || turno === h.turno || turno === '';
-      if (turnoMatch && hhmm >= h.inicio && hhmm < h.fin) return 'encendido';
-    }
+    const turno = ac.turno||'ambos';
+    const H = [];
+    if([1,2,4,5].includes(dia)) H.push({t:'matutino', i:6*60+45, f:13*60});
+    if(dia===3)                  H.push({t:'matutino', i:8*60+45, f:13*60});
+    if([1,2,3,4].includes(dia)) H.push({t:'vespertino',i:13*60+45,f:20*60});
+    if(dia===5)                  H.push({t:'vespertino',i:15*60+45,f:20*60});
+    if(dia===6)                  H.push({t:'matutino', i:7*60+45, f:13*60});
+    for (const h of H) { if ((turno==='ambos'||turno===h.t||turno==='')&&hhmm>=h.i&&hhmm<h.f) return 'encendido'; }
     return 'apagado';
   }
 
   function calcularHorasDesde(turno, fechaInicio) {
-    const hoy   = new Date(); hoy.setHours(23, 59, 0, 0);
-    const inicio = fechaInicio instanceof Date ? fechaInicio : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    let totalMinutos = 0;
-    const cursor = new Date(inicio); cursor.setHours(0, 0, 0, 0);
-    while (cursor <= hoy) {
-      totalMinutos += _minDia(cursor.getDay(), turno);
-      cursor.setDate(cursor.getDate() + 1);
-    }
-    return +(totalMinutos / 60).toFixed(1);
+    const hoy = new Date(); hoy.setHours(23,59,0,0);
+    const inicio = fechaInicio instanceof Date ? fechaInicio : new Date(hoy.getFullYear(),hoy.getMonth(),1);
+    let totalMin = 0;
+    const cur = new Date(inicio); cur.setHours(0,0,0,0);
+    while (cur <= hoy) { totalMin += _minDia(cur.getDay(), turno); cur.setDate(cur.getDate()+1); }
+    return +(totalMin/60).toFixed(1);
   }
 
   function calcularHorasMesCompleto(turno) {
-    const hoy   = new Date();
-    const inicio = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-    const fin    = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0); fin.setHours(23,59,0,0);
-    let totalMinutos = 0;
-    const cursor = new Date(inicio);
-    while (cursor <= fin) {
-      totalMinutos += _minDia(cursor.getDay(), turno);
-      cursor.setDate(cursor.getDate()+1);
-    }
-    return +(totalMinutos/60).toFixed(1);
+    const hoy = new Date();
+    const inicio = new Date(hoy.getFullYear(),hoy.getMonth(),1);
+    const fin    = new Date(hoy.getFullYear(),hoy.getMonth()+1,0); fin.setHours(23,59,0,0);
+    let totalMin = 0;
+    const cur = new Date(inicio);
+    while (cur <= fin) { totalMin += _minDia(cur.getDay(), turno); cur.setDate(cur.getDate()+1); }
+    return +(totalMin/60).toFixed(1);
   }
 
   function enriquecerAC(doc) {
-    const d      = doc.data();
-    const estado = d.dado_de_baja === true ? 'apagado' : calcularEstadoPorHorario(d);
-    const turno  = d.turno || 'ambos';
+    const d = doc.data(), turno = d.turno||'ambos';
+    const estado = d.dado_de_baja===true ? 'apagado' : calcularEstadoPorHorario(d);
     const fechaReg = d.fecha_registro?.toDate ? d.fecha_registro.toDate() : null;
     const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0,0,0,0);
-    const desdeF    = (fechaReg && fechaReg > inicioMes) ? fechaReg : inicioMes;
+    const desdeF = (fechaReg&&fechaReg>inicioMes) ? fechaReg : inicioMes;
     const horas = calcularHorasDesde(turno, desdeF);
     const kwh   = +((d.potencia_w||0)/1000 * horas).toFixed(1);
-    return {
-      id: doc.id, nombre: d.nombre||`AC-${doc.id.slice(-4).toUpperCase()}`,
-      aula: d.aula||'Sin asignar', turno, estado,
-      temperatura: d.temperatura||null, potencia_w: d.potencia_w||0,
-      consumo_mes: kwh, horas_mes: horas,
-      horas_proyect: calcularHorasMesCompleto(turno),
-      fecha_registro: fechaReg, marca: d.marca||'—',
-    };
+    return { id:doc.id, nombre:d.nombre||`AC-${doc.id.slice(-4).toUpperCase()}`, aula:d.aula||'Sin asignar', turno, estado, temperatura:d.temperatura||null, potencia_w:d.potencia_w||0, consumo_mes:kwh, horas_mes:horas, horas_proyect:calcularHorasMesCompleto(turno), fecha_registro:fechaReg, marca:d.marca||'—' };
   }
 
-  function generarSimulados() {
-    const aulas    = ['Aula 1A','Aula 1B','Aula 2A','Aula 2B','Lab Cómputo','Sala Maestros','Dirección','Aula 3A','Lab Electrónica','Biblioteca'];
-    const marcas   = ['Carrier','LG','Samsung','Daikin','Trane'];
-    const turnos   = ['matutino','vespertino','ambos','ambos','ambos'];
-    const potencias = [1500,1760,2200,1500,2640,1760,2200,1500,2640,1760,2200,1500];
-    const inicioMes = new Date(); inicioMes.setDate(1); inicioMes.setHours(0,0,0,0);
-    todosACs = Array.from({length:12}, (_,i) => {
-      const turno    = turnos[i % turnos.length];
-      const acSim    = { turno, estado: i < 2 ? 'mantenimiento' : 'auto' };
-      const estado   = calcularEstadoPorHorario(acSim);
-      const potencia = potencias[i];
-      const horas    = calcularHorasDesde(turno, inicioMes);
-      const kwh      = +((potencia/1000) * horas).toFixed(1);
-      return {
-        id: `sim-${i+1}`, nombre: `AC-${String(i+1).padStart(3,'0')}`,
-        aula: aulas[i % aulas.length], turno, estado,
-        temperatura: estado === 'encendido' ? +(18+Math.random()*6).toFixed(1) : null,
-        potencia_w: potencia, consumo_mes: kwh, horas_mes: horas,
-        horas_proyect: calcularHorasMesCompleto(turno),
-        fecha_registro: inicioMes, marca: marcas[i % marcas.length],
-      };
-    });
-    refrescar();
-  }
-
-  function refrescar() {
-    actualizarKPIs();
-    actualizarHora();
-    renderSeccion();
-  }
-
-  function actualizarHora() {
-    document.getElementById('horaUpdate').textContent = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
-  }
-
-  function recargarDatos() {
-    const ic = document.getElementById('iconRecargar');
-    ic.style.animation = 'spin .5s linear';
-    setTimeout(() => ic.style.animation = '', 600);
-    generarSimulados();
-    showToast('Datos actualizados','success');
-  }
+  function refrescar() { actualizarKPIs(); actualizarHora(); renderSeccion(); }
+  function actualizarHora() { document.getElementById('horaUpdate').textContent = new Date().toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'}); }
 
   // ══════════════════════════════════════════════════════════════
-  // PARADIGMA 8 — REDUCE
-  // reduce recorre TODA la lista y va acumulando un resultado.
-  // Aquí lo usamos 3 veces:
-  // 1. Para sumar todos los kWh de todos los ACs → un solo número
-  // 2. Para sumar todas las horas acumuladas → un solo número
-  // 3. Para sumar los kWh estimados de hoy → un solo número
+  // PARADIGMA 8 — FUNCIONES DE ARRAY (map, filter, reduce)
+  // JavaScript tiene funciones integradas para trabajar con listas:
+  // • map    → transforma cada elemento en otro valor
+  // • filter → se queda solo con los que cumplen una condición
+  // • reduce → recorre toda la lista y acumula un solo resultado
+  // Los 3 se usan aquí en actualizarKPIs():
+  // filter → obtiene solo los ACs encendidos
+  // reduce → suma todos los kWh en un solo número
+  // reduce → suma todas las horas en un solo número
   // Se refleja en: los 4 KPI cards arriba de la página.
   // ══════════════════════════════════════════════════════════════
   function actualizarKPIs() {
+    // filter: se queda solo con los ACs encendidos
     const enc = todosACs.filter(a => a.estado === 'encendido');
 
-    // reduce: empieza en 0 y va sumando el consumo_mes de cada AC
+    // reduce: recorre todos y suma consumo_mes → un solo número total
     const kwh = todosACs.reduce((suma, ac) => suma + ac.consumo_mes, 0);
 
-    // reduce: empieza en 0 y va sumando las horas de cada AC
+    // reduce: recorre todos y suma horas_mes → un solo número total
     const horasAcum = todosACs.reduce((suma, ac) => suma + ac.horas_mes, 0);
-    const horasProy = todosACs.reduce((suma, ac) => suma + (ac.horas_proyect || ac.horas_mes), 0);
+    const horasProy = todosACs.reduce((suma, ac) => suma + (ac.horas_proyect||ac.horas_mes), 0);
 
-    const promAcum = todosACs.length ? (horasAcum / todosACs.length).toFixed(0) : '—';
-    const promProy = todosACs.length ? (horasProy / todosACs.length).toFixed(0) : '—';
+    const promAcum = todosACs.length ? (horasAcum/todosACs.length).toFixed(0) : '—';
+    const promProy = todosACs.length ? (horasProy/todosACs.length).toFixed(0) : '—';
 
-    const tempProm = enc.length
-      ? (enc.reduce((suma, a) => suma + (a.temperatura||0), 0) / enc.length).toFixed(1)
-      : null;
+    // reduce: suma temperatura de encendidos para sacar promedio
+    const tempProm = enc.length ? (enc.reduce((s,a)=>s+(a.temperatura||0),0)/enc.length).toFixed(1) : null;
 
-    // reduce: calcula los kWh de hoy sumando todos los ACs
+    // reduce: calcula kWh estimados de hoy
     const kwhHoy = todosACs.reduce((suma, ac) => {
-      const kw  = (ac.potencia_w||0) / 1000;
-      const dia = new Date().getDay();
-      const min = _minDia(dia, ac.turno||'ambos');
-      return suma + kw * (min/60);
+      const kw = (ac.potencia_w||0)/1000;
+      return suma + kw * (_minDia(new Date().getDay(), ac.turno||'ambos')/60);
     }, 0);
 
     document.getElementById('kpiTotal').textContent  = todosACs.length;
@@ -557,52 +396,68 @@
     document.getElementById('kpiKwh').textContent    = kwh.toFixed(1);
     document.getElementById('kpiKwhSub').textContent = `~${kwhHoy.toFixed(1)} kWh estimado hoy`;
     document.getElementById('kpiHoras').textContent  = promAcum;
-    const lblHoras = document.getElementById('kpiHorasSub');
-    if (lblHoras) lblHoras.textContent = `Proyección mes: ~${promProy}h`;
+    const lblH = document.getElementById('kpiHorasSub'); if(lblH) lblH.textContent=`Proyección mes: ~${promProy}h`;
     document.getElementById('kpiTemp').textContent   = tempProm ? `${tempProm}°C` : '—°C';
   }
 
   // ══════════════════════════════════════════════════════════════
   // PARADIGMA 9 — COMPOSICIÓN DE FUNCIONES
-  // Encadenamos funciones pequeñas: la salida de una entra a la otra.
-  // soloActivos   → filtra los que no están dados de baja
-  // soloEncendidos → filtra los que están encendidos ahora
-  // contarEncendidosActivos → aplica ambas y cuenta el resultado
-  // Es como una línea de ensamblaje: cada función hace UNA cosa.
+  // Encadenamos funciones pequeñas donde la salida de una
+  // es la entrada de la siguiente, como una línea de ensamblaje.
+  // soloActivos    → recibe lista, devuelve solo los no dados de baja
+  // soloEncendidos → recibe lista, devuelve solo los encendidos
+  // contarEncendidosActivos → aplica las dos anteriores y cuenta
   // Se refleja en: el subtítulo "X encendidos ahora" del primer KPI.
   // ══════════════════════════════════════════════════════════════
-  const soloActivos      = acs => acs.filter(a => a.dado_de_baja !== true);
-  const soloEncendidos   = acs => acs.filter(a => a.estado === 'encendido');
+  const soloActivos             = acs => acs.filter(a => a.dado_de_baja !== true);
+  const soloEncendidos          = acs => acs.filter(a => a.estado === 'encendido');
   const contarEncendidosActivos = acs => soloEncendidos(soloActivos(acs)).length;
 
   // ══════════════════════════════════════════════════════════════
   // PARADIGMA 10 — RECURSIÓN
-  // La función se llama a sí misma hasta llegar al caso base.
+  // Una función que se llama a sí misma hasta llegar al caso base.
   // Aquí recorre la lista de ACs uno por uno sumando su potencia.
-  // Caso base: cuando index llega al final de la lista, regresa 0.
-  // Llamada recursiva: suma la potencia del AC actual y avanza.
-  // Se refleja en: el KPI de total de equipos usa este conteo.
+  // Caso base: index >= acs.length → ya no hay más ACs, regresa 0
+  // Llamada recursiva: suma potencia del AC actual y avanza al siguiente
+  // Se refleja en: podría usarse para contar o sumar cualquier
+  // propiedad de los ACs sin necesidad de un ciclo for o while.
   // ══════════════════════════════════════════════════════════════
   function sumarPotenciaRecursivo(acs, index = 0) {
-    if (index >= acs.length) return 0;                            // caso base
+    if (index >= acs.length) return 0;                                     // caso base
     return acs[index].potencia_w + sumarPotenciaRecursivo(acs, index + 1); // llamada recursiva
+  }
+
+  // ══════════════════════════════════════════════════════════════
+  // PARADIGMA 11 — EVALUACIÓN PEREZOSA (Lazy Evaluation)
+  // Los datos NO se procesan hasta que realmente se necesitan.
+  // Aquí encadenamos filter + map pero el resultado no se calcula
+  // hasta que llamamos a forEach al final.
+  // Es como preparar los ingredientes pero no cocinar hasta
+  // que alguien pide el platillo.
+  // Se refleja en: la lista de ACs del tab "Estado en tiempo real"
+  // solo se procesa cuando el usuario abre esa pestaña.
+  // ══════════════════════════════════════════════════════════════
+  function obtenerAcsParaMostrar(filtro) {
+    // Encadenamos operaciones — no se ejecutan hasta que se recorren
+    return todosACs
+      .filter(a => filtro === 'todos' ? true : a.estado === filtro)  // condición perezosa
+      .map(a => ({ ...a, estadoLabel: { encendido:'Encendido', apagado:'Apagado', mantenimiento:'Mantenimiento' }[a.estado]||a.estado }));
+    // El resultado solo existe cuando alguien lo usa (forEach, join, etc.)
   }
 
   function cambiarTab(tab, el) {
     tabActual = tab;
     document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
     el.classList.add('active');
-    ['Estado','Kwh','General','Uptime'].forEach(s => {
-      document.getElementById('sec'+s).style.display = tab === s.toLowerCase() ? '' : 'none';
-    });
+    ['Estado','Kwh','General','Uptime'].forEach(s => { document.getElementById('sec'+s).style.display = tab===s.toLowerCase()?'':'none'; });
     renderSeccion();
   }
 
   function renderSeccion() {
-    if (tabActual === 'estado')  renderEstado();
-    if (tabActual === 'kwh')     renderKwh();
-    if (tabActual === 'general') renderGeneral();
-    if (tabActual === 'uptime')  renderUptime();
+    if (tabActual==='estado')  renderEstado();
+    if (tabActual==='kwh')     renderKwh();
+    if (tabActual==='general') renderGeneral();
+    if (tabActual==='uptime')  renderUptime();
   }
 
   function filtrarEstado(f, el) {
@@ -613,35 +468,24 @@
   }
 
   function renderEstado() {
-    const lista = filtroAct === 'todos' ? todosACs : todosACs.filter(a => a.estado === filtroAct);
+    // Usamos obtenerAcsParaMostrar (evaluación perezosa) para obtener la lista
+    const lista = obtenerAcsParaMostrar(filtroAct);
     document.getElementById('countEstado').textContent = `${lista.length} equipo${lista.length!==1?'s':''}`;
     const grid = document.getElementById('gridEstado');
-    if (!lista.length) {
-      grid.innerHTML = `<div class="empty-state"><i class="fa-solid fa-snowflake"></i><h3>Sin equipos con este estado</h3></div>`;
-      return;
-    }
-    const lblEstado = { encendido:'Encendido', apagado:'Apagado', mantenimiento:'Mantenimiento' };
+    if (!lista.length) { grid.innerHTML=`<div class="empty-state"><i class="fa-solid fa-snowflake"></i><h3>Sin equipos con este estado</h3></div>`; return; }
     grid.innerHTML = lista.map((ac,i) => `
       <div class="ac-card" style="animation-delay:${i*.04}s">
         <div class="ac-top-bar ${ac.estado}"></div>
         <div class="ac-header">
           <div><div class="ac-nombre">${ac.nombre}</div><div class="ac-aula">${ac.aula}</div></div>
-          <span class="estado-badge ${ac.estado}">${lblEstado[ac.estado]||ac.estado}</span>
+          <span class="estado-badge ${ac.estado}">${ac.estadoLabel}</span>
         </div>
         <div class="ac-stats">
-          <div class="ac-stat">
-            <div class="ac-stat-val">${ac.consumo_mes}<span style="font-size:.65rem;font-weight:400"> kWh</span></div>
-            <div class="ac-stat-lbl">Consumo mes</div>
-          </div>
-          <div class="ac-stat">
-            <div class="ac-stat-val">${ac.horas_mes}<span style="font-size:.65rem;font-weight:400"> h</span></div>
-            <div class="ac-stat-lbl">Horas mes</div>
-          </div>
+          <div class="ac-stat"><div class="ac-stat-val">${ac.consumo_mes}<span style="font-size:.65rem;font-weight:400"> kWh</span></div><div class="ac-stat-lbl">Consumo mes</div></div>
+          <div class="ac-stat"><div class="ac-stat-val">${ac.horas_mes}<span style="font-size:.65rem;font-weight:400"> h</span></div><div class="ac-stat-lbl">Horas mes</div></div>
         </div>
         <div class="ac-footer">
-          ${ac.temperatura
-            ? `<i class="fa-solid fa-temperature-half" style="color:var(--azul-light)"></i> ${ac.temperatura}°C`
-            : `<i class="fa-solid fa-circle-minus" style="opacity:.4"></i> Sin temperatura`}
+          ${ac.temperatura?`<i class="fa-solid fa-temperature-half" style="color:var(--azul-light)"></i> ${ac.temperatura}°C`:`<i class="fa-solid fa-circle-minus" style="opacity:.4"></i> Sin temperatura`}
           <span style="margin-left:auto">${ac.marca}</span>
         </div>
       </div>`).join('');
@@ -649,172 +493,75 @@
 
   function renderKwh() {
     const sel = document.getElementById('selectAulaKwh');
-    if (sel.options.length === 1) {
-      [...new Set(todosACs.map(a => a.aula))].sort().forEach(au => {
-        const op = document.createElement('option'); op.value = au; op.textContent = au; sel.appendChild(op);
-      });
-    }
+    if (sel.options.length===1) { [...new Set(todosACs.map(a=>a.aula))].sort().forEach(au=>{ const op=document.createElement('option'); op.value=au; op.textContent=au; sel.appendChild(op); }); }
     actualizarGraficaKwh();
   }
 
   function actualizarGraficaKwh() {
-    const aula   = document.getElementById('selectAulaKwh').value;
-    const lista  = aula === 'todos' ? todosACs : todosACs.filter(a => a.aula === aula);
-    const sorted = [...lista].sort((a,b) => b.consumo_mes - a.consumo_mes);
-    const max = sorted[0]?.consumo_mes || 1;
-    const colores = sorted.map(a =>
-      a.estado === 'encendido' ? '#1A75FF' : a.estado === 'mantenimiento' ? '#F59E0B' : '#DDE5F4');
-    if (chKwh) chKwh.destroy();
-    chKwh = new Chart(document.getElementById('chartKwh'), {
-      type: 'bar',
-      data: { labels: sorted.map(a => a.nombre), datasets: [{ label:'kWh', data: sorted.map(a => a.consumo_mes), backgroundColor: colores, borderRadius: 6, borderSkipped: false }] },
-      options: { responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}}, scales:{y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8',maxRotation:45}}} }
-    });
-    document.getElementById('rankingKwh').innerHTML = sorted.slice(0,8).map((ac,i) => `
-      <div class="rank-item">
-        <span class="rank-num">${i+1}</span>
-        <div class="rank-info"><div class="rank-name">${ac.nombre}</div><div class="rank-aula">${ac.aula}</div></div>
-        <div class="rank-bar-wrap"><div class="rank-bar" style="width:${(ac.consumo_mes/max*100).toFixed(0)}%"></div></div>
-        <span class="rank-val">${ac.consumo_mes} kWh</span>
-      </div>`).join('');
+    const aula  = document.getElementById('selectAulaKwh').value;
+    const lista = aula==='todos' ? todosACs : todosACs.filter(a=>a.aula===aula);
+    const sorted = [...lista].sort((a,b)=>b.consumo_mes-a.consumo_mes);
+    const max = sorted[0]?.consumo_mes||1;
+    const colores = sorted.map(a=>a.estado==='encendido'?'#1A75FF':a.estado==='mantenimiento'?'#F59E0B':'#DDE5F4');
+    if(chKwh) chKwh.destroy();
+    chKwh = new Chart(document.getElementById('chartKwh'),{type:'bar',data:{labels:sorted.map(a=>a.nombre),datasets:[{label:'kWh',data:sorted.map(a=>a.consumo_mes),backgroundColor:colores,borderRadius:6,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8',maxRotation:45}}}}});
+    document.getElementById('rankingKwh').innerHTML = sorted.slice(0,8).map((ac,i)=>`<div class="rank-item"><span class="rank-num">${i+1}</span><div class="rank-info"><div class="rank-name">${ac.nombre}</div><div class="rank-aula">${ac.aula}</div></div><div class="rank-bar-wrap"><div class="rank-bar" style="width:${(ac.consumo_mes/max*100).toFixed(0)}%"></div></div><span class="rank-val">${ac.consumo_mes} kWh</span></div>`).join('');
   }
 
-  function renderGeneral() {
-    cambiarPeriodo(periodoAct, document.getElementById('tab' + periodoAct.charAt(0).toUpperCase() + periodoAct.slice(1)));
-  }
+  function renderGeneral() { cambiarPeriodo(periodoAct, document.getElementById('tab'+periodoAct.charAt(0).toUpperCase()+periodoAct.slice(1))); }
 
   function cambiarPeriodo(periodo, el) {
     periodoAct = periodo;
-    document.querySelectorAll('.period-tab').forEach(t => t.classList.remove('active'));
-    if (el) el.classList.add('active');
-    const hoy = new Date();
-    let labels = [], datos = [];
-    if (periodo === 'semana') {
-      for (let i = 6; i >= 0; i--) {
-        const d = new Date(hoy); d.setDate(hoy.getDate() - i);
-        labels.push(d.toLocaleDateString('es-MX',{weekday:'short'}));
-        const kwh = todosACs.reduce((s, ac) => {
-          const reg = ac.fecha_registro ? new Date(ac.fecha_registro) : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-          const regD = new Date(reg); regD.setHours(0,0,0,0);
-          const dD   = new Date(d);   dD.setHours(0,0,0,0);
-          if (regD > dD) return s;
-          return s + +((ac.potencia_w||0)/1000 * _minDia(d.getDay(), ac.turno||'ambos')/60).toFixed(2);
-        }, 0);
-        datos.push(+kwh.toFixed(1));
-      }
-    } else if (periodo === 'mes') {
-      const diasMes = new Date(hoy.getFullYear(), hoy.getMonth()+1, 0).getDate();
-      for (let d = 1; d <= diasMes; d++) {
-        const fecha = new Date(hoy.getFullYear(), hoy.getMonth(), d);
-        labels.push(String(d));
-        if (fecha > hoy) { datos.push(0); continue; }
-        const kwh = todosACs.reduce((s, ac) => {
-          const reg = ac.fecha_registro ? new Date(ac.fecha_registro) : new Date(hoy.getFullYear(), hoy.getMonth(), 1);
-          const regD = new Date(reg); regD.setHours(0,0,0,0);
-          const fD   = new Date(fecha); fD.setHours(0,0,0,0);
-          if (regD > fD) return s;
-          return s + +((ac.potencia_w||0)/1000 * _minDia(fecha.getDay(), ac.turno||'ambos')/60).toFixed(2);
-        }, 0);
-        datos.push(+kwh.toFixed(1));
-      }
+    document.querySelectorAll('.period-tab').forEach(t=>t.classList.remove('active'));
+    if(el) el.classList.add('active');
+    const hoy = new Date(); let labels=[], datos=[];
+    if(periodo==='semana'){
+      for(let i=6;i>=0;i--){ const d=new Date(hoy); d.setDate(hoy.getDate()-i); labels.push(d.toLocaleDateString('es-MX',{weekday:'short'})); const kwh=todosACs.reduce((s,ac)=>{ const reg=ac.fecha_registro?new Date(ac.fecha_registro):new Date(hoy.getFullYear(),hoy.getMonth(),1); const regD=new Date(reg); regD.setHours(0,0,0,0); const dD=new Date(d); dD.setHours(0,0,0,0); if(regD>dD) return s; return s+((ac.potencia_w||0)/1000*_minDia(d.getDay(),ac.turno||'ambos')/60); },0); datos.push(+kwh.toFixed(1)); }
+    } else if(periodo==='mes'){
+      const diasMes=new Date(hoy.getFullYear(),hoy.getMonth()+1,0).getDate();
+      for(let d=1;d<=diasMes;d++){ const fecha=new Date(hoy.getFullYear(),hoy.getMonth(),d); labels.push(String(d)); if(fecha>hoy){datos.push(0);continue;} const kwh=todosACs.reduce((s,ac)=>{ const reg=ac.fecha_registro?new Date(ac.fecha_registro):new Date(hoy.getFullYear(),hoy.getMonth(),1); const regD=new Date(reg); regD.setHours(0,0,0,0); const fD=new Date(fecha); fD.setHours(0,0,0,0); if(regD>fD) return s; return s+((ac.potencia_w||0)/1000*_minDia(fecha.getDay(),ac.turno||'ambos')/60); },0); datos.push(+kwh.toFixed(1)); }
     } else {
-      const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-      labels = meses;
-      for (let m = 0; m < 12; m++) {
-        if (m > hoy.getMonth()) { datos.push(0); continue; }
-        const diasM = new Date(hoy.getFullYear(), m+1, 0).getDate();
-        let kwhMes = 0;
-        for (let d = 1; d <= diasM; d++) {
-          const fecha = new Date(hoy.getFullYear(), m, d);
-          if (fecha > hoy) break;
-          kwhMes += todosACs.reduce((s, ac) => {
-            return s + +((ac.potencia_w||0)/1000 * _minDia(fecha.getDay(), ac.turno||'ambos')/60).toFixed(2);
-          }, 0);
-        }
-        datos.push(+kwhMes.toFixed(1));
-      }
+      const meses=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']; labels=meses;
+      for(let m=0;m<12;m++){ if(m>hoy.getMonth()){datos.push(0);continue;} const diasM=new Date(hoy.getFullYear(),m+1,0).getDate(); let kwhMes=0; for(let d=1;d<=diasM;d++){ const fecha=new Date(hoy.getFullYear(),m,d); if(fecha>hoy) break; kwhMes+=todosACs.reduce((s,ac)=>s+((ac.potencia_w||0)/1000*_minDia(fecha.getDay(),ac.turno||'ambos')/60),0); } datos.push(+kwhMes.toFixed(1)); }
     }
-    const total = datos.reduce((s,v)=>s+v, 0);
-    const dias  = datos.filter(v=>v>0).length || 1;
-    document.getElementById('kpiPTotal').textContent  = total.toFixed(1);
-    document.getElementById('kpiPProm').textContent   = (total/dias).toFixed(1);
-    document.getElementById('kpiPCosto').textContent  = `$${Number((total*2.5).toFixed(0)).toLocaleString('es-MX')}`;
-    if (chGeneral) chGeneral.destroy();
-    chGeneral = new Chart(document.getElementById('chartGeneral'), {
-      type: 'line',
-      data: { labels, datasets: [{ label:'kWh', data: datos, borderColor:'#1A75FF', backgroundColor:'rgba(26,117,255,.07)', borderWidth:2.5, pointRadius:periodo==='mes'?2:4, pointBackgroundColor:'#1A75FF', fill:true, tension:.4 }]},
-      options: { responsive:true, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}}, scales:{y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8',maxTicksLimit:periodo==='mes'?10:12}}} }
-    });
-    const enc  = todosACs.filter(a=>a.estado==='encendido').length   || 0;
-    const apag = todosACs.filter(a=>a.estado==='apagado').length     || 0;
-    const mant = todosACs.filter(a=>a.estado==='mantenimiento').length;
-    if (chDonut) chDonut.destroy();
-    chDonut = new Chart(document.getElementById('chartDonut'), {
-      type:'doughnut',
-      data:{labels:['Encendidos','Apagados','Mantenimiento'],datasets:[{data:[enc||0,apag||todosACs.length,mant],backgroundColor:['#1A75FF','#DDE5F4','#F59E0B'],borderWidth:0,hoverOffset:6}]},
-      options:{cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11},color:'#3D5280',boxWidth:12,padding:14}}}}
-    });
-    const aulasMap = {};
-    todosACs.forEach(a => { aulasMap[a.aula] = (aulasMap[a.aula]||0) + a.consumo_mes; });
-    const aulasArr = Object.entries(aulasMap).sort((a,b)=>b[1]-a[1]);
-    if (chAulas) chAulas.destroy();
-    chAulas = new Chart(document.getElementById('chartAulas'), {
-      type:'bar',
-      data:{labels:aulasArr.map(a=>a[0]),datasets:[{label:'kWh',data:aulasArr.map(a=>+a[1].toFixed(1)),backgroundColor:'#00C2A8',borderRadius:5,borderSkipped:false}]},
-      options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},scales:{x:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8'}},y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8'}}}}
-    });
+    const total=datos.reduce((s,v)=>s+v,0), dias=datos.filter(v=>v>0).length||1;
+    document.getElementById('kpiPTotal').textContent=total.toFixed(1); document.getElementById('kpiPProm').textContent=(total/dias).toFixed(1); document.getElementById('kpiPCosto').textContent=`$${Number((total*2.5).toFixed(0)).toLocaleString('es-MX')}`;
+    if(chGeneral) chGeneral.destroy();
+    chGeneral=new Chart(document.getElementById('chartGeneral'),{type:'line',data:{labels,datasets:[{label:'kWh',data:datos,borderColor:'#1A75FF',backgroundColor:'rgba(26,117,255,.07)',borderWidth:2.5,pointRadius:periodo==='mes'?2:4,pointBackgroundColor:'#1A75FF',fill:true,tension:.4}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8',maxTicksLimit:periodo==='mes'?10:12}}}}});
+    const enc=todosACs.filter(a=>a.estado==='encendido').length, apag=todosACs.filter(a=>a.estado==='apagado').length, mant=todosACs.filter(a=>a.estado==='mantenimiento').length;
+    if(chDonut) chDonut.destroy();
+    chDonut=new Chart(document.getElementById('chartDonut'),{type:'doughnut',data:{labels:['Encendidos','Apagados','Mantenimiento'],datasets:[{data:[enc||0,apag||todosACs.length,mant],backgroundColor:['#1A75FF','#DDE5F4','#F59E0B'],borderWidth:0,hoverOffset:6}]},options:{cutout:'68%',plugins:{legend:{position:'bottom',labels:{font:{family:'DM Sans',size:11},color:'#3D5280',boxWidth:12,padding:14}}}}});
+    const aulasMap={}; todosACs.forEach(a=>{aulasMap[a.aula]=(aulasMap[a.aula]||0)+a.consumo_mes;}); const aulasArr=Object.entries(aulasMap).sort((a,b)=>b[1]-a[1]);
+    if(chAulas) chAulas.destroy();
+    chAulas=new Chart(document.getElementById('chartAulas'),{type:'bar',data:{labels:aulasArr.map(a=>a[0]),datasets:[{label:'kWh',data:aulasArr.map(a=>+a[1].toFixed(1)),backgroundColor:'#00C2A8',borderRadius:5,borderSkipped:false}]},options:{indexAxis:'y',responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} kWh`}}},scales:{x:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8'}},y:{grid:{display:false},ticks:{font:{family:'DM Sans',size:10},color:'#7A90B8'}}}}});
   }
 
   function renderUptime() {
-    const sorted = [...todosACs].sort((a,b)=>b.horas_mes-a.horas_mes);
-    const maxH = sorted[0]?.horas_mes || 1;
-    const colMap = { encendido:'#1A75FF', mantenimiento:'#F59E0B', apagado:'#DDE5F4' };
-    document.getElementById('uptimeList').innerHTML = sorted.map((ac,i) => {
-      const proy = ac.horas_proyect || maxH;
-      const pct  = proy > 0 ? Math.min((ac.horas_mes/proy*100),100).toFixed(0) : 0;
-      const rCls = i===0?'r1':i===1?'r2':i===2?'r3':'';
-      return `<div class="uptime-item">
-        <span class="uptime-rank ${rCls}">${i+1}</span>
-        <div class="uptime-info"><div class="uptime-name">${ac.nombre}</div><div class="uptime-aula">${ac.aula}</div></div>
-        <div class="uptime-bar-wrap"><div class="uptime-bar" style="width:${(ac.horas_mes/maxH*100).toFixed(0)}%;background:${colMap[ac.estado]||'#DDE5F4'}"></div></div>
-        <div class="uptime-right"><div class="uptime-hours">${ac.horas_mes}h</div><div class="uptime-pct">${pct}%</div></div>
-      </div>`;
-    }).join('');
-    const hoy  = new Date();
-    const dias  = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
-    const diaSem= [1,2,3,4,5,6,0];
-    const hDia  = diaSem.map(diaIdx => {
-      const totalMin = todosACs.reduce((s, ac) => s + _minDia(diaIdx, ac.turno||'ambos'), 0);
-      return +(totalMin/60).toFixed(1);
-    });
-    if (chUptime) chUptime.destroy();
-    chUptime = new Chart(document.getElementById('chartUptime'), {
-      type:'bar',
-      data:{labels:dias,datasets:[{label:'Horas',data:hDia,backgroundColor:'#1A75FF',borderRadius:7,borderSkipped:false}]},
-      options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} h encendido`}}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}}}}
-    });
+    const sorted=[...todosACs].sort((a,b)=>b.horas_mes-a.horas_mes), maxH=sorted[0]?.horas_mes||1;
+    const colMap={encendido:'#1A75FF',mantenimiento:'#F59E0B',apagado:'#DDE5F4'};
+    document.getElementById('uptimeList').innerHTML=sorted.map((ac,i)=>{ const proy=ac.horas_proyect||maxH, pct=proy>0?Math.min((ac.horas_mes/proy*100),100).toFixed(0):0, rCls=i===0?'r1':i===1?'r2':i===2?'r3':''; return `<div class="uptime-item"><span class="uptime-rank ${rCls}">${i+1}</span><div class="uptime-info"><div class="uptime-name">${ac.nombre}</div><div class="uptime-aula">${ac.aula}</div></div><div class="uptime-bar-wrap"><div class="uptime-bar" style="width:${(ac.horas_mes/maxH*100).toFixed(0)}%;background:${colMap[ac.estado]||'#DDE5F4'}"></div></div><div class="uptime-right"><div class="uptime-hours">${ac.horas_mes}h</div><div class="uptime-pct">${pct}%</div></div></div>`; }).join('');
+    const dias=['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'], diaSem=[1,2,3,4,5,6,0];
+    const hDia=diaSem.map(d=>+(todosACs.reduce((s,ac)=>s+_minDia(d,ac.turno||'ambos'),0)/60).toFixed(1));
+    if(chUptime) chUptime.destroy();
+    chUptime=new Chart(document.getElementById('chartUptime'),{type:'bar',data:{labels:dias,datasets:[{label:'Horas',data:hDia,backgroundColor:'#1A75FF',borderRadius:7,borderSkipped:false}]},options:{responsive:true,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.raw} h encendido`}}},scales:{y:{beginAtZero:true,grid:{color:'#EEF1F8'},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}},x:{grid:{display:false},ticks:{font:{family:'DM Sans',size:11},color:'#7A90B8'}}}}});
   }
 
-  function showToast(msg, type='info') {
-    const icons = {success:'circle-check',info:'circle-info'};
-    const wrap = document.getElementById('toastWrap');
-    const t = document.createElement('div');
-    t.className = `toast ${type}`;
-    t.innerHTML = `<i class="fa-solid fa-${icons[type]||'circle-info'}"></i> ${msg}`;
-    wrap.appendChild(t);
-    setTimeout(()=>t.remove(), 3000);
+  function showToast(msg,type='info'){
+    const icons={success:'circle-check',info:'circle-info'};
+    const wrap=document.getElementById('toastWrap'); const t=document.createElement('div');
+    t.className=`toast ${type}`; t.innerHTML=`<i class="fa-solid fa-${icons[type]||'circle-info'}"></i> ${msg}`;
+    wrap.appendChild(t); setTimeout(()=>t.remove(),3000);
   }
 </script>
 
 <script>
   (function(){
-    var el = document.getElementById('simgeca-preloader');
+    var el=document.getElementById('simgeca-preloader');
     if(!el) return;
-    function dismiss(){ el.classList.add('fade-out'); setTimeout(function(){ el.remove(); }, 550); }
-    if(document.readyState === 'complete'){ setTimeout(dismiss, 400); }
-    else { window.addEventListener('load', function(){ setTimeout(dismiss, 400); }); }
+    function dismiss(){ el.classList.add('fade-out'); setTimeout(function(){ el.remove(); },550); }
+    if(document.readyState==='complete'){ setTimeout(dismiss,400); }
+    else{ window.addEventListener('load',function(){ setTimeout(dismiss,400); }); }
   })();
 </script>
-
 </body>
 </html>
