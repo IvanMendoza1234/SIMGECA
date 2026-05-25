@@ -175,6 +175,10 @@
     .toast.error   { background: var(--danger); }
     .toast.info    { background: var(--azul); }
 
+    .btn-simulacion { display: flex; align-items: center; gap: .45rem; padding: .5rem 1rem; background: #FEF3C7; border: 1.5px solid #FCD34D; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600; color: #92400E; cursor: pointer; transition: all .2s; }
+    .btn-simulacion:hover { background: #FDE68A; }
+    .btn-simulacion.activo { background: var(--warning); color: #fff; border-color: var(--warning); }
+
     @media (max-width: 768px) {
       .sidebar { display: none; }
       .main { margin-left: 0; }
@@ -252,6 +256,9 @@
         <i class="fa-solid fa-circle-info"></i>
         Los nuevos usuarios se registran desde la app móvil
       </div>
+      <button class="btn-simulacion" id="btnSim" onclick="toggleSimulacion()">
+        <i class="fa-solid fa-flask"></i> Simulación
+      </button>
     </div>
   </header>
 
@@ -860,6 +867,47 @@
   document.querySelectorAll('.modal-overlay').forEach(o => {
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
   });
+
+  // ══════════════════════════════════════════════════════════════
+  // BOTÓN SIMULACIÓN
+  // Agrega usuarios de prueba temporales para mostrar los paradigmas.
+  // No modifica Firebase, solo afecta la vista local.
+  // ══════════════════════════════════════════════════════════════
+  var modoSimulacion = false;
+  var usuariosReales = [];
+
+  const USUARIOS_SIMULADOS = [
+    { id:'sim1', nombre:'Carlos', apellidos:'Mendoza López',    correo:'carlos.mendoza@lcardenas.tecnm.mx',  rol:'admin',   turno:'matutino',   noControl:'A001', departamento:'Sistemas Computacionales', activo: true  },
+    { id:'sim2', nombre:'María',  apellidos:'García Ramos',     correo:'maria.garcia@lcardenas.tecnm.mx',    rol:'docente', turno:'vespertino',  noControl:'D002', departamento:'Ingeniería Industrial',    activo: true  },
+    { id:'sim3', nombre:'Luis',   apellidos:'Torres Vega',      correo:'luis.torres@lcardenas.tecnm.mx',     rol:'alumno',  turno:'matutino',   noControl:'L21320001', departamento:'Sistemas Computacionales', activo: true  },
+    { id:'sim4', nombre:'Ana',    apellidos:'Soto Díaz',        correo:'ana.soto@lcardenas.tecnm.mx',        rol:'alumno',  turno:'vespertino',  noControl:'L21320002', departamento:'Mecatrónica',             activo: true  },
+    { id:'sim5', nombre:'Pedro',  apellidos:'Ramírez Cruz',     correo:'pedro.ramirez@lcardenas.tecnm.mx',   rol:'tecnico', turno:'ambos',       noControl:'T003', departamento:'Mantenimiento',            activo: true  },
+    { id:'sim6', nombre:'Sofia',  apellidos:'Ruiz Flores',      correo:'sofia.ruiz@lcardenas.tecnm.mx',      rol:'docente', turno:'matutino',   noControl:'D004', departamento:'Ciencias Básicas',         activo: false },
+    { id:'sim7', nombre:'Juan',   apellidos:'Pérez Hernández',  correo:'juan.perez@lcardenas.tecnm.mx',      rol:'alumno',  turno:'matutino',   noControl:'L21320003', departamento:'Sistemas Computacionales', activo: true  },
+    { id:'sim8', nombre:'Laura',  apellidos:'Jiménez Morales',  correo:'laura.jimenez@lcardenas.tecnm.mx',   rol:'alumno',  turno:'vespertino',  noControl:'L21320004', departamento:'Gestión Empresarial',     activo: false },
+  ];
+
+  function toggleSimulacion() {
+    const btn = document.getElementById('btnSim');
+    if (!modoSimulacion) {
+      // Guardar usuarios reales y activar simulados
+      usuariosReales   = todosUsuarios;
+      todosUsuarios    = USUARIOS_SIMULADOS;
+      modoSimulacion   = true;
+      btn.classList.add('activo');
+      btn.innerHTML    = '<i class="fa-solid fa-flask"></i> Quitar simulación';
+      showToast('Simulación activada — mostrando usuarios de prueba', 'info');
+    } else {
+      // Restaurar usuarios reales
+      todosUsuarios  = usuariosReales;
+      modoSimulacion = false;
+      btn.classList.remove('activo');
+      btn.innerHTML  = '<i class="fa-solid fa-flask"></i> Simulación';
+      showToast('Simulación desactivada — mostrando datos reales', 'success');
+    }
+    actualizarContadores();
+    filtrar();
+  }
 
   function showToast(msg, type = 'info') {
     const icons = { success:'circle-check', error:'circle-xmark', info:'circle-info' };
