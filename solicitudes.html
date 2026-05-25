@@ -141,6 +141,10 @@
     .toast.error   { background: var(--danger); }
     .toast.info    { background: var(--azul); }
 
+    .btn-simulacion { display: flex; align-items: center; gap: .45rem; padding: .5rem 1rem; background: #FEF3C7; border: 1.5px solid #FCD34D; border-radius: 9px; font-family: 'DM Sans', sans-serif; font-size: .82rem; font-weight: 600; color: #92400E; cursor: pointer; transition: all .2s; }
+    .btn-simulacion:hover { background: #FDE68A; }
+    .btn-simulacion.activo { background: var(--warning); color: #fff; border-color: var(--warning); }
+
     @media (max-width: 768px) { .sidebar { display: none; } .main { margin-left: 0; } .sol-grid { grid-template-columns: 1fr; } }
 
     #simgeca-preloader { position: fixed; inset: 0; z-index: 9999; background: #003B8E; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.5rem; transition: opacity .5s ease, visibility .5s ease; }
@@ -205,6 +209,11 @@
     <div class="topbar-left">
       <h1>Solicitudes</h1>
       <p>Revisión y aprobación de solicitudes del sistema</p>
+    </div>
+    <div>
+      <button class="btn-simulacion" id="btnSim" onclick="toggleSimulacion()">
+        <i class="fa-solid fa-flask"></i> Simulación
+      </button>
     </div>
   </header>
 
@@ -711,6 +720,54 @@
   document.querySelectorAll('.modal-overlay').forEach(o => {
     o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
   });
+
+  // ══════════════════════════════════════════════════════════════
+  // BOTÓN SIMULACIÓN
+  // Agrega solicitudes de prueba temporales para mostrar paradigmas.
+  // No modifica Firebase, solo afecta la vista local.
+  // ══════════════════════════════════════════════════════════════
+  var modoSimulacion  = false;
+  var solRegReales    = [];
+  var solACReales     = [];
+
+  const SOL_REGISTRO_SIMULADAS = [
+    { id:'sr1', nombre:'Carlos', apellidos:'Mendoza López',   correo:'carlos.mendoza@lcardenas.tecnm.mx',  telefono:'7531234567', noControl:'L21320001', departamento:'Sistemas Computacionales', estado:'pendiente',  fecha: { toDate: () => new Date() } },
+    { id:'sr2', nombre:'María',  apellidos:'García Ramos',    correo:'maria.garcia@lcardenas.tecnm.mx',    telefono:'7539876543', noControl:'L21320002', departamento:'Mecatrónica',             estado:'pendiente',  fecha: { toDate: () => new Date(Date.now() - 3600000) } },
+    { id:'sr3', nombre:'Luis',   apellidos:'Torres Vega',     correo:'luis.torres@lcardenas.tecnm.mx',     telefono:'7531112233', noControl:'L21320003', departamento:'Gestión Empresarial',     estado:'aprobada',   fecha: { toDate: () => new Date(Date.now() - 86400000) } },
+    { id:'sr4', nombre:'Ana',    apellidos:'Soto Díaz',       correo:'ana.soto@lcardenas.tecnm.mx',        telefono:'7534445566', noControl:'L21320004', departamento:'Ciencias Básicas',        estado:'rechazada',  nota_rechazo: 'Documentación incompleta', fecha: { toDate: () => new Date(Date.now() - 172800000) } },
+  ];
+
+  const SOL_AC_SIMULADAS = [
+    { id:'sa1', usuario_nombre:'Pedro Ramírez', usuario_correo:'pedro@lcardenas.tecnm.mx', aula:'Aula 204', hora_inicio:'20:00', hora_fin:'22:00', motivo:'Examen extraordinario de Cálculo', estado:'pendiente',  fecha: { toDate: () => new Date() },                       fecha_uso: { toDate: () => new Date() } },
+    { id:'sa2', usuario_nombre:'Sofia Ruiz',    usuario_correo:'sofia@lcardenas.tecnm.mx',  aula:'Lab Cómputo', hora_inicio:'21:00', hora_fin:'23:00', motivo:'Proyecto final de semestre',   estado:'pendiente',  fecha: { toDate: () => new Date(Date.now() - 3600000) },   fecha_uso: { toDate: () => new Date() } },
+    { id:'sa3', usuario_nombre:'Juan Pérez',    usuario_correo:'juan@lcardenas.tecnm.mx',   aula:'Aula 101', hora_inicio:'19:00', hora_fin:'21:00', motivo:'Práctica de laboratorio',         estado:'aprobada',   fecha: { toDate: () => new Date(Date.now() - 86400000) },  fecha_uso: { toDate: () => new Date(Date.now() - 86400000) } },
+    { id:'sa4', usuario_nombre:'Laura Jiménez', usuario_correo:'laura@lcardenas.tecnm.mx',  aula:'Aula 305', hora_inicio:'20:30', hora_fin:'22:30', motivo:'Asesoría grupal',                  estado:'rechazada',  nota_rechazo: 'Fuera del horario permitido', fecha: { toDate: () => new Date(Date.now() - 172800000) }, fecha_uso: { toDate: () => new Date(Date.now() - 172800000) } },
+  ];
+
+  function toggleSimulacion() {
+    const btn = document.getElementById('btnSim');
+    if (!modoSimulacion) {
+      solRegReales  = todasSolReg;
+      solACReales   = todasSolAC;
+      todasSolReg   = SOL_REGISTRO_SIMULADAS;
+      todasSolAC    = SOL_AC_SIMULADAS;
+      modoSimulacion = true;
+      btn.classList.add('activo');
+      btn.innerHTML  = '<i class="fa-solid fa-flask"></i> Quitar simulación';
+      showToast('Simulación activada — mostrando solicitudes de prueba', 'info');
+    } else {
+      todasSolReg   = solRegReales;
+      todasSolAC    = solACReales;
+      modoSimulacion = false;
+      btn.classList.remove('activo');
+      btn.innerHTML  = '<i class="fa-solid fa-flask"></i> Simulación';
+      showToast('Simulación desactivada — mostrando datos reales', 'success');
+    }
+    actualizarBadgesReg();
+    actualizarBadgesAC();
+    filtrarReg();
+    filtrarAC();
+  }
 
   function showToast(msg, type = 'info') {
     const icons = { success:'circle-check', error:'circle-xmark', info:'circle-info' };
