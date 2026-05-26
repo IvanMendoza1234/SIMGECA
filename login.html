@@ -186,6 +186,7 @@
   // Se refleja en: el mensaje de error que aparece cuando el
   // correo o contraseña son incorrectos al intentar iniciar sesión.
   // ══════════════════════════════════════════════════════════════
+  // Paso1 Aquí se define y guarda en la variable:
   const traducirError = function(code) {
     const map = {
       'auth/user-not-found':         'No existe una cuenta con ese correo.',
@@ -196,6 +197,7 @@
       'auth/invalid-credential':     'Correo o contraseña incorrectos.',
       'auth/network-request-failed': 'Error de red. Verifica tu conexión.',
     };
+    //paso 4 Aquí traducirError busca en el diccionario y devuelve el mensaje:
     return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
   };
 
@@ -282,7 +284,7 @@
     inp.type       = show ? 'text' : 'password';
     icon.className = show ? 'fa-regular fa-eye-slash' : 'fa-regular fa-eye';
   }
-
+//Aquí el usuario da clic y se manda a Firebase:
   function doLogin() {
     if (!validar()) return;
 
@@ -304,6 +306,7 @@
         showToast('Sesión iniciada correctamente', 'success');
         setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
       })
+      //paso 3  Aquí Firebase detecta el error y se manda a llamar traducirError:
       .catch(err => {
         btn.disabled          = false;
         spinner.style.display = 'none';
@@ -326,7 +329,7 @@
   document.getElementById('password').addEventListener('keydown', e => {
     if (e.key === 'Enter') doLogin();
   });
-
+// Aquí showToast muestra el mensaje en pantalla:
   function showToast(msg, type = 'info') {
     const wrap = document.getElementById('toastWrap');
     const t    = document.createElement('div');
