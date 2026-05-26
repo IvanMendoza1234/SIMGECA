@@ -178,14 +178,14 @@
   const auth = firebase.auth();
   const db   = firebase.firestore();
 
-  // ══════════════════════════════════════════════════════════════
+
   // PARADIGMA 1 — FUNCIONES DE PRIMERA CLASE
   // Una función guardada en una variable, igual que un número o texto.
   // traducirError es una variable que contiene una función.
   // La usamos más adelante en doLogin() como cualquier otro valor.
   // Se refleja en: el mensaje de error que aparece cuando el
   // correo o contraseña son incorrectos al intentar iniciar sesión.
-  // ══════════════════════════════════════════════════════════════
+  
   // Paso1 Aquí se define y guarda en la variable:
   const traducirError = function(code) {
     const map = {
@@ -201,7 +201,7 @@
     return map[code] || 'Error al iniciar sesión. Intenta de nuevo.';
   };
 
-  // ══════════════════════════════════════════════════════════════
+  
   // PARADIGMA 2 — INMUTABILIDAD
   // El objeto map dentro de traducirError se define con const
   // y nunca se modifica. En lugar de cambiar el objeto original,
@@ -209,16 +209,15 @@
   // El objeto original siempre permanece igual.
   // Se refleja en: los mensajes de error son siempre los mismos
   // para el mismo tipo de error, nunca cambian inesperadamente.
-  // ══════════════════════════════════════════════════════════════
+  
 
-  // ══════════════════════════════════════════════════════════════
+
   // PARADIGMA 3 — FUNCIONES PURAS
   // obtenerIconoToast recibe un tipo y siempre devuelve el mismo
   // icono para el mismo tipo. No modifica nada externo.
   // Si le das 'success' siempre devuelve 'circle-check'.
   // Si le das 'error' siempre devuelve 'circle-xmark'.
   // Se refleja en: el ícono correcto en cada toast de notificación.
-  // ══════════════════════════════════════════════════════════════
   function obtenerIconoToast(tipo) {
     const iconos = {
       success: 'circle-check',
@@ -228,7 +227,6 @@
     return iconos[tipo] || 'circle-info';
   }
 
-  // ══════════════════════════════════════════════════════════════
   // PARADIGMA 4 — ELIMINACIÓN DE EFECTOS SECUNDARIOS
   // Separamos la lógica de validar los datos del formulario
   // de la lógica de modificar el DOM (mostrar errores en pantalla).
@@ -238,7 +236,6 @@
   // Cada función hace una sola cosa sin afectar a la otra.
   // Se refleja en: los mensajes de error rojos debajo del correo
   // y la contraseña cuando los datos no son válidos.
-  // ══════════════════════════════════════════════════════════════
   function obtenerErroresFormulario(email, pass) {
     // Esta función solo evalúa y retorna — no toca el DOM
     const errores = {};
@@ -264,7 +261,7 @@
   }
 
   // Si ya hay sesión activa, redirigir al dashboard
-  // ══════════════════════════════════════════════════════════════
+  
   // PARADIGMA 5 — FUNCIONES ANÓNIMAS Y ARROW FUNCTIONS
   // user => { ... } es una función anónima escrita con =>
   // Es la forma corta de escribir function(user) { ... }
@@ -272,7 +269,6 @@
   // Firebase la ejecute automáticamente cuando detecte un usuario.
   // Se refleja en: si ya tienes sesión iniciada, la página te
   // redirige automáticamente al dashboard sin hacer nada.
-  // ══════════════════════════════════════════════════════════════
   auth.onAuthStateChanged(user => {
     if (user) window.location.href = 'dashboard.html';
   });
