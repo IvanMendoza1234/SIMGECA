@@ -476,7 +476,7 @@
   
 function fnControlarAC(data){
   return auth.currentUser.getIdToken().then(function(token){
-    return fetch('https://us-central1-simgeca-26297.cloudfunctions.net/controlarAC',{
+    return fetch('https://controlarac-3rfmr7vbmq-uc.a.run.app',{
       method:'POST',
       headers:{
         'Content-Type':'application/json',
